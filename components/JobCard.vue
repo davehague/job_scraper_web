@@ -2,7 +2,9 @@
 <template>
   <div class="job-card">
     <h2>{{ job.title }} ({{ job.score }})</h2>
-    <h3>{{ job.company }}</h3>
+    <div class="company">
+      <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
+    </div>
     <div>Posted on {{ job.date_posted }}</div>
     <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
     <h4>Summary</h4>
@@ -49,6 +51,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.company
+{
+  font-size: 1.2em;
+  color: #666;
+}
+
 .job-card {
   border: 1px solid #ccc;
   padding: 24px;

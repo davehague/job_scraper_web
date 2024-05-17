@@ -31,7 +31,9 @@ export default defineComponent({
       if (error) {
         console.error(error)
       } else {
-        jobs.value = items as Job[]
+        jobs.value = (items as Job[]).sort((a, b) => {
+          return new Date(b.date_posted).getTime() - new Date(a.date_posted).getTime()
+        })
       }
     }
 

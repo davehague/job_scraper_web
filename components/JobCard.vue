@@ -3,28 +3,49 @@
   <div class="job-card">
     <h2>{{ job.title }}</h2>
     <h3>{{ job.company }}</h3>
-    <p>{{ truncate(job.short_summary, 200) }}</p>
-    <p>{{ truncate(job.hard_requirements, 200) }}</p>
-    <p>{{ truncate(job.description, 200) }}</p>
+    <h4 v-if="job.comp_interval">Compensation</h4>
+    <h4>Posted on {{ job.date_posted }}</h4>
+    <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
+    <h4>Summary</h4>
+    <div v-html="renderMarkdown(job.short_summary)"></div>
+    <h4>Requirements</h4>
+    <div v-html="renderMarkdown(job.hard_requirements)"></div>
     <a :href="job.url" target="_blank">View Job</a>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
+import { type Job } from '~/types/job'
+import { marked } from 'marked'
 
 export default defineComponent({
   props: {
     job: {
-      type: Object as PropType<any>,
+      type: Object as PropType<Job>,
       required: true
     }
   },
-  methods: {
-    truncate(text: string, length: number) {
-      return text.length > length ? text.substring(0, length) + '...' : text
+  computed: {
+    truncatedDescription(): string {
+      return this.truncate(this.job.description, 200)
     }
-  }
+  },
+  methods: {
+    renderMarkdown(text: string) {
+      return marked(text)
+    },
+    truncate(text: string, length: number) {
+      if (text.length > length) {
+        return text.substring(0, length) + '...'
+      }
+      return text
+    },
+    round(value: number): number {
+      return Math.round(value)
+    }
+  },
+
 })
 </script>
 
@@ -34,7 +55,7 @@ export default defineComponent({
   padding: 24px;
   margin: 24px;
   border-radius: 8px;
-  width: calc(33% - 48px); /* Adjust width to fit three cards in a row with some margin */
+  width: calc(33% - 48px);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -50,15 +71,10 @@ export default defineComponent({
   font-size: 1.2em;
 }
 
-.job-card p {
+.job-card div {
   margin: 0 0 16px;
   line-height: 1.5;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: normal; /* Wrap text */
-  display: -webkit-box;
-  -webkit-line-clamp: 6; /* Adjust to show up to 6 lines */
-  -webkit-box-orient: vertical;
+  white-space: normal;
 }
 
 .job-card a {

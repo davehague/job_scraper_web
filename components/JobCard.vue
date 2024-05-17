@@ -1,10 +1,9 @@
 <!-- components/JobCard.vue -->
 <template>
   <div class="job-card">
-    <h2>{{ job.title }}</h2>
+    <h2>{{ job.title }} ({{ job.score }})</h2>
     <h3>{{ job.company }}</h3>
-    <h4 v-if="job.comp_interval">Compensation</h4>
-    <h4>Posted on {{ job.date_posted }}</h4>
+    <div>Posted on {{ job.date_posted }}</div>
     <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
     <h4>Summary</h4>
     <div v-html="renderMarkdown(job.short_summary)"></div>

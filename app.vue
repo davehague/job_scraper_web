@@ -31,9 +31,15 @@ export default defineComponent({
       if (error) {
         console.error(error)
       } else {
-        jobs.value = (items as Job[]).sort((a, b) => {
-          return new Date(b.date_posted).getTime() - new Date(a.date_posted).getTime()
-        })
+        jobs.value = (items as Job[])
+          .filter(job => parseInt(job.score) >= 70)
+          .sort((a, b) => {
+            const dateComparison = new Date(b.date_posted).getTime() - new Date(a.date_posted).getTime()
+            if (dateComparison !== 0) {
+              return dateComparison
+            }
+            return parseInt(b.score) - parseInt(a.score)
+          })
       }
     }
 

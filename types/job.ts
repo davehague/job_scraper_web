@@ -18,5 +18,6 @@ export interface Job {
     emails: string | null
     description: string
     searched_title: string
+    role_id: number | null
   }
   

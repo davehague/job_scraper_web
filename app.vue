@@ -1,22 +1,28 @@
-// pages/index.vue
+// pages/app.vue
 <template>
   <div>
-    <h1>Data from Supabase</h1>
-    <ul>
-      <li v-for="item in data" :key="item.id">{{ item.title }}</li>
-    </ul>
+    <h1>Job Listings</h1>
+    <div class="job-list">
+      <JobCard v-for="job in jobs" :key="job.id" :job="job" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
 import { useNuxtApp } from '#app'
+import JobCard from '~/components/JobCard.vue'
+import { type Job } from '~/types/job'
+
 
 export default defineComponent({
+  components: {
+    JobCard
+  },
   setup() {
-    const data = ref<any[]>([])
+    const jobs = ref<Job[]>([])
 
-    const fetchData = async () => {
+    const fetchJobs = async () => {
       const { $supabase } = useNuxtApp()
       const { data: items, error } = await ($supabase as any)
         .from('jobs')
@@ -25,13 +31,21 @@ export default defineComponent({
       if (error) {
         console.error(error)
       } else {
-        data.value = items
+        jobs.value = items as Job[]
       }
     }
 
-    onMounted(fetchData)
+    onMounted(fetchJobs)
 
-    return { data }
+    return { jobs }
   }
 })
 </script>
+
+<style scoped>
+.job-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+</style>

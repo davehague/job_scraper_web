@@ -12,7 +12,6 @@
   </div>
 </template>
 
-
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue'
 import { useNuxtApp } from '#app'
@@ -107,8 +106,9 @@ export default defineComponent({
 }
 
 .job-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  justify-items: center;
 }
 </style>

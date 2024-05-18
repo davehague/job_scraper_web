@@ -65,6 +65,7 @@ export default defineComponent({
   width: calc(33% - 48px);
   box-sizing: border-box;
   overflow: hidden;
+  width: 100%;
 }
 
 .job-card h2 {

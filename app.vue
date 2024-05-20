@@ -41,7 +41,9 @@ export default defineComponent({
         jobs.value = (items as Job[])
           .filter(job => parseInt(job.score) >= 70)
           .sort((a, b) => {
-            const dateComparison = new Date(b.date_posted).getTime() - new Date(a.date_posted).getTime()
+            const dateA = new Date(a.date_posted || a.date_pulled).getTime()
+            const dateB = new Date(b.date_posted || b.date_pulled).getTime()
+            const dateComparison = dateB - dateA
             if (dateComparison !== 0) {
               return dateComparison
             }

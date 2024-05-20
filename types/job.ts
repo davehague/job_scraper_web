@@ -19,5 +19,6 @@ export interface Job {
     description: string
     searched_title: string
     role_id: number | null
+    date_pulled: string
   }
   

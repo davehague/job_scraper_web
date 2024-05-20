@@ -5,7 +5,8 @@
     <div class="company">
       <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
     </div>
-    <div>Posted on {{ job.date_posted }}</div>
+    <div v-if="job.date_posted">Posted on {{ job.date_posted }} on {{  job.job_site }}</div>
+    <div v-else-if="job.date_pulled">Pulled on {{ job.date_pulled }} from {{  job.job_site }}</div>
     <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
     <h4>Summary</h4>
     <div v-html="renderMarkdown(job.short_summary)"></div>

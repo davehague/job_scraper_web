@@ -1,7 +1,7 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  plugins: ["~/plugins/supabase.ts"],
+  plugins: ["~/plugins/supabase.ts", '~/plugins/analytics.client.ts'],
   runtimeConfig: {
     public: {
       SUPABASE_URL: process.env.SUPABASE_URL,

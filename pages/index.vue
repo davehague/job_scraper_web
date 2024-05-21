@@ -5,10 +5,11 @@
       <button @click="signIn">Sign In</button>
     </div>
     <div v-else>
+      <div>{{ (user as any).email }}</div>
       <button @click="signOut">Sign Out</button>
     </div>
 
-    <div v-if="user">
+    <div>
       <div class="role-filter">
         <select id="roles" v-model="selectedRole">
           <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
@@ -106,12 +107,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.auth-container {
-  display: flex;
-  justify-content: center;
-  margin: 20px;
-}
-
 .role-filter {
   display: flex;
   justify-content: center;

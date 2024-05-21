@@ -15,6 +15,7 @@
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign Up</p>
       </form>
+      <NuxtLink to="/">Skip sign in for now</NuxtLink>
     </div>
   </div>
 </template>

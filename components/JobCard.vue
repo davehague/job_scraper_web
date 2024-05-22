@@ -12,7 +12,7 @@
     <div v-html="renderMarkdown(job.short_summary)"></div>
     <h4>Requirements</h4>
     <div v-html="renderMarkdown(job.hard_requirements)"></div>
-    <a :href="job.url" target="_blank">View Job</a>
+    <a :href="job.url" @click="openInBrowser">View Job</a>
   </div>
 </template>
 
@@ -49,6 +49,11 @@ export default defineComponent({
     },
     round(value: number): number {
       return Math.round(value)
+    },
+    openInBrowser(event: MouseEvent) {
+      event.preventDefault();
+      const url = (event.target as HTMLAnchorElement)?.href;
+      window.open(url, '_blank');
     }
   },
 

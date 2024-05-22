@@ -1,6 +1,6 @@
 <!-- components/JobCard.vue -->
 <template>
-  <div class="job-card">
+  <div :class="['job-card', { 'older-job': isOlder }]">
     <h2>{{ job.title }} ({{ job.score }})</h2>
     <div class="company">
       <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
@@ -31,7 +31,11 @@ export default defineComponent({
   computed: {
     truncatedDescription(): string {
       return this.truncate(this.job.description, 200)
-    }
+    },
+    isOlder(): boolean {
+      const todayDate = new Date().toISOString().split('T')[0]
+      return this.job.date_posted < todayDate || this.job.date_pulled < todayDate
+    },
   },
   methods: {
     renderMarkdown(text: string) {
@@ -68,6 +72,11 @@ export default defineComponent({
   overflow: hidden;
   width: 100%;
 }
+
+.job-card.older-job {
+  background-color: #efefef; 
+}
+
 
 .job-card h2 {
   margin: 0 0 16px;

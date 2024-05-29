@@ -78,6 +78,10 @@ export default defineComponent({
   width: 100%;
 }
 
+.job-card:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .job-card.older-job {
   background-color: #efefef; 
 }

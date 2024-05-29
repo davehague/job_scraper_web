@@ -1,5 +1,5 @@
 <template>
-    <button @click="cancel" class="back-btn"><font-awesome-icon icon="fas fa-arrow-left" /></button>
+  <button @click="cancel" class="back-btn"><font-awesome-icon icon="fas fa-arrow-left" /></button>
 
   <div class="user-profile">
     <h2>Personal Info</h2>
@@ -28,6 +28,8 @@
       </div>
     </template>
 
+    <hr />
+
     <div>
       <label>Remote:</label>
       <select v-model="remote">
@@ -43,21 +45,24 @@
       <input v-model="distance" type="number" />
     </div>
 
-    <!-- Stop words -->
+    <hr />
+
     <h3>Stop Words</h3>
     <template>
       <div>
         <div v-for="(word, index) in stopWords" :key="'stopWord-' + index" class="input-group">
           <input class="multi" v-model="stopWords[index]" type="text" placeholder="Enter stop word" />
           <button @click="removeStopWord(index)" v-if="stopWords.length > 1" class="remove-btn">
-            <!-- <font-awesome-icon icon="fa-solid fa-minus-circle" /> -->
+            <font-awesome-icon icon="fa-solid fa-minus-circle" />
           </button>
           <button @click="addStopWord" v-if="index === stopWords.length - 1 && stopWords.length < 4" class="add-btn">
-            <!-- <font-awesome-icon icon="fa-solid fa-plus-circle" /> -->
+            <font-awesome-icon icon="fa-solid fa-plus-circle" />
           </button>
         </div>
       </div>
     </template>
+
+    <hr />
 
     <h3>Skill Words</h3>
     <template>
@@ -65,14 +70,16 @@
         <div v-for="(word, index) in skillWords" :key="'skillWord-' + index" class="input-group">
           <input class="multi" v-model="skillWords[index]" type="text" placeholder="Enter skill word" />
           <button @click="removeSkillWord(index)" v-if="skillWords.length > 1" class="remove-btn">
-            <!-- <font-awesome-icon icon="fa-solid fa-minus-circle" /> -->
+            <font-awesome-icon icon="fa-solid fa-minus-circle" />
           </button>
           <button @click="addSkillWord" v-if="index === skillWords.length - 1 && skillWords.length < 4" class="add-btn">
-            <!-- <font-awesome-icon icon="fa-solid fa-plus-circle" /> -->
+            <font-awesome-icon icon="fa-solid fa-plus-circle" />
           </button>
         </div>
       </div>
     </template>
+
+    <hr />
 
     <h3>Other Requirements</h3>
     <template>
@@ -80,15 +87,17 @@
         <div v-for="(requirement, index) in otherRequirements" :key="'otherRequirement-' + index" class="input-group">
           <input class="multi" v-model="otherRequirements[index]" type="text" placeholder="Enter other requirement" />
           <button @click="removeOtherRequirement(index)" v-if="otherRequirements.length > 1" class="remove-btn">
-            <!-- <font-awesome-icon icon="fa-solid fa-minus-circle" /> -->
+            <font-awesome-icon icon="fa-solid fa-minus-circle" />
           </button>
-          <button @click="addOtherRequirement" v-if="index === otherRequirements.length - 1 && otherRequirements.length < 4" class="add-btn">
-            <!-- <font-awesome-icon icon="fa-solid fa-plus-circle" /> -->
+          <button @click="addOtherRequirement"
+            v-if="index === otherRequirements.length - 1 && otherRequirements.length < 4" class="add-btn">
+            <font-awesome-icon icon="fa-solid fa-plus-circle" />
           </button>
         </div>
       </div>
     </template>
 
+    <hr />
 
     <div>
       <label>Resume:</label>
@@ -96,7 +105,6 @@
     </div>
 
     <button @click="save">Save</button>
-    <button @click="cancel">Cancel</button>
   </div>
 </template>
 
@@ -186,24 +194,24 @@ function cancel() {
 }
 
 .back-btn {
-  position: fixed; 
-  top: 20px; 
-  left: 20px; 
+  position: fixed;
+  top: 20px;
+  left: 20px;
   padding: 10px;
   color: white;
   border: none;
-  border-radius: 50%; 
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 16px; 
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px; 
-  height: 40px; 
+  width: 40px;
+  height: 40px;
 }
 
 .back-btn:hover {
-  background-color: #455A64; 
+  background-color: #455A64;
 }
 
 label {
@@ -244,8 +252,8 @@ button {
   border-radius: 3px;
   cursor: pointer;
   display: flex;
-  align-items: center; 
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
 }
 
 .input-group {
@@ -264,8 +272,8 @@ button {
 .add-btn {
   width: 30px;
   height: 30px;
-  align-items: center; 
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
 }
 
 .remove-btn {

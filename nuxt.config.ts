@@ -11,4 +11,8 @@ export default defineNuxtConfig({
       SUPABASE_KEY: process.env.SUPABASE_KEY,
     }
   },
+  css: [
+    '~/assets/global.css',
+    '@fortawesome/fontawesome-svg-core/styles.css'
+  ]
 });

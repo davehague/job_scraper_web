@@ -117,16 +117,10 @@ input {
 .auth-button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
-  color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-}
-
-.auth-button:hover {
-  background-color: #0056b3;
 }
 
 .error-message {

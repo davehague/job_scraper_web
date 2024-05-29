@@ -9,10 +9,14 @@ select {
 button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #607d8b;
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
+}
+
+button:hover {
+  background-color: #455a64;
 }

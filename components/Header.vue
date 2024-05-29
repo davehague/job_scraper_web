@@ -137,12 +137,14 @@ watch(selectedRole, (newVal) => {
   padding: 10px;
   display: flex;
   flex-direction: column;
+  width: 150px;
 }
 
 .dropdown-menu button {
   padding: 10px;
   border: none;
   background: none;
+  color: black;
   cursor: pointer;
   text-align: left;
   width: 100%;

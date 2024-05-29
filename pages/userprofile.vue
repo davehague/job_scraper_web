@@ -1,4 +1,6 @@
 <template>
+    <button @click="cancel" class="back-btn"><font-awesome-icon icon="fas fa-arrow-left" /></button>
+
   <div class="user-profile">
     <h2>Personal Info</h2>
     <div>
@@ -183,6 +185,27 @@ function cancel() {
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.back-btn {
+  position: fixed; 
+  top: 20px; 
+  left: 20px; 
+  padding: 10px;
+  color: white;
+  border: none;
+  border-radius: 50%; 
+  cursor: pointer;
+  font-size: 16px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; 
+  height: 40px; 
+}
+
+.back-btn:hover {
+  background-color: #455A64; 
+}
+
 label {
   display: block;
   margin-right: 10px;
@@ -217,8 +240,6 @@ input:disabled {
 button {
   margin: 10px 5px 10px 0px;
   padding: 10px;
-  background: #192b46;
-  color: white;
   border: none;
   border-radius: 3px;
   cursor: pointer;

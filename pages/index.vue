@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, inject } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useNuxtApp } from '#app'
 import { type Job } from '@/types/job'
 import Header from '@/components/Header.vue'
@@ -17,6 +17,7 @@ import { useJsaStore } from '@/stores/jsaStore'
 const jobs = ref<Job[]>([])
 const { $supabase } = useNuxtApp()
 const store = useJsaStore()
+const lastRefreshed = ref(Date.now());
 
 const fetchJobs = async () => {
   const { data: items, error } = await ($supabase as any)
@@ -37,6 +38,7 @@ const fetchJobs = async () => {
         }
         return parseInt(b.score) - parseInt(a.score)
       })
+    lastRefreshed.value = Date.now();
   }
 }
 
@@ -47,6 +49,11 @@ const filteredJobs = computed(() => {
 
 onMounted(async () => {
   await fetchJobs()
+  const intervalId = setInterval(fetchJobs, 300000); // Refresh every 5 minutes
+
+  onUnmounted(() => {
+    clearInterval(intervalId);
+  });
 })
 </script>
 

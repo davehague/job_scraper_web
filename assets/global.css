@@ -6,6 +6,10 @@ select {
   font-family: Arial, sans-serif;
 }
 
+body {
+  background-color: #607d8b;
+}
+
 button {
   width: 100%;
   padding: 10px;

@@ -1,4 +1,5 @@
 <!-- components/JobCard.vue -->
+<!-- components/JobCard.vue -->
 <template>
   <div :class="['job-card', { 'older-job': isOlder }]">
     <h2>{{ job.title }} ({{ job.score }})</h2>
@@ -8,10 +9,14 @@
     <div v-if="job.date_posted">Posted on {{ job.date_posted }} on {{  job.job_site }}</div>
     <div v-else-if="job.date_pulled">Pulled on {{ job.date_pulled }} from {{  job.job_site }}</div>
     <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
+
     <h4>Summary</h4>
-    <div v-html="renderMarkdown(job.short_summary)"></div>
-    <h4>Requirements</h4>
-    <div v-html="renderMarkdown(job.hard_requirements)"></div>
+    <div v-if="showFullSummary" v-html="renderMarkdown(job.short_summary)"></div>
+    <div v-else v-html="renderMarkdown(truncate(job.short_summary, 300))"></div>
+    <span class="link-like" @click="toggleSummary">{{ showFullSummary ? '[Show Less]' : '[Show More]' }}</span>
+    
+    <h4 @click="toggleRequirements">Requirements <span v-if="!showRequirements">[Show]</span><span v-else>[Hide]</span></h4>
+    <div v-if="showRequirements" v-html="renderMarkdown(job.hard_requirements)"></div>
     <a :href="job.url" @click="openInBrowser">View Job</a>
   </div>
 </template>
@@ -27,6 +32,20 @@ export default defineComponent({
       type: Object as PropType<Job>,
       required: true
     }
+  },
+  setup() {
+    const showRequirements = ref(false);
+    const showFullSummary = ref(false);
+
+    const toggleRequirements = () => {
+      showRequirements.value = !showRequirements.value;
+    };
+
+    const toggleSummary = () => {
+      showFullSummary.value = !showFullSummary.value;
+    };
+
+    return { showRequirements, toggleRequirements, showFullSummary, toggleSummary };
   },
   computed: {
     truncatedDescription(): string {
@@ -68,9 +87,9 @@ export default defineComponent({
 }
 
 .job-card {
+  background-color: #fff;
   border: 1px solid #ccc;
   padding: 24px;
-  margin: 24px;
   border-radius: 8px;
   width: calc(33% - 48px);
   box-sizing: border-box;
@@ -111,5 +130,28 @@ export default defineComponent({
 
 .job-card a:hover {
   text-decoration: underline;
+}
+
+.job-card h4 {
+  cursor: pointer;
+}
+
+.job-card h4 span {
+  font-weight: normal;
+  font-size: 0.8em;
+  color: #333;
+  text-decoration: underline;
+}
+
+.job-card .link-like {
+  margin-top: 0px;
+  font-size: 0.8em;
+  color: #333;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.job-card .link-like:hover {
+  text-decoration: none;
 }
 </style>

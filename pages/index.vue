@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <Header />
     <div class="job-list">
       <JobCard v-for="job in filteredJobs" :key="job.id" :job="job" />
@@ -58,7 +58,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.container {
+  margin: 0 auto;
+  padding: 0 20px;
+  background-color: #607d8b;
+}
+
 .job-list {
+  margin-top: 24px;
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

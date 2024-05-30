@@ -7,7 +7,7 @@
     </div>
     <div class="right">
       <div v-if="user">
-        <img src="https://via.placeholder.com/40" class="profile-pic" @click="toggleMenu" />
+        <img src="/public/profile.png" class="profile-pic" @click="toggleMenu" />
         <div v-if="showMenu" class="dropdown-menu">
           <button @click="goToProfile">Profile</button>
           <button @click="signOut">Sign Out</button>
@@ -122,10 +122,11 @@ watch(selectedRole, (newVal) => {
 }
 
 .profile-pic {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   cursor: pointer;
+  background-color: #eee;
 }
 
 .dropdown-menu {

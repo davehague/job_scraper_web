@@ -48,7 +48,7 @@ export default {
           password: password.value
         });
 
-        if (data) {
+        if (data && data.user != null) {
           console.log('Sign-in successful:', data)
           store.setUser(data.user);
           router.push('/')

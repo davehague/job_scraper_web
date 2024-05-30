@@ -28,7 +28,6 @@
 
 <script lang="ts">
 import { ref, type PropType } from 'vue'
-import { useRouter } from '#app'
 import { supabase } from "@/utils/supabaseClient";
 import { useJsaStore } from '@/stores/jsaStore';
 
@@ -53,18 +52,17 @@ export default {
           password: password.value
         })
 
-        if (data) {
+        if (data && data.user != null) {
           console.log('Sign-up successful:', data)
-          store.setUser(data.user);
 
           // Insert into the users table
           // TODO: Put into PersistentDataService
-          const { error: userError } = await supabase
+          const { error: userCreateError } = await supabase
             .from('users')
             .insert({ id: data.user?.id, email: email.value })
 
-          if (userError) {
-            throw userError
+          if (userCreateError) {
+            throw userCreateError
           }
 
           signUpComplete.value = true

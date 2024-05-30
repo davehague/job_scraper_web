@@ -33,10 +33,10 @@ import { type AuthChangeEvent, type User, type Session } from "@supabase/supabas
 const router = useRouter()
 
 const user = ref<User | null>(null);
-const roles = ref<Role[]>([])
-const showMenu = ref(false)
-const selectedRole = ref<number>(0)
-const store = useJsaStore()
+const roles = ref<Role[]>([]);
+const showMenu = ref(false);
+const selectedRole = ref<number>(0);
+const store = useJsaStore();
 
 const fetchRoles = async () => {
   const items = await PersistentDataService.multiRecordFetch("roles");
@@ -73,7 +73,7 @@ const toggleMenu = () => {
 onMounted(async () => {
   await fetchRoles();
   await checkUser();
-  
+
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     user.value = session?.user || null
   })

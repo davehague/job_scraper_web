@@ -19,10 +19,6 @@ const store = useJsaStore()
 const lastRefreshed = ref(Date.now());
 
 const fetchJobs = async () => {
-  // const { data: items, error } = await ($supabase as any)
-  //   .from('jobs')
-  //   .select('*')
-
   const items = await PersistentDataService.multiRecordFetch("jobs");
   jobs.value = (items as Job[])
     .filter(job => parseInt(job.score) >= 70)

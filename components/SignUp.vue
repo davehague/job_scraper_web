@@ -1,27 +1,36 @@
 <template>
   <div class="auth-container">
     <div class="auth-box">
-      <h2>Sign Up</h2>
-      <form @submit.prevent="signUp">
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input v-model="email" type="email" id="email" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input v-model="password" type="password" id="password" required />
-        </div>
-        <button type="submit" class="auth-button">Sign Up</button>
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-        <p class="toggle-auth" @click="toggleAuth">Already have an account? Sign In</p>
-      </form>
+      <div v-if="signUpComplete">
+        <div class="thank-you-message">Thank you, please check your email to verify your account!</div>
+        <NuxtLink to="/">Return to home</NuxtLink>
+      </div>
+      <div v-else>
+        <h2>Sign Up</h2>
+        <form @submit.prevent="signUp">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input v-model="email" type="email" id="email" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input v-model="password" type="password" id="password" required />
+          </div>
+          <button type="submit" class="auth-button">Sign Up</button>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+          <p class="toggle-auth" @click="toggleAuth">Already have an account? Sign In</p>
+        </form>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, type PropType } from 'vue'
-import { useNuxtApp, useRouter } from '#app'
+import { ref, type PropType } from 'vue'
+import { useRouter } from '#app'
+import { supabase } from "@/utils/supabaseClient";
+import { useJsaStore } from '@/stores/jsaStore';
 
 export default {
   props: {
@@ -31,33 +40,37 @@ export default {
     }
   },
   setup(props) {
-    const email = ref('')
-    const password = ref('')
-    const errorMessage = ref('')
-    const { $supabase } = useNuxtApp()
-    const router = useRouter()
+    const email = ref('');
+    const password = ref('');
+    const errorMessage = ref('');
+    const store = useJsaStore();
+    const signUpComplete = ref(false);
 
     const signUp = async () => {
       try {
-        const { data, error } = await ($supabase as any).auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: email.value,
           password: password.value
         })
-        if (error) {
-          throw error
+
+        if (data) {
+          console.log('Sign-up successful:', data)
+          store.setUser(data.user);
+
+          // Insert into the users table
+          // TODO: Put into PersistentDataService
+          const { error: userError } = await supabase
+            .from('users')
+            .insert({ id: data.user?.id, email: email.value })
+
+          if (userError) {
+            throw userError
+          }
+
+          signUpComplete.value = true
+        } else {
+          throw error;
         }
-        console.log('Sign-up successful:', data)
-        // Insert into the users table
-        const { error: userError } = await ($supabase as any)
-          .from('users')
-          .insert({ id: data.user?.id, email: email.value })
-
-        if (userError) {
-          throw userError
-        }
-
-        router.push('/')
-
       } catch (error) {
         errorMessage.value = (error as Error).message
         console.error('Sign-up error:', error)
@@ -68,7 +81,8 @@ export default {
       email,
       password,
       errorMessage,
-      signUp
+      signUp,
+      signUpComplete,
     }
   }
 }
@@ -136,5 +150,9 @@ input {
 
 .toggle-auth:hover {
   text-decoration: underline;
+}
+
+.thank-you-message {
+  margin-bottom: 20px;
 }
 </style>

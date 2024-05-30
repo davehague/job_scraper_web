@@ -1,6 +1,5 @@
 <template>
   <button @click="cancel" class="back-btn">
-    <!-- <font-awesome-icon :icon="['fas', 'arrow-left']" /> -->
     <i class="fas fa-arrow-left"></i>
   </button>
 
@@ -114,6 +113,10 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useJsaStore } from '@/stores/jsaStore'
+
+const store = useJsaStore();
+console.log(store.user);
 
 const router = useRouter()
 const name = ref('')

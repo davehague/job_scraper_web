@@ -32,7 +32,7 @@ import { type AuthChangeEvent, type User, type Session } from "@supabase/supabas
 
 const router = useRouter()
 
-const user = ref<User | null>(null);
+let user = ref<User | null>(null);
 const roles = ref<Role[]>([]);
 const showMenu = ref(false);
 const selectedRole = ref<number>(0);
@@ -47,14 +47,19 @@ const fetchRoles = async () => {
 }
 
 const checkUser = async () => {
+  console.log('Checking user');
   const result = await supabase.auth.getUser();
+  console.log('Result:', result);
+  store.setUser(result.data.user);
   user.value = result.data.user;
+  console.log('User:', user.value);
 }
 
 const signOut = async () => {
-  const error = await supabase.auth.signOut();
-  if (error) console.error('Sign-out error:', error)
-  user.value = null
+  const result = await supabase.auth.signOut();
+  if (result.error != null) console.error('Sign-out error:', result)
+  store.signOutUser();
+  user.value = null;
   router.push('/login')
 }
 
@@ -75,7 +80,7 @@ onMounted(async () => {
   await checkUser();
 
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-    user.value = session?.user || null
+    store.setUser(session?.user || null);
   })
 })
 

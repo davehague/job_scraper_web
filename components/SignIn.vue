@@ -22,8 +22,10 @@
 
 
 <script lang="ts">
-import { ref, defineComponent, type PropType } from 'vue'
-import { useNuxtApp, useRouter } from '#app'
+import { ref, type PropType } from 'vue'
+import { useRouter } from '#app'
+import { supabase } from "@/utils/supabaseClient";
+import { useJsaStore } from '@/stores/jsaStore';
 
 export default {
   props: {
@@ -33,23 +35,26 @@ export default {
     }
   },
   setup(props) {
-    const email = ref('')
-    const password = ref('')
-    const errorMessage = ref('')
-    const { $supabase } = useNuxtApp()
-    const router = useRouter()
+    const email = ref('');
+    const password = ref('');
+    const errorMessage = ref('');
+    const router = useRouter();
+    const store = useJsaStore();
 
     const signIn = async () => {
       try {
-        const { data, error } = await ($supabase as any).auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: email.value,
           password: password.value
-        })
-        if (error) {
-          throw error
+        });
+
+        if (data) {
+          console.log('Sign-in successful:', data)
+          store.setUser(data.user);
+          router.push('/')
+        } else {
+          throw error;
         }
-        console.log('Sign-in successful:', data)
-        router.push('/')
       } catch (error) {
         errorMessage.value = (error as Error).message
         console.error('Sign-in error:', error)

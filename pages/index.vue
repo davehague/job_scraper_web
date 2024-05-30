@@ -9,37 +9,34 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useNuxtApp } from '#app'
 import { type Job } from '@/types/job'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
+import PersistentDataService from '@/services/PersistentDataService';
 
 const jobs = ref<Job[]>([])
-const { $supabase } = useNuxtApp()
 const store = useJsaStore()
 const lastRefreshed = ref(Date.now());
 
 const fetchJobs = async () => {
-  const { data: items, error } = await ($supabase as any)
-    .from('jobs')
-    .select('*')
+  // const { data: items, error } = await ($supabase as any)
+  //   .from('jobs')
+  //   .select('*')
 
-  if (error) {
-    console.error(error)
-  } else {
-    jobs.value = (items as Job[])
-      .filter(job => parseInt(job.score) >= 70)
-      .sort((a, b) => {
-        const dateA = new Date(a.date_posted || a.date_pulled).getTime()
-        const dateB = new Date(b.date_posted || b.date_pulled).getTime()
-        const dateComparison = dateB - dateA
-        if (dateComparison !== 0) {
-          return dateComparison
-        }
-        return parseInt(b.score) - parseInt(a.score)
-      })
-    lastRefreshed.value = Date.now();
-  }
+  const items = await PersistentDataService.multiRecordFetch("jobs");
+  jobs.value = (items as Job[])
+    .filter(job => parseInt(job.score) >= 70)
+    .sort((a, b) => {
+      const dateA = new Date(a.date_posted || a.date_pulled).getTime()
+      const dateB = new Date(b.date_posted || b.date_pulled).getTime()
+      const dateComparison = dateB - dateA
+      if (dateComparison !== 0) {
+        return dateComparison
+      }
+      return parseInt(b.score) - parseInt(a.score)
+    })
+  lastRefreshed.value = Date.now();
+
 }
 
 const filteredJobs = computed(() => {

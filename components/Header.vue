@@ -22,40 +22,37 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useNuxtApp, useRouter } from '#app'
+import { useRouter } from '#app'
 import { type Role } from '@/types/role'
 import { useJsaStore } from '@/stores/jsaStore'
+import PersistentDataService from '@/services/PersistentDataService';
 
+import { supabase } from "@/utils/supabaseClient";
+import { type AuthChangeEvent, type User, type Session } from "@supabase/supabase-js";
 
-const { $supabase } = useNuxtApp()
 const router = useRouter()
 
-const user = ref(null)
+const user = ref<User | null>(null);
 const roles = ref<Role[]>([])
 const showMenu = ref(false)
 const selectedRole = ref<number>(0)
 const store = useJsaStore()
 
 const fetchRoles = async () => {
-  const { data: items, error } = await ($supabase as any).from('roles').select('*')
-  if (error) {
-    console.error(error)
-  } else {
-    roles.value = items as Role[];
-
-    const roleId = parseInt(roles.value[0].id);
-    store.setSelectedRoleId(roleId);
-    selectedRole.value = roleId;
-  }
+  const items = await PersistentDataService.multiRecordFetch("roles");
+  roles.value = items as Role[];
+  const roleId = parseInt(roles.value[0].id);
+  store.setSelectedRoleId(roleId);
+  selectedRole.value = roleId;
 }
 
 const checkUser = async () => {
-  const { data } = await ($supabase as any).auth.getUser()
-  user.value = data.user
+  const result = await supabase.auth.getUser();
+  user.value = result.data.user;
 }
 
 const signOut = async () => {
-  const { error } = await ($supabase as any).auth.signOut()
+  const error = await supabase.auth.signOut();
   if (error) console.error('Sign-out error:', error)
   user.value = null
   router.push('/login')
@@ -76,7 +73,8 @@ const toggleMenu = () => {
 onMounted(async () => {
   await fetchRoles();
   await checkUser();
-  ($supabase as any).auth.onAuthStateChange((event: any, session: { user: null }) => {
+  
+  supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     user.value = session?.user || null
   })
 })
@@ -91,9 +89,7 @@ watch(selectedRole, (newVal) => {
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
-  padding: 10px 20px;
-  background-color: antiquewhite;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
 }
 
 .left {

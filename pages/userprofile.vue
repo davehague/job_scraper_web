@@ -1,5 +1,8 @@
 <template>
-  <button @click="cancel" class="back-btn"><font-awesome-icon icon="fas fa-arrow-left" /></button>
+  <button @click="cancel" class="back-btn">
+    <!-- <font-awesome-icon :icon="['fas', 'arrow-left']" /> -->
+    <i class="fas fa-arrow-left"></i>
+  </button>
 
   <div class="user-profile">
     <h2>Personal Info</h2>
@@ -19,10 +22,10 @@
         <div v-for="(title, index) in jobTitles" :key="'jobTitle-' + index" class="input-group">
           <input class="multi" v-model="jobTitles[index]" type="text" placeholder="Enter job title" />
           <button @click="removeJobTitle(index)" v-if="jobTitles.length > 1" class="remove-btn">
-            <font-awesome-icon icon="fas fa-minus-circle" />
+            <i class="fas fa-minus-circle"></i>
           </button>
           <button @click="addJobTitle" v-if="index === jobTitles.length - 1 && jobTitles.length < 4" class="add-btn">
-            <font-awesome-icon icon="fas fa-plus-circle" />
+            <i class="fas fa-plus-circle"></i>
           </button>
         </div>
       </div>
@@ -53,10 +56,10 @@
         <div v-for="(word, index) in stopWords" :key="'stopWord-' + index" class="input-group">
           <input class="multi" v-model="stopWords[index]" type="text" placeholder="Enter stop word" />
           <button @click="removeStopWord(index)" v-if="stopWords.length > 1" class="remove-btn">
-            <font-awesome-icon icon="fa-solid fa-minus-circle" />
+            <i class="fas fa-minus-circle"></i>
           </button>
           <button @click="addStopWord" v-if="index === stopWords.length - 1 && stopWords.length < 4" class="add-btn">
-            <font-awesome-icon icon="fa-solid fa-plus-circle" />
+            <i class="fas fa-plus-circle"></i>
           </button>
         </div>
       </div>
@@ -70,10 +73,10 @@
         <div v-for="(word, index) in skillWords" :key="'skillWord-' + index" class="input-group">
           <input class="multi" v-model="skillWords[index]" type="text" placeholder="Enter skill word" />
           <button @click="removeSkillWord(index)" v-if="skillWords.length > 1" class="remove-btn">
-            <font-awesome-icon icon="fa-solid fa-minus-circle" />
+            <i class="fas fa-minus-circle"></i>
           </button>
           <button @click="addSkillWord" v-if="index === skillWords.length - 1 && skillWords.length < 4" class="add-btn">
-            <font-awesome-icon icon="fa-solid fa-plus-circle" />
+            <i class="fas fa-plus-circle"></i>
           </button>
         </div>
       </div>
@@ -87,11 +90,11 @@
         <div v-for="(requirement, index) in otherRequirements" :key="'otherRequirement-' + index" class="input-group">
           <input class="multi" v-model="otherRequirements[index]" type="text" placeholder="Enter other requirement" />
           <button @click="removeOtherRequirement(index)" v-if="otherRequirements.length > 1" class="remove-btn">
-            <font-awesome-icon icon="fa-solid fa-minus-circle" />
+            <i class="fas fa-minus-circle"></i>
           </button>
           <button @click="addOtherRequirement"
             v-if="index === otherRequirements.length - 1 && otherRequirements.length < 4" class="add-btn">
-            <font-awesome-icon icon="fa-solid fa-plus-circle" />
+            <i class="fas fa-plus-circle"></i>
           </button>
         </div>
       </div>
@@ -198,7 +201,8 @@ function cancel() {
   top: 20px;
   left: 20px;
   padding: 10px;
-  color: white;
+  color: #333;
+  background-color: #ccc;
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -212,6 +216,7 @@ function cancel() {
 
 .back-btn:hover {
   background-color: #455A64;
+  color: #fff;
 }
 
 label {

@@ -7,14 +7,14 @@
     </div>
     <div class="right">
       <div v-if="store.authUser">
-        <img src="/public/profile.png" class="profile-pic" @click="toggleMenu" />
+        <img src="/public/profile.png" class="profile-pic" @click="toggleProfileMenu" />
         <div v-if="showMenu" class="dropdown-menu">
           <button @click="goToProfile">Profile</button>
           <button @click="signOut">Sign Out</button>
         </div>
       </div>
       <div v-else>
-        <button class="sign-in" @click="signIn">Sign In</button>
+        <button class="sign-in" @click="goToSignIn">Sign In</button>
       </div>
     </div>
   </header>
@@ -45,25 +45,26 @@ const fetchRoles = async () => {
 }
 
 const checkUser = async () => {
-  console.log('Checking for existing logged-in user');
   const result = await supabase.auth.getUser();
   if (result.error != null) {
     console.log('No existing user found:', result);
+    store.signOutUser();
+    return;
   }
 
-  console.log('User was logged in:', result.data.user);
   store.setAuthUser(result.data.user);
+  store.getDBUser(); // Pre-fetch the DB user
 }
 
 const signOut = async () => {
   const result = await supabase.auth.signOut();
   if (result.error != null) console.error('Sign-out error:', result)
+
   store.signOutUser();
-  store.setAuthUser(null);
   router.push('/login')
 }
 
-const signIn = () => {
+const goToSignIn = () => {
   router.push('/login')
 }
 
@@ -71,7 +72,7 @@ const goToProfile = () => {
   router.push('/userprofile')
 }
 
-const toggleMenu = () => {
+const toggleProfileMenu = () => {
   showMenu.value = !showMenu.value
 }
 

@@ -35,9 +35,9 @@
     <div>
       <label>Remote:</label>
       <select v-model="remote">
-        <option value="remoteOk">Remote OK</option>
-        <option value="remoteOnly">Remote ONLY</option>
-        <option value="localOnly">Local ONLY</option>
+        <option value="YES">Remote OK</option>
+        <option value="ONLY">Remote ONLY</option>
+        <option value="NO">Local ONLY</option>
       </select>
     </div>
     <div v-if="remote !== 'remoteOnly'">
@@ -114,19 +114,22 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJsaStore } from '@/stores/jsaStore'
+import PersistentDataService from '@/services/PersistentDataService'
 
 const store = useJsaStore();
 const router = useRouter()
+
 const name = ref('')
 const email = ref('example@example.com')
-const jobTitles = ref([''])
 const remote = ref('remoteOk')
 const location = ref('')
 const distance = ref(0)
+const resume = ref('')
+
+const jobTitles = ref([''])
 const stopWords = ref([''])
 const skillWords = ref([''])
 const otherRequirements = ref([''])
-const resume = ref('')
 
 function addJobTitle() {
   if (jobTitles.value.length < 4) {
@@ -179,10 +182,21 @@ function cancel() {
 }
 
 onMounted(async () => {
-  console.log('AuthUser = ', store.authUser);
-  console.log('DBUser = ', store.dbUser);
+  if (!store.authUser) {
+    await store.getAuthUser();
+  }
 
-  // const data = await fetchData();
+  if (!store.dbUser) {
+    await store.getDBUser();
+  }
+  
+  name.value = store.dbUser?.name || '';
+  email.value = store.authUser?.email || '';
+  remote.value = store.dbUser?.remote || 'YES';
+  location.value = store.dbUser?.location || '';
+  distance.value = store.dbUser?.distance || 0;
+  resume.value = store.dbUser?.resume || '';
+
   // jobTitles.value = data.jobTitles || [''];
   // stopWords.value = data.stopWords || [''];
   // skillWords.value = data.skillWords || [''];

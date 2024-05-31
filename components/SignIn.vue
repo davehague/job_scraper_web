@@ -53,6 +53,7 @@ export default {
         if (data && data.user != null) {
           console.log('Sign-in successful:', data)
           store.setAuthUser(data.user);
+          store.getDBUser(); // Pre-fetch the DB user
 
           let dbUser = await PersistentDataService.singleRecordFetch('users', data.user.id);
           store.setDBUser(dbUser as DBUser);

@@ -34,13 +34,13 @@
 
     <div>
       <label>Remote:</label>
-      <select v-model="remote">
+      <select v-model="remotePreference">
         <option value="YES">Remote OK</option>
         <option value="ONLY">Remote ONLY</option>
         <option value="NO">Local ONLY</option>
       </select>
     </div>
-    <div v-if="remote !== 'remoteOnly'">
+    <div v-if="remotePreference !== 'ONLY'">
       <label>Location:</label>
       <input v-model="location" type="text" />
       <label>Distance:</label>
@@ -102,6 +102,11 @@
     <hr />
 
     <div>
+      <label>Minimum Salary:</label>
+      <input v-model="minSalary" type="number" />
+    </div>
+
+    <div>
       <label>Resume:</label>
       <textarea v-model="resume" rows="10"></textarea>
     </div>
@@ -110,21 +115,23 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService'
+import { type User, type UserConfig } from '@/types/interfaces'
 
 const store = useJsaStore();
 const router = useRouter()
 
-const name = ref('')
 const email = ref('example@example.com')
-const remote = ref('remoteOk')
 const location = ref('')
+const remotePreference = ref('YES')
 const distance = ref(0)
+const minSalary = ref(0)
 const resume = ref('')
+const name = ref('')
 
 const jobTitles = ref([''])
 const stopWords = ref([''])
@@ -171,10 +178,33 @@ function removeOtherRequirement(index) {
   otherRequirements.value.splice(index, 1)
 }
 
-function save() {
-  // TODO: Implement saving logic
-  console.log('Saved:', { name: name.value, email: email.value, jobTitles: jobTitles.value, remote: remote.value, location: location.value, distance: distance.value, stopWords: stopWords.value, skillWords: skillWords.value, otherRequirements: otherRequirements.value, resume: resume.value })
-  router.push('/')
+async function save() {
+  const u = {
+    id: store.authUser?.id,
+    email: email.value,
+    location: location.value,
+    remote_preference: remotePreference.value,
+    distance: distance.value,
+    min_salary: minSalary.value,
+    resume: resume.value,
+    name: name.value,
+  };
+
+  const result = await PersistentDataService.upsertUser(u)
+
+  // Save Job Titles
+
+  // Save Stop Words
+
+  // Save Skill Words
+
+  // Save Other Requirements
+
+  if (result) {
+    console.log('User saved successfully', result);
+    router.push('/')
+  }
+
 }
 
 function cancel() {
@@ -189,13 +219,16 @@ onMounted(async () => {
   if (!store.dbUser) {
     await store.getDBUser();
   }
-  
+
   name.value = store.dbUser?.name || '';
   email.value = store.authUser?.email || '';
-  remote.value = store.dbUser?.remote || 'YES';
+  remotePreference.value = store.dbUser?.remote_preference || 'YES';
   location.value = store.dbUser?.location || '';
   distance.value = store.dbUser?.distance || 0;
   resume.value = store.dbUser?.resume || '';
+
+  const configs = await PersistentDataService.fetchUserConfigs(store.authUser?.id);
+  console.log('configs:', configs);
 
   // jobTitles.value = data.jobTitles || [''];
   // stopWords.value = data.stopWords || [''];

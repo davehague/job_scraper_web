@@ -1,4 +1,4 @@
-// types/job.ts
+// types/interfaces.ts
 export interface Job {
     id: string
     created_at: string
@@ -22,3 +22,15 @@ export interface Job {
     date_pulled: string
   }
   
+  export interface User {
+    id: string
+    email: string
+    location: string
+    remote_preferred: string
+    distance: number
+    results_wanted: number
+    min_salary: number
+    resume: string
+    name: string
+    is_public: boolean
+  }

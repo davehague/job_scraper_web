@@ -116,8 +116,6 @@ import { useRouter } from 'vue-router'
 import { useJsaStore } from '@/stores/jsaStore'
 
 const store = useJsaStore();
-console.log(store.user);
-
 const router = useRouter()
 const name = ref('')
 const email = ref('example@example.com')
@@ -180,13 +178,16 @@ function cancel() {
   router.push('/')
 }
 
-// onMounted(async () => {
-//   const data = await fetchData();
-//   jobTitles.value = data.jobTitles || [''];
-//   stopWords.value = data.stopWords || [''];
-//   skillWords.value = data.skillWords || [''];
-//   otherRequirements.value = data.otherRequirements || [''];
-// });
+onMounted(async () => {
+  console.log('AuthUser = ', store.authUser);
+  console.log('DBUser = ', store.dbUser);
+
+  // const data = await fetchData();
+  // jobTitles.value = data.jobTitles || [''];
+  // stopWords.value = data.stopWords || [''];
+  // skillWords.value = data.skillWords || [''];
+  // otherRequirements.value = data.otherRequirements || [''];
+});
 </script>
 
 <style scoped>

@@ -1,20 +1,25 @@
 import { defineStore } from 'pinia'
-import { type User } from '@supabase/supabase-js'
+import { type User as AuthUser } from '@supabase/supabase-js'
+import { type User as DBUser} from '@/types/interfaces'
 
 export const useJsaStore = defineStore('jsaStore', {
   state: () => ({
     selectedRoleId: 0 as number | undefined,
-    user: null as User | null,
+    authUser: null as AuthUser | null,
+    dbUser: null as DBUser | null
   }),
   actions: {
     setSelectedRoleId(role: number) {
       this.selectedRoleId = role;
     },
-    setUser(user: User | null) {
-      this.user = user;
+    setAuthUser(user: AuthUser | null) {
+      this.authUser = user;
+    },
+    setDBUser(user: DBUser) {
+      this.dbUser = user;
     },
     signOutUser() {
-      this.user = null;
+      this.authUser = null;
     }
   }
 })

@@ -6,7 +6,7 @@
       </select>
     </div>
     <div class="right">
-      <div v-if="user">
+      <div v-if="store.authUser">
         <img src="/public/profile.png" class="profile-pic" @click="toggleMenu" />
         <div v-if="showMenu" class="dropdown-menu">
           <button @click="goToProfile">Profile</button>
@@ -14,7 +14,7 @@
         </div>
       </div>
       <div v-else>
-        <button @click="signIn">Sign In</button>
+        <button class="sign-in" @click="signIn">Sign In</button>
       </div>
     </div>
   </header>
@@ -31,8 +31,6 @@ import { supabase } from "@/utils/supabaseClient";
 import { type AuthChangeEvent, type User, type Session } from "@supabase/supabase-js";
 
 const router = useRouter()
-
-let user = ref<User | null>(null);
 const roles = ref<Role[]>([]);
 const showMenu = ref(false);
 const selectedRole = ref<number>(0);
@@ -47,19 +45,21 @@ const fetchRoles = async () => {
 }
 
 const checkUser = async () => {
-  console.log('Checking user');
+  console.log('Checking for existing logged-in user');
   const result = await supabase.auth.getUser();
-  console.log('Result:', result);
-  store.setUser(result.data.user);
-  user.value = result.data.user;
-  console.log('User:', user.value);
+  if (result.error != null) {
+    console.log('No existing user found:', result);
+  }
+
+  console.log('User was logged in:', result.data.user);
+  store.setAuthUser(result.data.user);
 }
 
 const signOut = async () => {
   const result = await supabase.auth.signOut();
   if (result.error != null) console.error('Sign-out error:', result)
   store.signOutUser();
-  user.value = null;
+  store.setAuthUser(null);
   router.push('/login')
 }
 
@@ -80,7 +80,7 @@ onMounted(async () => {
   await checkUser();
 
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-    store.setUser(session?.user || null);
+    store.setAuthUser(session?.user || null);
   })
 })
 
@@ -100,6 +100,15 @@ watch(selectedRole, (newVal) => {
 .left {
   display: flex;
   align-items: center;
+}
+
+.sign-in {
+  background-color: #455a64;
+  color: white;
+}
+
+.sign-in:hover {
+  background-color: #333;
 }
 
 #roles {

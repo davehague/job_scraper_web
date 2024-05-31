@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { type Job } from '@/types/job'
+import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';

@@ -53,10 +53,7 @@ export default {
         })
 
         if (data && data.user != null) {
-          console.log('Sign-up successful:', data)
-
-          // Insert into the users table
-          // TODO: Put into PersistentDataService
+          console.log('Sign-up successful:', data);
           const { error: userCreateError } = await supabase
             .from('users')
             .insert({ id: data.user?.id, email: email.value })

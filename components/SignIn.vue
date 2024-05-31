@@ -26,6 +26,8 @@ import { ref, type PropType } from 'vue'
 import { useRouter } from '#app'
 import { supabase } from "@/utils/supabaseClient";
 import { useJsaStore } from '@/stores/jsaStore';
+import PersistentDataService from '~/services/PersistentDataService';
+import { type User as DBUser } from '~/types/interfaces';
 
 export default {
   props: {
@@ -50,7 +52,11 @@ export default {
 
         if (data && data.user != null) {
           console.log('Sign-in successful:', data)
-          store.setUser(data.user);
+          store.setAuthUser(data.user);
+
+          let dbUser = await PersistentDataService.singleRecordFetch('users', data.user.id);
+          store.setDBUser(dbUser as DBUser);
+
           router.push('/')
         } else {
           throw error;

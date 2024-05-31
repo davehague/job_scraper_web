@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
-import { type Job } from '~/types/job'
+import { type Job } from '~/types/interfaces'
 import { marked } from 'marked'
 
 export default defineComponent({
@@ -101,7 +101,7 @@ export default defineComponent({
 }
 
 .job-card.older-job {
-  background-color: #efefef;
+  background-color: #ddd;
 }
 
 

@@ -37,13 +37,15 @@ export default class PersistentDataService {
       throw error;
     }
 
-    return data; // Upserted user
+    return data.length > 0 ? data[0] : null;
   }
 
-  static async fetchUserConfigs(userId: string) 
-  : Promise<UserConfig[] | [null]>{
+  static async fetchUserConfigs(userId: string): Promise<UserConfig[] | []> {
     // TODO:  table swap
-    const query = supabase.from("role_configs").select("*").eq("user_id", userId);
+    const query = supabase
+      .from("role_configs")
+      .select("*")
+      .eq("user_id", userId);
     const { data, error } = await query;
 
     if (error) {
@@ -52,5 +54,54 @@ export default class PersistentDataService {
     }
 
     return data;
+  }
+
+  static async updateUserConfig(config: UserConfig) {
+    const query = supabase.from("role_configs").upsert([config]).select();
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error updating user config:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
+  static async insertUserConfig(config: UserConfig) {
+    const query = supabase
+      .from("role_configs")
+      .insert({
+        key: config.key,
+        string_value: config.string_value,
+        int_value: config.int_value,
+        bool_value: config.bool_value,
+        user_id: config.user_id,
+      })
+      .select();
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error inserting user config:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
+  static async deleteUserConfig(configId: number) {
+    const query = supabase
+      .from("role_configs")
+      .delete()
+      .eq("id", configId)
+      .select();
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error deleting user config:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
   }
 }

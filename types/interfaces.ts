@@ -37,10 +37,9 @@ export interface Job {
 
   export interface UserConfig {
     id: number
-    role_id: number
     key: string
-    string_value: string
-    int_value: number
-    bool_value: boolean
+    string_value: string | null
+    int_value: number | null
+    bool_value: boolean | null
     user_id: string
   }

@@ -54,7 +54,7 @@ const hideTooltip = () => {
   color: #333;
   text-align: left;
   border-radius: 6px;
-  padding: 5px;
+  padding: 15px;
   position: absolute;
   z-index: 1;
   bottom: 125%; 

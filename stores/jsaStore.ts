@@ -27,6 +27,11 @@ export const useJsaStore = defineStore("jsaStore", {
         return this.authUser;
       }
     },
+    async refreshDBUser() {
+      console.log("Refreshing DB user data...");
+      this.dbUser = null;
+      return this.getDBUser();
+    },
     async getDBUser() {
       if (this.dbUser != null && this.dbUser != undefined) {
         return this.dbUser;

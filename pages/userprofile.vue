@@ -18,9 +18,10 @@
     <div>
       
       <div class="label-container">
-        <label>Job Titles (comma separated):</label>
+        <label>Job Titles (top 3, comma separated):</label>
         <InfoTooltip
-          text="What are the top 3 job titles you'd like to target?  If you don't know, you can simply list your recent job titles.  This is what you would type into a job search engine. There may be some overlap and duplication in the titles." />
+          text="What are the top 3 job titles you'd like to target?  If you don't know, you can simply list your recent job titles.  
+          This is what you would type into a job search engine. There may be some overlap and duplication in the titles." />
       </div>
       <input v-model="jobTitles" type="text" placeholder="Enter job titles" />
     </div>
@@ -34,7 +35,7 @@
       </select>
     </div>
     <div v-if="remotePreference !== 'ONLY'">
-      <label>Location:</label>
+      <label>Location (City, State, Country):</label>
       <input v-model="location" type="text" />
       <label>Distance (miles):</label>
       <input v-model="distance" type="number" />
@@ -66,18 +67,29 @@
       <div class="label-container">
         <label>Other Requirements (comma separated):</label>
         <InfoTooltip
-          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, salary or hourly rate requirements?  Not all jobs list these things, but we can filter out the ones that do (and are too low, in the case of pay)." />
+          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
+          Not all jobs list these things, but we can highlight the ones that do." />
       </div>
       <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
     </div>
 
     <div>
-      <label>Minimum Salary:</label>
+      
+      <div class="label-container">
+        <label>Minimum Salary:</label>
+        <InfoTooltip
+          text="If the job lists the salary, we won't show it to you if the max offer is below your minimum" />
+      </div>
       <input v-model="minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
+      
     </div>
 
     <div>
-      <label>Resume:</label>
+      <div class="label-container">
+        <label>Resume:</label>
+        <InfoTooltip
+          text="We'll use your resume to match your particular skills against each and every job we show you." />
+      </div>
       <textarea v-model="resume" rows="10"></textarea>
     </div>
 
@@ -145,7 +157,7 @@ async function save() {
   try {
     const result = await PersistentDataService.upsertUser(u as User)
 
-    await reconcileAndPersistConfigs('job_titles', jobTitles.value);
+    await reconcileAndPersistConfigs('job_titles', jobTitles.value, 3);
     await reconcileAndPersistConfigs('stop_words', stopWords.value);
     await reconcileAndPersistConfigs('skill_words', skillWords.value);
     await reconcileAndPersistConfigs('candidate_requirements', candidateRequirements.value);
@@ -159,8 +171,9 @@ async function save() {
 }
 
 
-async function reconcileAndPersistConfigs(key: string, newValue: string) {
+async function reconcileAndPersistConfigs(key: string, newValue: string, maxValues = 99) {
   const { toUpdate, toInsert, toDelete } = reconcileConfigs(key, newValue);
+
   await performUpdate(toUpdate);
   await performInsert(toInsert);
   await performDelete(toDelete);
@@ -185,11 +198,13 @@ async function performDelete(configs: UserConfig[]) {
 }
 
 
-function reconcileConfigs(key: string, newValue: string) {
+function reconcileConfigs(key: string, newValue: string, maxValues = 99) {
   const uid = store.authUser?.id || '';
   if (!uid || uid === '') return { toUpdate: [], toInsert: [], toDelete: [] };
 
-  const newValues = newValue.split(',').map(v => v.trim().toLowerCase());
+  let newValues = newValue.split(',').map(v => v.trim().toLowerCase());
+  newValues = newValues.slice(0, maxValues);  
+  
   const existingConfigs = userConfigs.value.filter(config => config.key === key);
 
   // Create a map for quick lookup with normalized values
@@ -238,10 +253,8 @@ onMounted(async () => {
     await store.getAuthUser();
   }
 
-  if (!store.dbUser) {
-    await store.getDBUser();
-  }
-
+  await store.refreshDBUser();
+  
   name.value = store.dbUser?.name || '';
   email.value = store.authUser?.email || '';
   remotePreference.value = store.dbUser?.remote_preference || 'YES';

@@ -5,13 +5,13 @@ import PersistentDataService from "~/services/PersistentDataService";
 
 export const useJsaStore = defineStore("jsaStore", {
   state: () => ({
-    selectedRoleId: 0 as number | undefined,
+    selectedUserId: '',
     authUser: null as AuthUser | null,
     dbUser: null as DBUser | null,
   }),
   actions: {
-    setSelectedRoleId(role: number) {
-      this.selectedRoleId = role;
+    setSelectedUserId(userId: string) {
+      this.selectedUserId = userId;
     },
     async getAuthUser() {
       if (this.authUser != null) {

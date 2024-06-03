@@ -14,30 +14,67 @@ import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
 
-const jobs = ref<Job[]>([])
+const jobs = ref<Job[]>([]);
 const store = useJsaStore()
 const lastRefreshed = ref(Date.now());
 
-const fetchJobs = async () => {
-  const items = await PersistentDataService.multiRecordFetch("jobs");
-  jobs.value = (items as Job[])
-    .filter(job => parseInt(job.score) >= 70)
-    .sort((a, b) => {
-      const dateA = new Date(a.date_posted || a.date_pulled).getTime()
-      const dateB = new Date(b.date_posted || b.date_pulled).getTime()
-      const dateComparison = dateB - dateA
-      if (dateComparison !== 0) {
-        return dateComparison
-      }
-      return parseInt(b.score) - parseInt(a.score)
-    })
-  lastRefreshed.value = Date.now();
+const transformDataToJobs = (data: any[]): Job[] => {
+  return data.map(item => ({
+    id: item.id,
+    created_at: item.created_at,
+    title: item.title,
+    company: item.company,
+    short_summary: item.short_summary,
+    hard_requirements: item.hard_requirements,
+    job_site: item.job_site,
+    url: item.url,
+    location: item.location,
+    date_posted: item.date_posted,
+    comp_interval: item.comp_interval,
+    comp_min: item.comp_min,
+    comp_max: item.comp_max,
+    comp_currency: item.comp_currency,
+    emails: item.emails,
+    description: item.description,
+    date_pulled: item.date_pulled,
+    user_id: item.user_id,
+    user_score: parseInt(item.user_score, 10),
+    user_interested: item.user_interested,
+  }));
+};
 
-}
+const fetchJobs = async () => {
+  try {
+    const publicUsers = await PersistentDataService.fetchPublicUsers();
+    const rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);
+    const items: Job[] = transformDataToJobs(rawItems);
+
+    console.log(items);
+    jobs.value = items
+      .filter(job => job.user_score >= 70)
+      .sort((a, b) => {
+        const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+        const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+        const dateComparison = dateB - dateA;
+        if (dateComparison !== 0) {
+          return dateComparison;
+        }
+        return b.user_score - a.user_score;
+      });
+
+    lastRefreshed.value = Date.now();
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+  }
+};
 
 const filteredJobs = computed(() => {
-  const selectedRoleId = store.selectedRoleId;
-  return jobs.value.filter(job => job.role_id === selectedRoleId);
+  if (store.selectedUserId === null) {
+    return jobs.value;
+  }
+  else {
+    return jobs.value.filter(job => job.user_id === store.selectedUserId);
+  }
 })
 
 onMounted(async () => {

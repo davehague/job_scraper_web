@@ -1,7 +1,7 @@
 <!-- components/JobCard.vue -->
 <template>
   <div :class="['job-card', { 'older-job': isOlder }]">
-    <h2>{{ job.title }} ({{ job.score }})</h2>
+    <h2>{{ job.title }} ({{ job.user_score }})</h2>
     <div class="company">
       <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
     </div>

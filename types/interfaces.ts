@@ -6,7 +6,6 @@ export interface Job {
     company: string
     short_summary: string
     hard_requirements: string
-    score: string
     job_site: string
     url: string
     location: string | null
@@ -17,9 +16,11 @@ export interface Job {
     comp_currency: string | null
     emails: string | null
     description: string
-    searched_title: string
-    role_id: number | null
     date_pulled: string
+
+    user_id: string
+    user_score: number
+    user_interested: boolean
   }
   
   export interface User {
@@ -42,4 +43,12 @@ export interface Job {
     int_value: number | null
     bool_value: boolean | null
     user_id: string
+  }
+
+  export interface UsersJobs {
+    user_id: string
+    job_id: string
+    score: number
+    interested: boolean
+    searched_title: string
   }

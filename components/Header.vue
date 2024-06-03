@@ -1,8 +1,8 @@
 <template>
   <header class="header">
     <div class="left">
-      <select id="roles" v-model="selectedRole">
-        <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
+      <select id="roles" v-model="selectedPublicUser">
+        <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
       </select>
     </div>
     <div class="right">
@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from '#app'
-import { type Role } from '@/types/role'
+import { type User as DBUser } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
 
@@ -31,17 +31,17 @@ import { supabase } from "@/utils/supabaseClient";
 import { type AuthChangeEvent, type User, type Session } from "@supabase/supabase-js";
 
 const router = useRouter()
-const roles = ref<Role[]>([]);
+const publicUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
-const selectedRole = ref<number>(0);
+const selectedPublicUser = ref('');
 const store = useJsaStore();
 
 const fetchRoles = async () => {
-  const items = await PersistentDataService.multiRecordFetch("roles");
-  roles.value = items as Role[];
-  const roleId = parseInt(roles.value[0].id);
-  store.setSelectedRoleId(roleId);
-  selectedRole.value = roleId;
+  const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
+  publicUsers.value = items;
+  const userId = publicUsers.value[0].id;
+  store.setSelectedUserId(userId);
+  selectedPublicUser.value = userId;
 }
 
 const checkUser = async () => {
@@ -85,8 +85,8 @@ onMounted(async () => {
   })
 })
 
-watch(selectedRole, (newVal) => {
-  store.setSelectedRoleId(newVal);
+watch(selectedPublicUser, (newVal) => {
+  store.setSelectedUserId(newVal);
 })
 </script>
 

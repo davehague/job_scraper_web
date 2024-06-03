@@ -16,7 +16,12 @@
 
     <h2>Professional Info</h2>
     <div>
-      <label>Job Titles (comma separated):</label>
+      
+      <div class="label-container">
+        <label>Job Titles (comma separated):</label>
+        <InfoTooltip
+          text="What are the top 3 job titles you'd like to target?  If you don't know, you can simply list your recent job titles.  This is what you would type into a job search engine. There may be some overlap and duplication in the titles." />
+      </div>
       <input v-model="jobTitles" type="text" placeholder="Enter job titles" />
     </div>
 
@@ -36,15 +41,33 @@
     </div>
 
     <div>
-      <label>Stop Words (comma separated):</label>
+      <div class="label-container">
+        <label>Stop Words (comma separated):</label>
+        <InfoTooltip
+          text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  
+          <br><br><b>Example:</b> If you're looking for your first developer job, you don't want jobs that say 'Senior', 'Sr.', or 'III' 
+          in the title <br><br><b>Example</b>: If you don't want to be a manager you would ask to filter out jobs with 'manager', 'supervisor', 
+          or 'lead' in the title" />
+      </div>
       <input v-model="stopWords" type="text" placeholder="Enter stop words" />
     </div>
     <div>
-      <label>Skill Words (comma separated):</label>
+      <div class="label-container">
+        <label>Skill Words (comma separated):</label>
+        <InfoTooltip
+          text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.<br><br>
+              <b>Example:</b>  I'm a CNC machinist.  I'll know I've got a potentially good job if I see the words 'CNC', 'CAM programming' 
+              or 'PLC programming'<br><br><b>Example:</b>  I'm a developer.  I'll know I've got a potentially good job if I see the words 'Java', 
+              'Agile',  or 'Pull requests'" />
+      </div>
       <input v-model="skillWords" type="text" placeholder="Enter skill words" />
     </div>
     <div>
-      <label>Other Requirements (comma separated):</label>
+      <div class="label-container">
+        <label>Other Requirements (comma separated):</label>
+        <InfoTooltip
+          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, salary or hourly rate requirements?  Not all jobs list these things, but we can filter out the ones that do (and are too low, in the case of pay)." />
+      </div>
       <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
     </div>
 
@@ -68,6 +91,8 @@ import { useRouter } from 'vue-router'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService'
 import { type User, type UserConfig } from '@/types/interfaces'
+import InfoTooltip from '@/components/InfoTooltip.vue';
+
 
 const store = useJsaStore();
 const router = useRouter()
@@ -281,10 +306,17 @@ onMounted(async () => {
   color: #fff;
 }
 
+.label-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px; /* Adjust as needed */
+}
+
 label {
   display: block;
-  margin-top: 30px;
   font-weight: 600;
+  margin: 0;
 }
 
 input,

@@ -49,7 +49,7 @@ const hideTooltip = () => {
 
 .tooltip-content {
   visibility: visible;
-  width: 400px; 
+  width: 400px;
   background-color: #ddd;
   color: #333;
   text-align: left;
@@ -57,15 +57,15 @@ const hideTooltip = () => {
   padding: 15px;
   position: absolute;
   z-index: 1;
-  bottom: 125%; 
+  bottom: 125%;
   left: 50%;
-  margin-left: -200px; 
+  margin-left: -200px;
 }
 
 .tooltip-content::after {
   content: "";
   position: absolute;
-  top: 100%; 
+  top: 100%;
   left: 50%;
   margin-left: -5px;
   border-width: 5px;

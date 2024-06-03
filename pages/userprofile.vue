@@ -16,7 +16,7 @@
 
     <h2>Professional Info</h2>
     <div>
-      
+
       <div class="label-container">
         <label>Job Titles (top 3, comma separated):</label>
         <InfoTooltip
@@ -44,8 +44,7 @@
     <div>
       <div class="label-container">
         <label>Stop Words (comma separated):</label>
-        <InfoTooltip
-          text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  
+        <InfoTooltip text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  
           <br><br><b>Example:</b> If you're looking for your first developer job, you don't want jobs that say 'Senior', 'Sr.', or 'III' 
           in the title <br><br><b>Example</b>: If you don't want to be a manager you would ask to filter out jobs with 'manager', 'supervisor', 
           or 'lead' in the title" />
@@ -55,8 +54,7 @@
     <div>
       <div class="label-container">
         <label>Skill Words (comma separated):</label>
-        <InfoTooltip
-          text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.<br><br>
+        <InfoTooltip text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.<br><br>
               <b>Example:</b>  I'm a CNC machinist.  I'll know I've got a potentially good job if I see the words 'CNC', 'CAM programming' 
               or 'PLC programming'<br><br><b>Example:</b>  I'm a developer.  I'll know I've got a potentially good job if I see the words 'Java', 
               'Agile',  or 'Pull requests'" />
@@ -66,22 +64,21 @@
     <div>
       <div class="label-container">
         <label>Other Requirements (comma separated):</label>
-        <InfoTooltip
-          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
+        <InfoTooltip text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
           Not all jobs list these things, but we can highlight the ones that do." />
       </div>
       <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
     </div>
 
     <div>
-      
+
       <div class="label-container">
         <label>Minimum Salary:</label>
         <InfoTooltip
           text="If the job lists the salary, we won't show it to you if the max offer is below your minimum" />
       </div>
       <input v-model="minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
-      
+
     </div>
 
     <div>
@@ -109,7 +106,7 @@ import InfoTooltip from '@/components/InfoTooltip.vue';
 const store = useJsaStore();
 const router = useRouter()
 
-const email = ref('example@example.com')
+const email = ref('')
 const location = ref('')
 const remotePreference = ref('YES')
 const distance = ref(0)
@@ -141,21 +138,21 @@ const removeFormatting = () => {
 };
 
 async function save() {
-  const u: User = {
-    id: store.authUser?.id ?? '',
-    email: email.value,
+  const uid = store.authUser?.id || '';
+  if (!uid || uid === '') return;
+
+  const baseUser = {
+    id: uid,
     location: location.value,
     remote_preference: remotePreference.value,
     distance: distance.value,
     min_salary: minSalary.value,
     resume: resume.value,
-    results_wanted: 20, // TODO
-    is_public: true,  // TODO
     name: name.value
   };
 
   try {
-    const result = await PersistentDataService.upsertUser(u as User)
+    const result = await PersistentDataService.upsertUser(baseUser as User)
 
     await reconcileAndPersistConfigs('job_titles', jobTitles.value, 3);
     await reconcileAndPersistConfigs('stop_words', stopWords.value);
@@ -197,14 +194,13 @@ async function performDelete(configs: UserConfig[]) {
   }
 }
 
-
 function reconcileConfigs(key: string, newValue: string, maxValues = 99) {
   const uid = store.authUser?.id || '';
   if (!uid || uid === '') return { toUpdate: [], toInsert: [], toDelete: [] };
 
   let newValues = newValue.split(',').map(v => v.trim().toLowerCase());
-  newValues = newValues.slice(0, maxValues);  
-  
+  newValues = newValues.slice(0, maxValues);
+
   const existingConfigs = userConfigs.value.filter(config => config.key === key);
 
   // Create a map for quick lookup with normalized values
@@ -254,7 +250,7 @@ onMounted(async () => {
   }
 
   await store.refreshDBUser();
-  
+
   name.value = store.dbUser?.name || '';
   email.value = store.authUser?.email || '';
   remotePreference.value = store.dbUser?.remote_preference || 'YES';
@@ -323,7 +319,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px; /* Adjust as needed */
+  margin-bottom: 8px;
 }
 
 label {

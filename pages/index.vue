@@ -38,8 +38,8 @@ const transformDataToJobs = (data: any[]): Job[] => {
     description: item.description,
     date_pulled: item.date_pulled,
     user_id: item.user_id,
-    user_score: parseInt(item.user_score, 10),
-    user_interested: item.user_interested,
+    user_score: parseInt(item.score, 10),
+    user_interested: item.interested,
   }));
 };
 
@@ -79,7 +79,7 @@ const filteredJobs = computed(() => {
 
 onMounted(async () => {
   await fetchJobs()
-  const intervalId = setInterval(fetchJobs, 300000); // Refresh every 5 minutes
+  const intervalId = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 
   onUnmounted(() => {
     clearInterval(intervalId);

@@ -44,22 +44,16 @@ export default class PersistentDataService {
     const userIds = users.map((user) => user.id);
 
     const { data, error } = await supabase
-      .from('users_jobs')
-      .select('user_id, score, interested, jobs(*)')
-      .in('user_id', userIds);
-  
+      .from("recent_high_score_jobs")
+      .select("*");
+
     if (error) {
-      console.error('Error fetching jobs for users:', error);
+      console.error("Error fetching jobs for users:", error);
       throw error;
     }
-  
-    console.log('Fetched jobs for users:', data);
-    return data.map((record) => ({
-      ...record.jobs,
-      user_id: record.user_id,
-      user_score: record.score,
-      user_interested: record.interested,
-    }));
+
+    console.log("Fetched jobs for users:", data);
+    return data;
   }
 
   // ============= userProfile.vue ============= //

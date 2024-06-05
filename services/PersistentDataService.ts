@@ -1,5 +1,10 @@
 import { supabase } from "@/utils/supabaseClient";
-import { type User, type UserConfig, type Job } from "@/types/interfaces";
+import {
+  type User,
+  type UserConfig,
+  type Job,
+  type UsersJobs,
+} from "@/types/interfaces";
 
 export default class PersistentDataService {
   // ============= GENERAL ============= //
@@ -54,6 +59,45 @@ export default class PersistentDataService {
 
     console.log("Fetched jobs for users:", data);
     return data;
+  }
+
+  // ============= JobCard.vue ============= //
+  static async setUserInterest(
+    userId: string,
+    jobId: string,
+    interested: boolean | null
+  ) {
+    const query = supabase
+      .from("users_jobs")
+      .upsert([{ user_id: userId, job_id: jobId, interested }])
+      .select();
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error updating user interest:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
+  static async getUserInterest(
+    userId: string,
+    jobId: string
+  ): Promise<UsersJobs | null> {
+    const query = supabase
+      .from("users_jobs")
+      .select("interested")
+      .eq("user_id", userId)
+      .eq("job_id", jobId);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching user interest:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? (data[0] as UsersJobs) : null;
   }
 
   // ============= userProfile.vue ============= //

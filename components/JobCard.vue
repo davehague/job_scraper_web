@@ -5,7 +5,7 @@
       <h2 @click="toggleCard">{{ job.title }}</h2>
       <div class="score-circle">{{ job.user_score }}</div>
     </div>
-    <div class="content" v-if="showContent">
+    <div class="content-container" v-if="showContent">
       <div class="company">
         <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
       </div>
@@ -22,15 +22,29 @@
           v-else>[Hide]</span>
       </h4>
       <div v-if="showRequirements" v-html="renderMarkdown(job.hard_requirements)"></div>
-      <a :href="job.url" @click="openInBrowser">View Job</a>
+    </div>
+    <a :href="job.url" @click="openInBrowser">View Job</a>
+    <div class="action-buttons">
+      <button v-if="userAction !== false" @click="setUserInterest(userAction === true ? null : true)"
+        class="save-button">
+        <i :class="['fas', 'fa-heart', { 'icon-saved-active': userAction === true }]"></i>
+        {{ userAction === true ? 'Saved' : 'Save' }}
+      </button>
+      <button v-if="userAction !== true" @click="setUserInterest(userAction === false ? null : false)"
+        class="discard-button">
+        <i :class="['fas', 'fa-times-circle', { 'icon-discarded-active': userAction === false }]"></i>
+        {{ userAction === false ? 'Discarded' : 'Discard' }}
+      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType, ref, onMounted, onUnmounted } from 'vue'
-import { type Job } from '~/types/interfaces'
-import { marked } from 'marked'
+import { defineComponent, type PropType, ref, onMounted, onUnmounted } from 'vue';
+import { type Job, type UsersJobs } from '~/types/interfaces';
+import { marked } from 'marked';
+import PersistentDataService from '@/services/PersistentDataService';
+import { useJsaStore } from '@/stores/jsaStore'
 
 export default defineComponent({
   props: {
@@ -39,10 +53,12 @@ export default defineComponent({
       required: true
     }
   },
-  setup() {
+  setup({ job }) {
     const showRequirements = ref(false);
     const showFullSummary = ref(false);
     const showContent = ref(true);
+    const userAction = ref<boolean | null>(null);
+    const store = useJsaStore();
 
     const toggleCard = () => {
       if (window.innerWidth <= 768) {
@@ -52,7 +68,7 @@ export default defineComponent({
 
     const handleResize = () => {
       if (window.innerWidth > 768) {
-        showContent.value = true; 
+        showContent.value = true;
       }
     };
 
@@ -64,15 +80,54 @@ export default defineComponent({
       showFullSummary.value = !showFullSummary.value;
     };
 
-    onMounted(() => {
+    const setUserInterest = async (interested: boolean | null) => {
+      try {
+        const uid = store.authUser?.id || '';
+        if (!uid || uid === '') return;
+
+        const result = await PersistentDataService.setUserInterest(uid, job.id, interested);
+        userAction.value = interested;
+        console.log("Interest set:", result);
+      } catch (error) {
+        console.error("Failed to set user interest:", error);
+      }
+    };
+
+    const getUserInterest = async () => {
+      try {
+        const uid = store.authUser?.id || '';
+        if (!uid || uid === '') return;
+
+        const result = await PersistentDataService.getUserInterest(uid, job.id);
+
+        if(result)
+          console.log("Found some user interest:", result);
+
+        return result;
+      } catch (error) {
+        console.error("Failed to get user interest:", error);
+      }
+    };
+
+    onMounted(async () => {
       window.addEventListener('resize', handleResize);
+      const result = await getUserInterest();
+      if (result) {
+        console.log("User interest:", result);
+        userAction.value = result.interested;
+      }
     });
 
     onUnmounted(() => {
       window.removeEventListener('resize', handleResize);
     });
 
-    return { showContent, toggleCard, showRequirements, toggleRequirements, showFullSummary, toggleSummary };
+    return {
+      showContent, toggleCard,
+      showRequirements, toggleRequirements,
+      showFullSummary, toggleSummary,
+      userAction, setUserInterest
+    };
   },
   computed: {
     truncatedDescription(): string {
@@ -113,18 +168,20 @@ export default defineComponent({
 }
 
 .job-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background-color: #fff;
   border: 1px solid #ccc;
   padding: 24px;
   border-radius: 8px;
-  width: calc(33% - 48px);
   box-sizing: border-box;
-  overflow: hidden;
   width: 100%;
+  overflow: hidden;
 }
 
 .job-card:hover {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .job-card.older-job {
@@ -140,16 +197,16 @@ export default defineComponent({
 .title-and-score {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Align items to the top */
+  align-items: flex-start;
   position: relative;
 }
 
 .score-circle {
-  width: 40px;  
-  height: 40px;  
-  background-color: #bbb;  
+  width: 40px;
+  height: 40px;
+  background-color: #bbb;
   color: #333;
-  border-radius: 50%; 
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -161,9 +218,13 @@ export default defineComponent({
 
 .job-card h2 {
   flex-grow: 1;
-  margin-top: 10px;  
-  margin-right: 50px; 
+  margin-top: 10px;
+  margin-right: 50px;
   white-space: normal;
+}
+
+.content-container {
+  flex-grow: 1;
 }
 
 .job-card h3 {
@@ -181,6 +242,7 @@ export default defineComponent({
 .job-card a {
   color: #007bff;
   text-decoration: none;
+  margin: 10px 0;
 }
 
 .job-card a:hover {
@@ -189,6 +251,10 @@ export default defineComponent({
 
 .job-card h4 {
   cursor: pointer;
+}
+
+.job-card i {
+  color: #777;
 }
 
 .job-card h4 span {
@@ -208,5 +274,36 @@ export default defineComponent({
 
 .job-card .link-like:hover {
   text-decoration: none;
+}
+
+.job-card .action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0 0 0;
+}
+
+.save-button,
+.discard-button {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+  background-color: aliceblue;
+  color: #333;
+}
+
+.save-button:hover,
+.discard-button:hover {
+  background-color: #d8ebff;
+}
+
+.job-card .icon-saved-active {
+  color: red;
+}
+.job-card .icon-discarded-active {
+  color: #000;
 }
 </style>

@@ -4,6 +4,9 @@
     <div class="job-list">
       <JobCard v-for="job in filteredJobs" :key="job.id" :job="job" />
     </div>
+    <div v-if="jobs.length === 0" class="no-jobs">
+      <p>No jobs found.  Is your <a href="/userprofile">profile</a> filled out completely? If you're still experiencing a problem please contact David!</p>
+    </div>  
   </div>
 </template>
 
@@ -48,10 +51,17 @@ const transformDataToJobs = (data: any[]): Job[] => {
   }));
 };
 
-const fetchJobs = async () => {
+const fetchJobs = async (loggedInUserId: string | null) => {
   try {
-    const publicUsers = await PersistentDataService.fetchPublicUsers();
-    const rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);
+    let rawItems = [];
+    if(loggedInUserId === null) {
+      const publicUsers = await PersistentDataService.fetchPublicUsers();
+      rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);  
+    }
+    else {
+      rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId!);
+    }
+    
     const items: Job[] = transformDataToJobs(rawItems);
 
     console.log(items);
@@ -74,6 +84,11 @@ const fetchJobs = async () => {
 };
 
 const filteredJobs = computed(() => {
+  const loggedInUserId = store.authUser?.id || null;
+  if (loggedInUserId != null) {
+    return jobs.value.filter(job => job.user_id === loggedInUserId);
+  }
+
   if (store.selectedUserId === null) {
     return jobs.value;
   }
@@ -83,7 +98,9 @@ const filteredJobs = computed(() => {
 })
 
 onMounted(async () => {
-  await fetchJobs()
+  const loggedInUserId = store.authUser?.id || null;
+
+  await fetchJobs(loggedInUserId)
   const intervalId = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 
   onUnmounted(() => {
@@ -103,7 +120,26 @@ onMounted(async () => {
   margin-top: 24px;
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   justify-items: center;
+}
+
+.no-jobs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa; 
+  border-radius: 10px;       
+  padding: 20px;             
+  margin-top: 20px;          
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  min-height: 200px;
+}
+
+.no-jobs p {
+  text-align: center;        /* Center the text within the paragraph */
+  color: #333;               /* Darker text for contrast */
+  margin: 0;                 /* Remove default margin */
+  font-size: 16px;           /* Optional: Adjust font size as needed */
 }
 </style>

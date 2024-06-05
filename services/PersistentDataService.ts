@@ -56,6 +56,20 @@ export default class PersistentDataService {
     return data;
   }
 
+  static async fetchJobsForUser(userId: string) {
+    const { data, error } = await supabase
+      .from("recent_high_score_jobs")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error fetching jobs for user:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
   // ============= JobCard.vue ============= //
   static async setUserInterest(
     userId: string,

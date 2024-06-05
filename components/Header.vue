@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <div class="left">
+    <div v-if="userIsNotLoggedIn" class="left">
       <select id="roles" v-model="selectedPublicUser">
         <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
       </select>
@@ -35,6 +35,8 @@ const publicUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
 const selectedPublicUser = ref('');
 const store = useJsaStore();
+
+const userIsNotLoggedIn = ref(false);
 
 const fetchRoles = async () => {
   const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
@@ -79,6 +81,10 @@ const toggleProfileMenu = () => {
 onMounted(async () => {
   await fetchRoles();
   await checkUser();
+  
+  if (!store.authUser) {
+    userIsNotLoggedIn.value = true;
+  }
 
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     store.setAuthUser(session?.user || null);
@@ -94,13 +100,14 @@ watch(selectedPublicUser, (newVal) => {
 .header {
   border-radius: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 10px 0;
 }
 
 .left {
   display: flex;
   align-items: center;
+  margin-right: 25px;
 }
 
 .sign-in {
@@ -151,6 +158,7 @@ watch(selectedPublicUser, (newVal) => {
   display: flex;
   flex-direction: column;
   width: 150px;
+  z-index: 1000;
 }
 
 .dropdown-menu button {

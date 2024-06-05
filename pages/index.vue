@@ -124,6 +124,12 @@ onMounted(async () => {
   justify-items: center;
 }
 
+@media (min-width: 768px) {
+  .job-list {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+}
+
 .no-jobs {
   display: flex;
   justify-content: center;
@@ -137,9 +143,9 @@ onMounted(async () => {
 }
 
 .no-jobs p {
-  text-align: center;        /* Center the text within the paragraph */
-  color: #333;               /* Darker text for contrast */
-  margin: 0;                 /* Remove default margin */
-  font-size: 16px;           /* Optional: Adjust font size as needed */
+  text-align: center;
+  color: #333;
+  margin: 0;
+  font-size: 16px;
 }
 </style>

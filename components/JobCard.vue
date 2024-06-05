@@ -1,28 +1,34 @@
 <!-- components/JobCard.vue -->
 <template>
   <div :class="['job-card', { 'older-job': isOlder }]">
-    <h2>{{ job.title }} ({{ job.user_score }})</h2>
-    <div class="company">
-      <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
+    <div class="title-and-score">
+      <h2 @click="toggleCard">{{ job.title }}</h2>
+      <div class="score-circle">{{ job.user_score }}</div>
     </div>
-    <div v-if="job.date_posted">Posted on {{ job.date_posted }} on {{ job.job_site }}</div>
-    <div v-else-if="job.date_pulled">Pulled on {{ job.date_pulled }} from {{ job.job_site }}</div>
-    <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
+    <div class="content" v-if="showContent">
+      <div class="company">
+        <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
+      </div>
+      <div v-if="job.date_posted">Posted on {{ job.date_posted }} on {{ job.job_site }}</div>
+      <div v-else-if="job.date_pulled">Pulled on {{ job.date_pulled }} from {{ job.job_site }}</div>
+      <div v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! / 1000) }}k</div>
 
-    <h4>Summary</h4>
-    <div v-if="showFullSummary" v-html="renderMarkdown(job.short_summary)"></div>
-    <div v-else v-html="renderMarkdown(truncate(job.short_summary, 300))"></div>
-    <span class="link-like" @click="toggleSummary">{{ showFullSummary ? '[Show Less]' : '[Show More]' }}</span>
+      <h4>Summary</h4>
+      <div v-if="showFullSummary" v-html="renderMarkdown(job.short_summary)"></div>
+      <div v-else v-html="renderMarkdown(truncate(job.short_summary, 300))"></div>
+      <span class="link-like" @click="toggleSummary">{{ showFullSummary ? '[Show Less]' : '[Show More]' }}</span>
 
-    <h4 @click="toggleRequirements">Requirements <span v-if="!showRequirements">[Show]</span><span v-else>[Hide]</span>
-    </h4>
-    <div v-if="showRequirements" v-html="renderMarkdown(job.hard_requirements)"></div>
-    <a :href="job.url" @click="openInBrowser">View Job</a>
+      <h4 @click="toggleRequirements">Requirements <span v-if="!showRequirements">[Show]</span><span
+          v-else>[Hide]</span>
+      </h4>
+      <div v-if="showRequirements" v-html="renderMarkdown(job.hard_requirements)"></div>
+      <a :href="job.url" @click="openInBrowser">View Job</a>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue'
+import { defineComponent, type PropType, ref, onMounted, onUnmounted } from 'vue'
 import { type Job } from '~/types/interfaces'
 import { marked } from 'marked'
 
@@ -36,6 +42,19 @@ export default defineComponent({
   setup() {
     const showRequirements = ref(false);
     const showFullSummary = ref(false);
+    const showContent = ref(true);
+
+    const toggleCard = () => {
+      if (window.innerWidth <= 768) {
+        showContent.value = !showContent.value;
+      }
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        showContent.value = true; 
+      }
+    };
 
     const toggleRequirements = () => {
       showRequirements.value = !showRequirements.value;
@@ -45,7 +64,15 @@ export default defineComponent({
       showFullSummary.value = !showFullSummary.value;
     };
 
-    return { showRequirements, toggleRequirements, showFullSummary, toggleSummary };
+    onMounted(() => {
+      window.addEventListener('resize', handleResize);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('resize', handleResize);
+    });
+
+    return { showContent, toggleCard, showRequirements, toggleRequirements, showFullSummary, toggleSummary };
   },
   computed: {
     truncatedDescription(): string {
@@ -104,10 +131,39 @@ export default defineComponent({
   background-color: #ddd;
 }
 
+@media (max-width: 768px) {
+  .job-card h2 {
+    cursor: pointer;
+  }
+}
+
+.title-and-score {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Align items to the top */
+  position: relative;
+}
+
+.score-circle {
+  width: 40px;  
+  height: 40px;  
+  background-color: #bbb;  
+  color: #333;
+  border-radius: 50%; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  position: absolute;
+  top: 10px;
+  right: 0px;
+}
 
 .job-card h2 {
-  margin: 0 0 16px;
-  font-size: 1.5em;
+  flex-grow: 1;
+  margin-top: 10px;  
+  margin-right: 50px; 
+  white-space: normal;
 }
 
 .job-card h3 {

@@ -19,8 +19,14 @@ export interface Job {
     date_pulled: string
 
     user_id: string
-    user_score: number
     user_interested: boolean
+    
+    overall_score: number
+    desire_score: number
+    experience_score: number
+    meets_requirements_score: number
+    meets_experience_score: number
+    
   }
   
   export interface User {
@@ -48,7 +54,11 @@ export interface Job {
   export interface UsersJobs {
     user_id: string
     job_id: string
-    score: number
     interested: boolean
     searched_title: string
+    score: number
+    desire_score: number
+    experience_score: number
+    meets_requirements_score: number
+    meets_experience_score: number
   }

@@ -3,7 +3,12 @@
   <div :class="['job-card', { 'older-job': isOlder }]">
     <div class="title-and-score">
       <h2 @click="toggleCard">{{ job.title }}</h2>
-      <div class="score-circle">{{ job.user_score }}</div>
+      <div :title="'Overall Score: ' + job.overall_score
+    + '\nDesire Score: ' + job.desire_score
+    + '\nExperience Score: ' + job.experience_score
+    + '\nMeets Requirements Score: ' + job.meets_requirements_score
+    + '\nMeets Experience Score: ' + job.meets_experience_score" class="score-circle">{{ job.overall_score }}
+      </div>
     </div>
     <div class="content-container" v-if="showContent">
       <div class="company">
@@ -100,7 +105,7 @@ export default defineComponent({
 
         const result = await PersistentDataService.getUserInterest(uid, job.id);
 
-        if(result)
+        if (result)
           console.log("Found some user interest:", result);
 
         return result;
@@ -303,6 +308,7 @@ export default defineComponent({
 .job-card .icon-saved-active {
   color: red;
 }
+
 .job-card .icon-discarded-active {
   color: #000;
 }

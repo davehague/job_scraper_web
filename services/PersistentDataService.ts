@@ -1,10 +1,5 @@
 import { supabase } from "@/utils/supabaseClient";
-import {
-  type User,
-  type UserConfig,
-  type Job,
-  type UsersJobs,
-} from "@/types/interfaces";
+import { type User, type UserConfig, type UsersJobs } from "@/types/interfaces";
 
 export default class PersistentDataService {
   // ============= GENERAL ============= //

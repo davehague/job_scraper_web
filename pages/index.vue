@@ -38,8 +38,13 @@ const transformDataToJobs = (data: any[]): Job[] => {
     description: item.description,
     date_pulled: item.date_pulled,
     user_id: item.user_id,
-    user_score: parseInt(item.score, 10),
     user_interested: item.interested,
+
+    overall_score: parseInt(item.score, 10),
+    desire_score: parseInt(item.desire_score, 10),
+    experience_score: parseInt(item.experience_score, 10),
+    meets_requirements_score: parseInt(item.meets_requirements_score, 10),
+    meets_experience_score: parseInt(item.meets_experience_score, 10),
   }));
 };
 
@@ -51,7 +56,7 @@ const fetchJobs = async () => {
 
     console.log(items);
     jobs.value = items
-      .filter(job => job.user_score >= 70)
+      .filter(job => job.overall_score >= 70)
       .sort((a, b) => {
         const dateA = new Date(a.date_posted || a.date_pulled).getTime();
         const dateB = new Date(b.date_posted || b.date_pulled).getTime();
@@ -59,7 +64,7 @@ const fetchJobs = async () => {
         if (dateComparison !== 0) {
           return dateComparison;
         }
-        return b.user_score - a.user_score;
+        return b.overall_score - a.overall_score;
       });
 
     lastRefreshed.value = Date.now();

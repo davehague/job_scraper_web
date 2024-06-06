@@ -40,6 +40,7 @@ export interface Job {
     resume: string
     name: string
     is_public: boolean
+    send_emails: boolean
   }
 
   export interface UserConfig {

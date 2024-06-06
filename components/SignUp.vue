@@ -30,6 +30,7 @@
 import { ref, type PropType } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
 import { useJsaStore } from '@/stores/jsaStore';
+import PersistentDataService from '~/services/PersistentDataService';
 
 export default {
   props: {
@@ -42,11 +43,17 @@ export default {
     const email = ref('');
     const password = ref('');
     const errorMessage = ref('');
-    const store = useJsaStore();
     const signUpComplete = ref(false);
 
     const signUp = async () => {
       try {
+        let existingUser = await PersistentDataService.fetchUserByEmail(email.value);
+        console.log('existingUser', existingUser);
+        if (existingUser) {
+          errorMessage.value = 'Email already exists, please sign in instead.';
+          return;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email: email.value,
           password: password.value

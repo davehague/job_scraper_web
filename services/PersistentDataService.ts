@@ -27,6 +27,19 @@ export default class PersistentDataService {
     return data.length > 0 ? data[0] : null;
   }
 
+  // ============= Login ============= //
+  static async fetchUserByEmail(email: string): Promise<User | null> {
+    const query = supabase.from("users").select("*").eq("email", email);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching user by email:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
   // ============= index.vue ============= //
   static async fetchPublicUsers() {
     const query = supabase.from("users").select("*").eq("is_public", true);
@@ -138,7 +151,7 @@ export default class PersistentDataService {
   }
 
   static async updateUserConfig(config: UserConfig) {
-    const query = supabase.from("role_configs").upsert([config]).select();
+    const query = supabase.from("user_configs").upsert([config]).select();
     const { data, error } = await query;
 
     if (error) {
@@ -151,7 +164,7 @@ export default class PersistentDataService {
 
   static async insertUserConfig(config: UserConfig) {
     const query = supabase
-      .from("role_configs")
+      .from("user_configs")
       .insert({
         key: config.key,
         string_value: config.string_value,
@@ -172,7 +185,7 @@ export default class PersistentDataService {
 
   static async deleteUserConfig(configId: number) {
     const query = supabase
-      .from("role_configs")
+      .from("user_configs")
       .delete()
       .eq("id", configId)
       .select();

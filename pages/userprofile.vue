@@ -13,6 +13,13 @@
       <label>Email:</label>
       <input v-model="email" type="email" disabled />
     </div>
+    <div class="checkbox-container">
+      <label>
+        Send me emails about new jobs
+        <input type="checkbox" v-model="emailConsent">
+        <span class="checkmark"></span>
+      </label>
+    </div>
 
     <h2>Professional Info</h2>
     <div>
@@ -101,18 +108,20 @@ import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService'
 import { type User, type UserConfig } from '@/types/interfaces'
 import InfoTooltip from '@/components/InfoTooltip.vue';
+import '@/assets/checkbox.css';
 
 
 const store = useJsaStore();
 const router = useRouter()
 
-const email = ref('')
-const location = ref('')
-const remotePreference = ref('YES')
-const distance = ref(0)
-const minSalary = ref(0)
-const resume = ref('')
-const name = ref('')
+const email = ref('');
+const emailConsent = ref(false);
+const location = ref('');
+const remotePreference = ref('YES');
+const distance = ref(0);
+const minSalary = ref(0);
+const resume = ref('');
+const name = ref('');
 
 const jobTitles = ref('');
 const stopWords = ref('');
@@ -148,7 +157,8 @@ async function save() {
     distance: distance.value,
     min_salary: minSalary.value,
     resume: resume.value,
-    name: name.value
+    name: name.value,
+    send_emails: emailConsent.value,
   };
 
   try {
@@ -253,6 +263,7 @@ onMounted(async () => {
 
   name.value = store.dbUser?.name || '';
   email.value = store.authUser?.email || '';
+  emailConsent.value = store.dbUser?.send_emails || false;
   remotePreference.value = store.dbUser?.remote_preference || 'YES';
   location.value = store.dbUser?.location || '';
   distance.value = store.dbUser?.distance || 0;
@@ -325,12 +336,15 @@ onMounted(async () => {
 label {
   display: block;
   font-weight: 600;
-  margin: 0;
+  margin-bottom: 10px;
 }
 
-input,
+input[type="text"],
+input[type="email"],
+input[type="number"],
 select,
-textarea {
+textarea,
+input[type="checkbox"] {
   margin-bottom: 20px;
   padding: 10px;
   border: 1px solid #ccc;
@@ -345,7 +359,7 @@ input:disabled {
 }
 
 button {
-  margin: 10px 5px 10px 0;
+  margin-top: 20px;
   padding: 10px;
   border: none;
   border-radius: 3px;

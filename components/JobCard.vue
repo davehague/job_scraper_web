@@ -118,7 +118,6 @@ export default defineComponent({
       window.addEventListener('resize', handleResize);
       const result = await getUserInterest();
       if (result) {
-        console.log("User interest:", result);
         userAction.value = result.interested;
       }
     });

@@ -1,4 +1,4 @@
-export const addedToGroup = `
+export const welcome = `
 <!DOCTYPE html>
 <html>
 <head>

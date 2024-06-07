@@ -31,6 +31,7 @@ import { ref, type PropType } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
 import { useJsaStore } from '@/stores/jsaStore';
 import PersistentDataService from '~/services/PersistentDataService';
+import { welcome } from '@/services/emailTemplates';
 
 export default {
   props: {
@@ -44,6 +45,32 @@ export default {
     const password = ref('');
     const errorMessage = ref('');
     const signUpComplete = ref(false);
+
+    const sendWelcomeEmail = async (email: string) => {
+      try {
+        const response = await fetch('/api/sendEmail', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            toEmail: email,
+            subject: `Welcome to the Job App!`,
+            htmlTemplate: welcome,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        console.log('Member added successfully:', result);
+
+      } catch (error) {
+        console.error('Error adding member:', error);
+      }
+    }
 
     const signUp = async () => {
       try {
@@ -60,6 +87,7 @@ export default {
         })
 
         if (data && data.user != null) {
+          sendWelcomeEmail(email.value);
           console.log('Sign-up successful:', data);
           const { error: userCreateError } = await supabase
             .from('users')

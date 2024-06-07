@@ -24,10 +24,13 @@ export default defineEventHandler(async (event) => {
                         },
                     ],
                     Subject: `${subject}`,
+                    TextPart: "Welcome to the Job App!",
                     HTMLPart: `${htmlTemplate}`,
                 },
             ],
         })
+
+        console.log('Email sent with result:', request);
 
         return {
             success: true,

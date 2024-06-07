@@ -31,7 +31,7 @@ import { ref, type PropType } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
 import { useJsaStore } from '@/stores/jsaStore';
 import PersistentDataService from '~/services/PersistentDataService';
-import { welcome } from '@/services/emailTemplates';
+import { welcome } from '@/services/EmailTemplates';
 
 export default {
   props: {

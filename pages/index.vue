@@ -5,8 +5,9 @@
       <JobCard v-for="job in filteredJobs" :key="job.id" :job="job" />
     </div>
     <div v-if="jobs.length === 0" class="no-jobs">
-      <p>No jobs found.  Is your <a href="/userprofile">profile</a> filled out completely? If you're still experiencing a problem please contact David!</p>
-    </div>  
+      <p>No jobs found. Is your <a href="/userprofile">profile</a> filled out completely? If you're still experiencing a
+        problem please contact David!</p>
+    </div>
   </div>
 </template>
 
@@ -54,17 +55,15 @@ const transformDataToJobs = (data: any[]): Job[] => {
 const fetchJobs = async (loggedInUserId: string | null) => {
   try {
     let rawItems = [];
-    if(loggedInUserId === null) {
+    if (loggedInUserId === null) {
       const publicUsers = await PersistentDataService.fetchPublicUsers();
-      rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);  
+      rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);
     }
     else {
       rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId!);
     }
-    
-    const items: Job[] = transformDataToJobs(rawItems);
 
-    console.log(items);
+    const items: Job[] = transformDataToJobs(rawItems);
     jobs.value = items
       .filter(job => job.overall_score >= 70)
       .sort((a, b) => {
@@ -98,6 +97,14 @@ const filteredJobs = computed(() => {
 })
 
 onMounted(async () => {
+  if (!store.authUser) {
+    await store.getAuthUser();
+  }
+
+  if (!store.dbUser) {
+    await store.getDBUser();
+  }
+
   const loggedInUserId = store.authUser?.id || null;
 
   await fetchJobs(loggedInUserId)
@@ -134,11 +141,11 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f8f9fa; 
-  border-radius: 10px;       
-  padding: 20px;             
-  margin-top: 20px;          
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   min-height: 200px;
 }
 

@@ -58,12 +58,31 @@ export default defineComponent({
       required: true
     }
   },
-  setup({ job }) {
+  async setup({ job }) {
     const showRequirements = ref(false);
     const showFullSummary = ref(false);
     const showContent = ref(true);
     const userAction = ref<boolean | null>(null);
     const store = useJsaStore();
+
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        showContent.value = true;
+      }
+    };
+
+    onUnmounted(() => {
+      window.removeEventListener('resize', handleResize);
+    });
+
+
+    onMounted(async () => {
+      window.addEventListener('resize', handleResize);
+      const result = await getUserInterest();
+      if (result) {
+        userAction.value = result.interested;
+      }
+    });
 
     const toggleCard = () => {
       if (window.innerWidth <= 768) {
@@ -71,11 +90,6 @@ export default defineComponent({
       }
     };
 
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        showContent.value = true;
-      }
-    };
 
     const toggleRequirements = () => {
       showRequirements.value = !showRequirements.value;
@@ -105,26 +119,11 @@ export default defineComponent({
 
         const result = await PersistentDataService.getUserInterest(uid, job.id);
 
-        if (result)
-          console.log("Found some user interest:", result);
-
         return result;
       } catch (error) {
         console.error("Failed to get user interest:", error);
       }
     };
-
-    onMounted(async () => {
-      window.addEventListener('resize', handleResize);
-      const result = await getUserInterest();
-      if (result) {
-        userAction.value = result.interested;
-      }
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener('resize', handleResize);
-    });
 
     return {
       showContent, toggleCard,

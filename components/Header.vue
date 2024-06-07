@@ -6,7 +6,8 @@
       </select>
     </div>
     <div class="right">
-      <div v-if="store.authUser">
+      <div class="user-details" v-if="store.authUser">
+        <div class="username">{{ userName }}</div>
         <img src="/public/profile.png" class="profile-pic" @click="toggleProfileMenu" />
         <div v-if="showMenu" class="dropdown-menu">
           <button @click="goToProfile">Profile</button>
@@ -28,13 +29,14 @@ import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
 
 import { supabase } from "@/utils/supabaseClient";
-import { type AuthChangeEvent, type User, type Session } from "@supabase/supabase-js";
+import { type AuthChangeEvent, type Session } from "@supabase/supabase-js";
 
 const router = useRouter()
 const publicUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
 const selectedPublicUser = ref('');
 const store = useJsaStore();
+const userName = ref('');
 
 const userIsNotLoggedIn = ref(false);
 
@@ -49,13 +51,13 @@ const fetchRoles = async () => {
 const checkUser = async () => {
   const result = await supabase.auth.getUser();
   if (result.error != null) {
-    console.log('No existing user found:', result);
     store.signOutUser();
     return;
   }
 
   store.setAuthUser(result.data.user);
-  store.getDBUser(); // Pre-fetch the DB user
+  await store.getDBUser(); // Pre-fetch the DB user
+  userName.value = store.dbUser?.name && store.dbUser.name.length > 0 ? store.dbUser.name : store.dbUser?.email || '';
 }
 
 const signOut = async () => {
@@ -81,7 +83,7 @@ const toggleProfileMenu = () => {
 onMounted(async () => {
   await fetchRoles();
   await checkUser();
-  
+
   if (!store.authUser) {
     userIsNotLoggedIn.value = true;
   }
@@ -136,6 +138,12 @@ watch(selectedPublicUser, (newVal) => {
   display: flex;
   align-items: center;
   position: relative;
+  flex-direction: row; /* Ensure children are in a row */
+  justify-content: flex-end; /* Aligns children to the right */
+}
+
+.user-details {
+  display: flex;
 }
 
 .profile-pic {
@@ -144,6 +152,14 @@ watch(selectedPublicUser, (newVal) => {
   border-radius: 50%;
   cursor: pointer;
   background-color: #eee;
+}
+
+.username {
+  font-size: 1.1em;
+  color: white;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-menu {

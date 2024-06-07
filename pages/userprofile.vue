@@ -108,7 +108,7 @@ import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService'
 import { type User, type UserConfig } from '@/types/interfaces'
 import InfoTooltip from '@/components/InfoTooltip.vue';
-import '@/assets/checkbox.css';
+import '~/assets/checkbox.css';
 
 
 const store = useJsaStore();

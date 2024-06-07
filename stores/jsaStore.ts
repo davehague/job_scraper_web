@@ -20,8 +20,8 @@ export const useJsaStore = defineStore("jsaStore", {
         console.log("Checking if the user is already logged in...");
         const { data, error } = await supabase.auth.getUser();
         if (error) {
-          console.error("Error fetching user data:", error);
-          throw error;
+          console.log("User was not logged in");
+          return null;
         }
         this.authUser = data.user;
         return this.authUser;
@@ -44,8 +44,6 @@ export const useJsaStore = defineStore("jsaStore", {
 
         this.dbUser = data;
         return this.dbUser;
-      } else {
-        console.error("No user data found");
       }
     },
     setAuthUser(user: AuthUser | null) {

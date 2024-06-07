@@ -58,14 +58,15 @@ export default class PersistentDataService {
 
     const { data, error } = await supabase
       .from("recent_high_score_jobs")
-      .select("*");
+      .select("*")
+      .in("user_id", userIds);
 
     if (error) {
       console.error("Error fetching jobs for users:", error);
       throw error;
     }
 
-    console.log("Fetched jobs for users:", data);
+    console.log("Fetched jobs for public users:", data);
     return data;
   }
 
@@ -80,6 +81,7 @@ export default class PersistentDataService {
       throw error;
     }
 
+    console.log("Fetched jobs for user with userId ", userId, ":", data);
     return data;
   }
 

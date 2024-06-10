@@ -8,7 +8,7 @@ This is the web frontend for the [Job Scraper application](https://github.com/da
 
 ## Getting Started
 
-To run the Job Scraper Web App, ensure you have NPM installed, then pull the code and run:
+To run the Job Scraper Web App, ensure you have NPM installed (I'm using [nvm](https://github.com/coreybutler/nvm-windows) with Node 18.17.1), then pull the code and run:
 
 
 ```bash
@@ -16,11 +16,13 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file to store your Supabase connection
+Create a `.env` file to store your Supabase connection, and Mailjet keys (if you want to send email)
 
 ```bash
 SUPABASE_URL=https://<project_url>.supabase.co
 SUPABASE_KEY=eyJhbGci...
+MJ_APIKEY_PUBLIC=dd2d...
+MJ_APIKEY_PRIVATE=e3e4...
 ```
 
 ## Dev Guidance

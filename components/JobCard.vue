@@ -90,7 +90,6 @@ export default defineComponent({
       }
     };
 
-
     const toggleRequirements = () => {
       showRequirements.value = !showRequirements.value;
     };

@@ -4,7 +4,7 @@
     <div class="job-list">
       <JobCard v-for="job in filteredJobs" :key="job.id" :job="job" />
     </div>
-    <div v-if="jobs.length === 0" class="no-jobs">
+    <div v-if="filteredJobs.length === 0" class="no-jobs">
       <p>No jobs found. Is your <a href="/userprofile">profile</a> filled out completely? If you're still experiencing a
         problem please contact David!</p>
     </div>
@@ -18,9 +18,11 @@ import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
 
-const jobs = ref<Job[]>([]);
 const store = useJsaStore()
 const lastRefreshed = ref(Date.now());
+
+const allJobs = ref<Job[]>([]);
+const intervalId = ref<number>();
 
 const transformDataToJobs = (data: any[]): Job[] => {
   return data.map(item => ({
@@ -63,19 +65,7 @@ const fetchJobs = async (loggedInUserId: string | null) => {
       rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId!);
     }
 
-    const items: Job[] = transformDataToJobs(rawItems);
-    jobs.value = items
-      .filter(job => job.overall_score >= 70)
-      .sort((a, b) => {
-        const dateA = new Date(a.date_posted || a.date_pulled).getTime();
-        const dateB = new Date(b.date_posted || b.date_pulled).getTime();
-        const dateComparison = dateB - dateA;
-        if (dateComparison !== 0) {
-          return dateComparison;
-        }
-        return b.overall_score - a.overall_score;
-      });
-
+    allJobs.value = transformDataToJobs(rawItems);
     lastRefreshed.value = Date.now();
   } catch (error) {
     console.error("Error fetching jobs:", error);
@@ -83,36 +73,39 @@ const fetchJobs = async (loggedInUserId: string | null) => {
 };
 
 const filteredJobs = computed(() => {
+  let jobs = allJobs.value;
   const loggedInUserId = store.authUser?.id || null;
-  if (loggedInUserId != null) {
-    return jobs.value.filter(job => job.user_id === loggedInUserId);
+  if (loggedInUserId !== null) {
+    jobs = jobs.filter(job => job.user_id === loggedInUserId);
+  } else if (store.selectedUserId !== null) {
+    jobs = jobs.filter(job => job.user_id === store.selectedUserId);
   }
 
-  if (store.selectedUserId === null) {
-    return jobs.value;
-  }
-  else {
-    return jobs.value.filter(job => job.user_id === store.selectedUserId);
-  }
-})
+  jobs = jobs.filter(job => job.overall_score > 70);
+  jobs = jobs.sort((a, b) => {
+    const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+    const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+    return dateA - dateB || b.overall_score - a.overall_score;
+  });
+
+  console.log("Filtered jobs:", jobs);
+  return jobs;
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId.value);
+});
 
 onMounted(async () => {
-  if (!store.authUser) {
+  if (!store.authUser)
     await store.getAuthUser();
-  }
-
-  if (!store.dbUser) {
+  if (!store.dbUser)
     await store.getDBUser();
-  }
 
   const loggedInUserId = store.authUser?.id || null;
-
   await fetchJobs(loggedInUserId)
-  const intervalId = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 
-  onUnmounted(() => {
-    clearInterval(intervalId);
-  });
+  intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 })
 </script>
 

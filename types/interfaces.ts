@@ -19,7 +19,7 @@ export interface Job {
     date_pulled: string
 
     user_id: string
-    user_interested: boolean
+    user_interested: boolean | null
     
     overall_score: number
     desire_score: number

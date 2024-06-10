@@ -139,7 +139,7 @@ watch(selectedPublicUser, (newVal) => {
   display: flex;
   flex-direction: row;
   justify-content: start;
-  gap: 20px;
+  gap: 48px;
   padding: 10px 0;
   margin-left: 20px;
 }
@@ -239,7 +239,7 @@ watch(selectedPublicUser, (newVal) => {
 
 .dropdown-menu {
   position: absolute;
-  top: 50px;
+  top: 96px;
   right: 0;
   background-color: #fff;
   border: 1px solid #ccc;

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Header />
+    <Header @filter="handleFilter" />
     <div class="job-list">
       <JobCard v-for="job in filteredJobs" :key="job.id" :job="job" />
     </div>
@@ -23,6 +23,10 @@ const lastRefreshed = ref(Date.now());
 
 const allJobs = ref<Job[]>([]);
 const intervalId = ref<number>();
+
+const handleFilter = (filterType: string) => {
+  console.log("Filter type received:", filterType);
+}
 
 const transformDataToJobs = (data: any[]): Job[] => {
   return data.map(item => ({
@@ -60,8 +64,7 @@ const fetchJobs = async (loggedInUserId: string | null) => {
     if (loggedInUserId === null) {
       const publicUsers = await PersistentDataService.fetchPublicUsers();
       rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);
-    }
-    else {
+    } else {
       rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId!);
     }
 
@@ -73,7 +76,9 @@ const fetchJobs = async (loggedInUserId: string | null) => {
 };
 
 const filteredJobs = computed(() => {
-  let jobs = allJobs.value;
+  if (allJobs.value.length === 0) return [];
+  let jobs = [...allJobs.value];
+
   const loggedInUserId = store.authUser?.id || null;
   if (loggedInUserId !== null) {
     jobs = jobs.filter(job => job.user_id === loggedInUserId);
@@ -85,10 +90,9 @@ const filteredJobs = computed(() => {
   jobs = jobs.sort((a, b) => {
     const dateA = new Date(a.date_posted || a.date_pulled).getTime();
     const dateB = new Date(b.date_posted || b.date_pulled).getTime();
-    return dateA - dateB || b.overall_score - a.overall_score;
+    return (dateA - dateB) || (b.overall_score - a.overall_score);
   });
 
-  console.log("Filtered jobs:", jobs);
   return jobs;
 });
 
@@ -112,12 +116,11 @@ onMounted(async () => {
 <style scoped>
 .container {
   margin: 0 auto;
-  padding: 0 20px;
-  background-color: #607d8b;
+  background-color: #fff;
 }
 
 .job-list {
-  margin-top: 24px;
+  margin: 16px;
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

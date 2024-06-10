@@ -1,22 +1,31 @@
 <template>
   <header class="header">
-    <div v-if="userIsNotLoggedIn" class="left">
-      <select id="roles" v-model="selectedPublicUser">
-        <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
-      </select>
-    </div>
-    <div class="right">
-      <div class="user-details" v-if="store.authUser">
-        <div class="username">{{ userName }}</div>
-        <img src="/public/profile.png" class="profile-pic" @click="toggleProfileMenu" />
-        <div v-if="showMenu" class="dropdown-menu">
-          <button @click="goToProfile">Profile</button>
-          <button @click="signOut">Sign Out</button>
+    <div class="title-row">
+      <div class="left">
+        <h2 class="app-name">My Great Job App</h2>
+      </div>
+      <div class="right">
+        <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedPublicUser">
+          <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
+        </select>
+        <div class="user-details" v-if="store.authUser">
+          <div class="username">{{ userName }}</div>
+          <img src="/public/profile.png" class="profile-pic" @click="toggleProfileMenu" />
+          <div v-if="showMenu" class="dropdown-menu">
+            <button @click="goToProfile">Profile</button>
+            <button @click="signOut">Sign Out</button>
+          </div>
+        </div>
+        <div v-else>
+          <button class="sign-in" @click="goToSignIn">Sign In</button>
         </div>
       </div>
-      <div v-else>
-        <button class="sign-in" @click="goToSignIn">Sign In</button>
-      </div>
+    </div>
+    <div class="link-row">
+      <button class="link" @click="handleClick('latestSearch')">Latest Search</button>
+      <button class="link" @click="handleClick('savedResults')">Saved Results</button>
+      <button class="link" @click="handleClick('viewApplied')">View Applied</button>
+      <button class="link" @click="handleClick('viewDiscards')">View Discards</button>
     </div>
   </header>
 </template>
@@ -31,6 +40,8 @@ import PersistentDataService from '@/services/PersistentDataService';
 import { supabase } from "@/utils/supabaseClient";
 import { type AuthChangeEvent, type Session } from "@supabase/supabase-js";
 
+const emitFilter = defineEmits(['filter']);
+
 const router = useRouter()
 const publicUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
@@ -39,6 +50,10 @@ const store = useJsaStore();
 const userName = ref('');
 
 const userIsNotLoggedIn = ref(false);
+
+const handleClick = (filterType: string) => {
+  emitFilter('filter', filterType);
+};
 
 const fetchRoles = async () => {
   const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
@@ -100,10 +115,52 @@ watch(selectedPublicUser, (newVal) => {
 
 <style scoped>
 .header {
-  border-radius: 10px;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+  background: #234F5B;
+}
+
+.title-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0px 20px;
+}
+
+.link-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  gap: 20px;
   padding: 10px 0;
+  margin-left: 20px;
+}
+
+.link {
+  padding: 4px 0; 
+  margin-right: 10px;
+  width: fit-content;
+  border-radius: 0;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline; 
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.link:hover, .link:focus {
+  color: #FFFFFF;
+  box-shadow: 0 3px 0 0 #59C9A5;
+  outline: none;
+}
+
+.app-name {
+  color: #fff;
 }
 
 .left {
@@ -113,12 +170,12 @@ watch(selectedPublicUser, (newVal) => {
 }
 
 .sign-in {
-  background-color: #455a64;
+  background-color: #333;
   color: white;
 }
 
 .sign-in:hover {
-  background-color: #333;
+  background-color: #555;
 }
 
 #roles {
@@ -128,18 +185,19 @@ watch(selectedPublicUser, (newVal) => {
   border-radius: 5px;
   outline: none;
   transition: border-color 0.3s ease;
+  margin-right: 20px;
 }
 
 #roles:focus {
-  border-color: #007bff;
+  border-color: #000;
 }
 
 .right {
   display: flex;
   align-items: center;
   position: relative;
-  flex-direction: row; /* Ensure children are in a row */
-  justify-content: flex-end; /* Aligns children to the right */
+  flex-direction: row;
+  justify-content: flex-end;
 }
 
 .user-details {

@@ -31,13 +31,11 @@
     <a :href="job.url" @click="openInBrowser">View Job</a>
     <div class="action-buttons">
       <button v-if="userAction !== false" @click="setUserInterest(userAction === true ? null : true)"
-        class="save-button">
-        <i :class="['fas', 'fa-heart', { 'icon-saved-active': userAction === true }]"></i>
+        class="button-primary">
         {{ userAction === true ? 'Saved' : 'Save' }}
       </button>
       <button v-if="userAction !== true" @click="setUserInterest(userAction === false ? null : false)"
-        class="discard-button">
-        <i :class="['fas', 'fa-times-circle', { 'icon-discarded-active': userAction === false }]"></i>
+        class="button-secondary">
         {{ userAction === false ? 'Discarded' : 'Discard' }}
       </button>
     </div>
@@ -176,7 +174,6 @@ export default defineComponent({
   background-color: #fff;
   border: 1px solid #ccc;
   padding: 24px;
-  border-radius: 8px;
   box-sizing: border-box;
   width: 100%;
   overflow: hidden;
@@ -256,7 +253,7 @@ export default defineComponent({
 }
 
 .job-card i {
-  color: #777;
+  color: #bbb;
 }
 
 .job-card h4 span {
@@ -282,6 +279,27 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   margin: 10px 0 0 0;
+  gap: 10px;
+}
+
+.button-primary {
+  background-color: #234F5B;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.button-primary:hover {
+  background-color: #306e80;
+}
+
+.button-secondary {
+  background-color: #DEE5E6;
+  color: #333;
+  border-radius: 4px;
+}
+
+.button-secondary:hover {
+  background-color: #eee;
 }
 
 .save-button,
@@ -291,16 +309,11 @@ export default defineComponent({
   font-size: 16px;
   border: none;
   cursor: pointer;
-  margin-right: 5px;
+  
   border: 1px solid #ccc;
-  background-color: aliceblue;
-  color: #333;
 }
 
-.save-button:hover,
-.discard-button:hover {
-  background-color: #d8ebff;
-}
+
 
 .job-card .icon-saved-active {
   color: red;

@@ -177,14 +177,11 @@ export default defineComponent({
   box-sizing: border-box;
   width: 100%;
   overflow: hidden;
-}
-
-.job-card:hover {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.2);
 }
 
 .job-card.older-job {
-  background-color: #ddd;
+  background-color: #fff;  /* TBD */
 }
 
 @media (max-width: 768px) {
@@ -220,6 +217,8 @@ export default defineComponent({
   margin-top: 10px;
   margin-right: 50px;
   white-space: normal;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .content-container {
@@ -279,13 +278,19 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   margin: 10px 0 0 0;
-  gap: 10px;
+  gap: 24px;
+}
+
+.job-card button {
+  border-radius: 4px;
+  padding: 4px 32px;
+  height: 32px;
+  font-weight: 400;
 }
 
 .button-primary {
   background-color: #234F5B;
   color: #fff;
-  border-radius: 4px;
 }
 
 .button-primary:hover {
@@ -295,7 +300,6 @@ export default defineComponent({
 .button-secondary {
   background-color: #DEE5E6;
   color: #333;
-  border-radius: 4px;
 }
 
 .button-secondary:hover {

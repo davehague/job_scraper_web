@@ -22,10 +22,14 @@
       </div>
     </div>
     <div class="link-row">
-      <button class="link" @click="handleClick('latestSearch')">Latest Search</button>
-      <button class="link" @click="handleClick('savedResults')">Saved Results</button>
-      <button class="link" @click="handleClick('viewApplied')">View Applied</button>
-      <button class="link" @click="handleClick('viewDiscards')">View Discards</button>
+      <button class="link" :class="{ selected: selectedLink === 'latestSearch' }"
+        @click="handleClick('latestSearch')">Latest Search</button>
+      <button class="link" :class="{ selected: selectedLink === 'savedResults' }"
+        @click="handleClick('savedResults')">Saved Results</button>
+      <button class="link" :class="{ selected: selectedLink === 'viewApplied' }"
+        @click="handleClick('viewApplied')">View Applied</button>
+      <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
+        @click="handleClick('viewDiscards')">View Discards</button>
     </div>
   </header>
 </template>
@@ -41,6 +45,7 @@ import { supabase } from "@/utils/supabaseClient";
 import { type AuthChangeEvent, type Session } from "@supabase/supabase-js";
 
 const emitFilter = defineEmits(['filter']);
+const selectedLink = ref('latestSearch');
 
 const router = useRouter()
 const publicUsers = ref<DBUser[]>([]);
@@ -52,6 +57,7 @@ const userName = ref('');
 const userIsNotLoggedIn = ref(false);
 
 const handleClick = (filterType: string) => {
+  selectedLink.value = filterType;
   emitFilter('filter', filterType);
 };
 
@@ -105,7 +111,7 @@ onMounted(async () => {
 
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     store.setAuthUser(session?.user || null);
-  })
+  });
 })
 
 watch(selectedPublicUser, (newVal) => {
@@ -139,28 +145,36 @@ watch(selectedPublicUser, (newVal) => {
 }
 
 .link {
-  padding: 4px 0; 
-  margin-right: 10px;
-  width: fit-content;
-  border-radius: 0;
   background: none;
   border: none;
+  border-radius: 0;
   color: #FFFFFF;
-  font-size: 16px;
-  text-decoration: none;
+  display: inline;
   cursor: pointer;
-  display: inline; 
+  font-size: 24px;
+  font-weight: 700;
+  padding: 4px 0;
+  margin-right: 10px;
+  text-decoration: none;
   transition: background-color 0.3s ease, color 0.3s ease;
+  width: fit-content;
 }
 
-.link:hover, .link:focus {
+.link:hover,
+.link:focus {
+  box-shadow: 0 4px 0 0 #59C9A5;
   color: #FFFFFF;
-  box-shadow: 0 3px 0 0 #59C9A5;
   outline: none;
+}
+
+.selected {
+  box-shadow: 0 4px 0 0 #59C9A5;
 }
 
 .app-name {
   color: #fff;
+  font-size: 32px;
+  font-weight: 700;
 }
 
 .left {
@@ -205,15 +219,18 @@ watch(selectedPublicUser, (newVal) => {
 }
 
 .profile-pic {
-  width: 45px;
-  height: 45px;
+  width: 64px;
+  height: 64px;
+  margin-top: 32px;
   border-radius: 50%;
   cursor: pointer;
   background-color: #eee;
 }
 
 .username {
-  font-size: 1.1em;
+  font-size: 24px;
+  margin-top: 40px;
+  font-weight: 400;
   color: white;
   margin-right: 20px;
   display: flex;

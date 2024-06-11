@@ -58,7 +58,11 @@ export default {
           let dbUser = await PersistentDataService.singleRecordFetch('users', data.user.id);
           store.setDBUser(dbUser as DBUser);
 
-          router.push('/')
+          if (dbUser.onboarding_complete) {
+            router.push('/');
+          } else {
+            router.push('/onboarding');
+          }
         } else {
           throw error;
         }

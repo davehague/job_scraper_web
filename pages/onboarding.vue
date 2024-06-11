@@ -110,6 +110,13 @@ const store = useJsaStore();
 const currentScreen = ref(1);
 const totalScreens = ref(3);
 
+onMounted(async () => {
+  const loggedInUser = await store.getAuthUser();
+  if (!loggedInUser) {
+    router.push("/");
+  }
+});
+
 const formData = ref({
   resume: '',
   name: '',

@@ -26,8 +26,8 @@
         @click="handleClick('latestSearch')">Latest Search</button>
       <button class="link" :class="{ selected: selectedLink === 'savedResults' }"
         @click="handleClick('savedResults')">Saved Results</button>
-      <button class="link" :class="{ selected: selectedLink === 'viewApplied' }"
-        @click="handleClick('viewApplied')">View Applied</button>
+      <!-- <button class="link" :class="{ selected: selectedLink === 'viewApplied' }"
+        @click="handleClick('viewApplied')">View Applied</button> -->
       <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
         @click="handleClick('viewDiscards')">View Discards</button>
     </div>

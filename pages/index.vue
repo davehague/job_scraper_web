@@ -120,9 +120,9 @@ onMounted(async () => {
 }
 
 .job-list {
-  margin: 16px;
+  margin: 40px 108px;
   display: grid;
-  gap: 20px;
+  gap: 48px;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   justify-items: center;
 }

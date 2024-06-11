@@ -124,7 +124,6 @@ watch(selectedPublicUser, (newVal) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 10px;
   background: #234F5B;
 }
 
@@ -132,7 +131,8 @@ watch(selectedPublicUser, (newVal) => {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin: 0px 20px;
+  margin: 24px 40px 0 40px;
+  height: 64px;
 }
 
 .link-row {
@@ -140,8 +140,7 @@ watch(selectedPublicUser, (newVal) => {
   flex-direction: row;
   justify-content: start;
   gap: 48px;
-  padding: 10px 0;
-  margin-left: 20px;
+  margin: 20px 40px;
 }
 
 .link {
@@ -151,10 +150,10 @@ watch(selectedPublicUser, (newVal) => {
   color: #FFFFFF;
   display: inline;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 700;
   padding: 4px 0;
-  margin-right: 10px;
+
   text-decoration: none;
   transition: background-color 0.3s ease, color 0.3s ease;
   width: fit-content;
@@ -175,12 +174,12 @@ watch(selectedPublicUser, (newVal) => {
   color: #fff;
   font-size: 32px;
   font-weight: 700;
+  margin: 0;
 }
 
 .left {
   display: flex;
   align-items: center;
-  margin-right: 25px;
 }
 
 .sign-in {
@@ -216,20 +215,19 @@ watch(selectedPublicUser, (newVal) => {
 
 .user-details {
   display: flex;
+  height: 64px;
 }
 
 .profile-pic {
   width: 64px;
   height: 64px;
-  margin-top: 32px;
   border-radius: 50%;
   cursor: pointer;
   background-color: #eee;
 }
 
 .username {
-  font-size: 24px;
-  margin-top: 40px;
+  font-size: 20px;
   font-weight: 400;
   color: white;
   margin-right: 20px;

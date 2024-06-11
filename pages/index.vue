@@ -12,12 +12,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
 
-const store = useJsaStore()
+const router = useRouter();
+const store = useJsaStore();
 const lastRefreshed = ref(Date.now());
 
 const allJobs = ref<Job[]>([]);
@@ -42,11 +44,11 @@ const handleFilter = (filterType: string) => {
       noJobsMessage.value = 'No applied jobs found.';
       break;
     case 'viewDiscards':
-    visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && !job.user_interested);
-    noJobsMessage.value = 'No discarded jobs found.';
+      visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && !job.user_interested);
+      noJobsMessage.value = 'No discarded jobs found.';
       break;
     default:
-    visibleJobs.value = allJobs.value;
+      visibleJobs.value = allJobs.value;
   }
 }
 
@@ -109,7 +111,7 @@ const fetchJobs = async (loggedInUserId: string | null) => {
   }
 };
 
- watch(() => store.selectedUserId, (newVal) => {
+watch(() => store.selectedUserId, (newVal) => {
   const loggedInUserId = store.authUser?.id || null;
   if (loggedInUserId !== null) {
     return;
@@ -127,8 +129,13 @@ onUnmounted(() => {
 onMounted(async () => {
   if (!store.authUser)
     await store.getAuthUser();
-  if (!store.dbUser)
+  if (!store.dbUser) {
     await store.getDBUser();
+  }
+
+  if (store.authUser && !store.dbUser?.onboarding_complete) {
+    router.push('/onboarding');
+  }
 
   const loggedInUserId = store.authUser?.id || null;
   await fetchJobs(loggedInUserId)

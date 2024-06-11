@@ -111,9 +111,13 @@ const currentScreen = ref(1);
 const totalScreens = ref(3);
 
 onMounted(async () => {
+  // If not logged in, push to "/" to prevent onboarding
   const loggedInUser = await store.getAuthUser();
-  if (!loggedInUser) {
+  const dbUser = await store.getDBUser();
+  if (loggedInUser && dbUser && dbUser.onboarding_complete) {
     router.push("/");
+  } else if (loggedInUser && dbUser && !dbUser.onboarding_complete) {
+    router.push("/onboarding");
   }
 });
 
@@ -184,12 +188,12 @@ const submitPersonalInfo = async () => {
 
 const submitJobInfo = async () => {
   console.log('Submitting job info:', formData.value.jobTitles);
-  
+
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
   console.log('User ID:', uid);
   if (!uid || uid === '') return;
-  
+
   try {
     clearConfigs(uid);
 
@@ -216,8 +220,8 @@ const clearConfigs = async (uid: string) => {
   try {
     const configs = await PersistentDataService.fetchUserConfigs(uid);
 
-    if(configs.length === 0) return;
-    else { console.log('Deleting user configuration:', configs);}
+    if (configs.length === 0) return;
+    else { console.log('Deleting user configuration:', configs); }
 
     for (const config of configs) {
       await PersistentDataService.deleteUserConfig(config.id);

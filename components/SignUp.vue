@@ -29,7 +29,6 @@
 <script lang="ts">
 import { ref, type PropType } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
-import { useJsaStore } from '@/stores/jsaStore';
 import PersistentDataService from '~/services/PersistentDataService';
 import { welcome } from '@/services/EmailTemplates';
 
@@ -87,7 +86,7 @@ export default {
         })
 
         if (data && data.user != null) {
-          sendWelcomeEmail(email.value);
+          // sendWelcomeEmail(email.value);
           console.log('Sign-up successful:', data);
           const { error: userCreateError } = await supabase
             .from('users')

@@ -102,17 +102,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useJsaStore } from '@/stores/jsaStore'
-import PersistentDataService from '@/services/PersistentDataService'
-import { type User, type UserConfig } from '@/types/interfaces'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useJsaStore } from '@/stores/jsaStore';
+import PersistentDataService from '@/services/PersistentDataService';
+import { type User, type UserConfig } from '@/types/interfaces';
 import InfoTooltip from '@/components/InfoTooltip.vue';
 import '~/assets/checkbox.css';
 
 
 const store = useJsaStore();
-const router = useRouter()
+const router = useRouter();
 
 const email = ref('');
 const emailConsent = ref(false);

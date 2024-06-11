@@ -58,6 +58,7 @@ import { type Job } from '~/types/interfaces';
 import { marked } from 'marked';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore'
+import '~/assets/buttons.css';
 
 export default defineComponent({
   props: {
@@ -312,24 +313,6 @@ export default defineComponent({
   padding: 4px 32px;
   height: 32px;
   font-weight: 400;
-}
-
-.button-primary {
-  background-color: #234F5B;
-  color: #fff;
-}
-
-.button-primary:hover {
-  background-color: #306e80;
-}
-
-.button-secondary {
-  background-color: #DEE5E6;
-  color: #333;
-}
-
-.button-secondary:hover {
-  background-color: #eee;
 }
 
 .save-button,

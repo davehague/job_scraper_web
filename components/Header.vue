@@ -21,7 +21,7 @@
         </div>
       </div>
     </div>
-    <div class="link-row">
+    <div v-if="!userIsNotLoggedIn" class="link-row">
       <button class="link" :class="{ selected: selectedLink === 'latestSearch' }"
         @click="handleClick('latestSearch')">Latest Search</button>
       <button class="link" :class="{ selected: selectedLink === 'savedResults' }"
@@ -125,6 +125,7 @@ watch(selectedPublicUser, (newVal) => {
   flex-direction: column;
   justify-content: space-between;
   background: #234F5B;
+  min-height: 120px;
 }
 
 .title-row {
@@ -237,7 +238,7 @@ watch(selectedPublicUser, (newVal) => {
 
 .dropdown-menu {
   position: absolute;
-  top: 96px;
+  top: 72px;
   right: 0;
   background-color: #fff;
   border: 1px solid #ccc;

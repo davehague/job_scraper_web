@@ -2,17 +2,16 @@
   <div class="container">
     <Header @filter="handleFilter" />
     <div class="job-list">
-      <JobCard v-for="job in filteredJobs" :key="job.id" :job="job" />
+      <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" />
     </div>
-    <div v-if="filteredJobs.length === 0" class="no-jobs">
-      <p>No jobs found. Is your <a href="/userprofile">profile</a> filled out completely? If you're still experiencing a
-        problem please contact David!</p>
+    <div v-if="visibleJobs.length === 0" class="no-jobs">
+      <p>{{ noJobsMessage }} </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
@@ -22,10 +21,33 @@ const store = useJsaStore()
 const lastRefreshed = ref(Date.now());
 
 const allJobs = ref<Job[]>([]);
+const visibleJobs = ref<Job[]>([]);
+const noJobsMessage = ref<string>('Loading jobs...');
+
 const intervalId = ref<number>();
 
 const handleFilter = (filterType: string) => {
-  console.log("Filter type received:", filterType);
+  switch (filterType) {
+    case 'latestSearch':
+      visibleJobs.value = allJobs.value.filter(job => job.user_interested == null);
+      noJobsMessage.value = 'No jobs found. Is your profile filled out completely? If you\'re still experiencing a problem please contact David!';
+      break;
+    case 'savedResults':
+      visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && job.user_interested);
+      noJobsMessage.value = 'No saved jobs found.';
+      break;
+    case 'viewApplied':
+      // TODO: Implement applied
+      visibleJobs.value = [];
+      noJobsMessage.value = 'No applied jobs found.';
+      break;
+    case 'viewDiscards':
+    visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && !job.user_interested);
+    noJobsMessage.value = 'No discarded jobs found.';
+      break;
+    default:
+    visibleJobs.value = allJobs.value;
+  }
 }
 
 const transformDataToJobs = (data: any[]): Job[] => {
@@ -68,32 +90,34 @@ const fetchJobs = async (loggedInUserId: string | null) => {
       rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId!);
     }
 
-    allJobs.value = transformDataToJobs(rawItems);
     lastRefreshed.value = Date.now();
+    let jobs = transformDataToJobs(rawItems);
+    allJobs.value = jobs.sort((a, b) => {
+      const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+      const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+      return (dateA - dateB) || (b.overall_score - a.overall_score);
+    })
+
+    if (loggedInUserId === null) {
+      visibleJobs.value = jobs.filter(job => job.user_id === store.selectedUserId);
+    } else {
+      visibleJobs.value = jobs.filter(job => job.user_id === loggedInUserId);
+    }
+
   } catch (error) {
     console.error("Error fetching jobs:", error);
   }
 };
 
-const filteredJobs = computed(() => {
-  if (allJobs.value.length === 0) return [];
-  let jobs = [...allJobs.value];
-
+ watch(() => store.selectedUserId, (newVal) => {
   const loggedInUserId = store.authUser?.id || null;
   if (loggedInUserId !== null) {
-    jobs = jobs.filter(job => job.user_id === loggedInUserId);
-  } else if (store.selectedUserId !== null) {
-    jobs = jobs.filter(job => job.user_id === store.selectedUserId);
+    return;
   }
 
-  jobs = jobs.filter(job => job.overall_score > 70);
-  jobs = jobs.sort((a, b) => {
-    const dateA = new Date(a.date_posted || a.date_pulled).getTime();
-    const dateB = new Date(b.date_posted || b.date_pulled).getTime();
-    return (dateA - dateB) || (b.overall_score - a.overall_score);
-  });
-
-  return jobs;
+  if (newVal != null) {
+    visibleJobs.value = allJobs.value.filter(job => job.user_id === newVal);
+  }
 });
 
 onUnmounted(() => {

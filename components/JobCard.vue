@@ -54,7 +54,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType, ref, onMounted, onUnmounted } from 'vue';
-import { type Job, type UsersJobs } from '~/types/interfaces';
+import { type Job } from '~/types/interfaces';
 import { marked } from 'marked';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore'
@@ -212,12 +212,10 @@ export default defineComponent({
 }
 
 .title {
-  flex-grow: 1;
   margin-top: 10px;
-  margin-right: 72px;
-  white-space: normal;
   font-size: 24px;
   font-weight: 700;
+  width: 80%;
 }
 
 .score-circle {
@@ -229,11 +227,9 @@ export default defineComponent({
   font-weight: 700;
   font-size: 24px;
   height: 64px;
-  justify-content: center;
-  position: absolute;
-  right: 0px;
-  top: 10px;
   width: 64px;
+  justify-content: center;
+  /* position: absolute; */
   transition: background-color 0.3s ease;
 }
 

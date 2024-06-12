@@ -7,7 +7,8 @@
     + '\nDesire Score: ' + job.desire_score
     + '\nExperience Score: ' + job.experience_score
     + '\nMeets Requirements Score: ' + job.meets_requirements_score
-    + '\nMeets Experience Score: ' + job.meets_experience_score" class="score-circle"
+    + '\nMeets Experience Score: ' + job.meets_experience_score
+    + '\n\nGuidance: ' + job.guidance" class="score-circle"
         :style="{ backgroundColor: getScoreColor(job.overall_score) }">
         <span class="score-text">{{ job.overall_score }}</span>
       </div>

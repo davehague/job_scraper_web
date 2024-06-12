@@ -111,7 +111,6 @@ const currentScreen = ref(1);
 const totalScreens = ref(3);
 
 onMounted(async () => {
-  // If not logged in, push to "/" to prevent onboarding
   const loggedInUser = await store.getAuthUser();
   const dbUser = await store.getDBUser();
   if (loggedInUser && dbUser && dbUser.onboarding_complete) {

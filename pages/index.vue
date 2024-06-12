@@ -79,6 +79,7 @@ const transformDataToJobs = (data: any[]): Job[] => {
     experience_score: parseInt(item.experience_score, 10),
     meets_requirements_score: parseInt(item.meets_requirements_score, 10),
     meets_experience_score: parseInt(item.meets_experience_score, 10),
+    guidance: item.guidance,
   }));
 };
 
@@ -97,7 +98,7 @@ const fetchJobs = async (loggedInUserId: string | null) => {
     allJobs.value = jobs.sort((a, b) => {
       const dateA = new Date(a.date_posted || a.date_pulled).getTime();
       const dateB = new Date(b.date_posted || b.date_pulled).getTime();
-      return (dateA - dateB) || (b.overall_score - a.overall_score);
+      return (dateB - dateA) || (b.overall_score - a.overall_score);
     })
 
     if (loggedInUserId === null) {

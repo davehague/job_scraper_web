@@ -26,7 +26,7 @@ export interface Job {
     experience_score: number
     meets_requirements_score: number
     meets_experience_score: number
-    
+    guidance: string
   }
   
   export interface User {

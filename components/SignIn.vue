@@ -28,6 +28,7 @@ import { supabase } from "@/utils/supabaseClient";
 import { useJsaStore } from '@/stores/jsaStore';
 import PersistentDataService from '~/services/PersistentDataService';
 import { type User as DBUser } from '~/types/interfaces';
+import { shouldRedirectToOnboarding } from '~/utils/helpers.ts';
 
 export default {
   props: {
@@ -58,11 +59,13 @@ export default {
           let dbUser = await PersistentDataService.singleRecordFetch('users', data.user.id);
           store.setDBUser(dbUser as DBUser);
 
-          if (dbUser.onboarding_complete) {
-            router.push('/');
+          const userShouldOnboard = await shouldRedirectToOnboarding();
+          if (userShouldOnboard) {
+            router.push("/onboarding");
           } else {
-            router.push('/onboarding');
+            router.push("/");
           }
+
         } else {
           throw error;
         }

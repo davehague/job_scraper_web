@@ -5,7 +5,7 @@ import PersistentDataService from "~/services/PersistentDataService";
 
 export const useJsaStore = defineStore("jsaStore", {
   state: () => ({
-    selectedUserId: '',
+    selectedUserId: "",
     authUser: null as AuthUser | null,
     dbUser: null as DBUser | null,
   }),
@@ -30,7 +30,8 @@ export const useJsaStore = defineStore("jsaStore", {
     async refreshDBUser() {
       console.log("Refreshing DB user data...");
       this.dbUser = null;
-      return this.getDBUser();
+      const refreshedUser = await this.getDBUser();
+      return refreshedUser;
     },
     async getDBUser() {
       if (this.dbUser != null && this.dbUser != undefined) {

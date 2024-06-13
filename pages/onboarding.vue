@@ -103,6 +103,7 @@ import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
 import '~/assets/checkbox.css';
+import { shouldRedirectToOnboarding } from '@/utils/helpers.ts';
 
 const router = useRouter();
 const store = useJsaStore();
@@ -111,12 +112,11 @@ const currentScreen = ref(1);
 const totalScreens = ref(3);
 
 onMounted(async () => {
-  const loggedInUser = await store.getAuthUser();
-  const dbUser = await store.getDBUser();
-  if (loggedInUser && dbUser && dbUser.onboarding_complete) {
-    router.push("/");
-  } else if (loggedInUser && dbUser && !dbUser.onboarding_complete) {
+  const userShouldOnboard = await shouldRedirectToOnboarding();
+  if (userShouldOnboard) {
     router.push("/onboarding");
+  } else {
+    router.push("/");
   }
 });
 
@@ -273,13 +273,15 @@ const updateUserCompletedOnboarding = async () => {
     console.error('Error updating user onboarding status:', error);
   } finally {
     console.log('User onboarding status updated successfully');
+    await store.refreshDBUser();
   }
 };
 
 const handleSubmit = async () => {
+  console.log('Handling submit...', currentScreen.value, totalScreens.value);
   if (currentScreen.value === totalScreens.value) {
     console.log('Onboarding complete.');
-    updateUserCompletedOnboarding();
+    await updateUserCompletedOnboarding();
     router.push("/");
   } else {
     currentScreen.value++;

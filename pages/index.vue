@@ -17,6 +17,7 @@ import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
+import { shouldRedirectToOnboarding } from '@/utils/helpers.ts';
 
 const router = useRouter();
 const store = useJsaStore();
@@ -134,9 +135,10 @@ onMounted(async () => {
     await store.getDBUser();
   }
 
-  if (store.authUser && !store.dbUser?.onboarding_complete) {
-    router.push('/onboarding');
-  }
+  const userShouldOnboard = await shouldRedirectToOnboarding();
+  if (userShouldOnboard) {
+    router.push("/onboarding");
+  } 
 
   const loggedInUserId = store.authUser?.id || null;
   await fetchJobs(loggedInUserId)

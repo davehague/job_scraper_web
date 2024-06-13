@@ -44,12 +44,14 @@
         </div>
         <input v-model="formData.minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
 
-        <div class="checkbox-container">
+        <div>
           <label>
-            Send me emails about new jobs
-            <input type="checkbox" v-model="formData.emailConsent">
-            <span class="checkmark"></span>
-          </label>
+            Send me emails about new jobs</label>
+          <select v-model="formData.sendEmails">
+            <option value="never">Never</option>
+            <option value="daily">Daily</option>
+            <option value="immediately">Immediately</option>
+          </select>
         </div>
       </template>
     </OnboardingScreen>
@@ -102,7 +104,6 @@ import { useRouter } from 'vue-router';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
-import '~/assets/checkbox.css';
 import { shouldRedirectToOnboarding } from '@/utils/helpers.ts';
 
 const router = useRouter();
@@ -131,7 +132,7 @@ const formData = ref({
   skillWords: '',
   candidateRequirements: '',
   minSalaryInput: '',
-  emailConsent: true
+  sendEmails: 'daily'
 });
 
 const submitResume = async () => {
@@ -170,7 +171,7 @@ const submitPersonalInfo = async () => {
     remote_preference: formData.value.remotePreference,
     location: formData.value.location,
     distance: formData.value.distance,
-    send_emails: formData.value.emailConsent,
+    send_emails: formData.value.sendEmails,
     min_salary: minSalary.value,
   };
 

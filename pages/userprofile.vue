@@ -13,12 +13,14 @@
       <label>Email:</label>
       <input v-model="email" type="email" disabled />
     </div>
-    <div class="checkbox-container">
+    <div>
       <label>
-        Send me emails about new jobs
-        <input type="checkbox" v-model="emailConsent">
-        <span class="checkmark"></span>
-      </label>
+        Send me emails about new jobs</label>
+      <select v-model="emailFrequency">
+        <option value="never">Never</option>
+        <option value="daily">Daily</option>
+        <option value="immediately">Immediately</option>
+      </select>
     </div>
 
     <h2>Professional Info</h2>
@@ -108,14 +110,13 @@ import { useJsaStore } from '@/stores/jsaStore';
 import PersistentDataService from '@/services/PersistentDataService';
 import { type User, type UserConfig } from '@/types/interfaces';
 import InfoTooltip from '@/components/InfoTooltip.vue';
-import '~/assets/checkbox.css';
-
 
 const store = useJsaStore();
 const router = useRouter();
 
 const email = ref('');
-const emailConsent = ref(false);
+const emailFrequency = ref('never');
+
 const location = ref('');
 const remotePreference = ref('YES');
 const distance = ref(0);
@@ -158,7 +159,7 @@ async function save() {
     min_salary: minSalary.value,
     resume: resume.value,
     name: name.value,
-    send_emails: emailConsent.value,
+    send_emails: emailFrequency.value,
   };
 
   try {
@@ -263,7 +264,7 @@ onMounted(async () => {
 
   name.value = store.dbUser?.name || '';
   email.value = store.authUser?.email || '';
-  emailConsent.value = store.dbUser?.send_emails || false;
+  emailFrequency.value = store.dbUser?.send_emails || 'never';
   remotePreference.value = store.dbUser?.remote_preference || 'YES';
   location.value = store.dbUser?.location || '';
   distance.value = store.dbUser?.distance || 0;

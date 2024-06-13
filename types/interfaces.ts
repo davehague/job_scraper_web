@@ -40,7 +40,7 @@ export interface Job {
     resume: string
     name: string
     is_public: boolean
-    send_emails: boolean
+    send_emails: string
     onboarding_complete: boolean
   }
 

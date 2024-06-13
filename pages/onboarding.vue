@@ -148,10 +148,22 @@ const submitResume = async () => {
   };
 
   try {
-    const result = await PersistentDataService.upsertUser(baseUser as User)
+    const result = await PersistentDataService.upsertUser(baseUser as User);
     console.log(result);
+
+    // Call the GCP function, silent and in the background
+    const gcpResponse = fetch('/api/onboarding', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: uid, resume: formData.value.resume }),
+    });
+
+    console.log('GCP Response:', gcpResponse);
+
   } catch (error) {
-    console.error('Error saving user configuration:', error);
+    console.error('Error in processing:', error);
   } finally {
     console.log('User saved successfully');
     await handleSubmit();

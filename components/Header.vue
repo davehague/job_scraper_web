@@ -2,7 +2,7 @@
   <header class="header">
     <div class="title-row">
       <div class="left">
-        <h2 class="app-name">My Great Job App</h2>
+        <h2 class="app-name">Scoutly</h2>
       </div>
       <div class="right">
         <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedPublicUser">

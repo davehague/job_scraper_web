@@ -30,8 +30,8 @@
       <span class="link-like" @click="toggleSummary">{{ showFullSummary ? '[Show Less]' : '[Show More]' }}</span>
 
       <!-- Requirements -->
-      <h4 class="expandable-section" @click="toggleRequirements">Requirements <span v-if="!showRequirements">[Show]</span><span
-          v-else>[Hide]</span>
+      <h4 class="expandable-section" @click="toggleRequirements">Requirements <span
+          v-if="!showRequirements">[Show]</span><span v-else>[Hide]</span>
       </h4>
       <div v-if="showRequirements" v-html="renderMarkdown(job.hard_requirements)"></div>
     </div>
@@ -53,134 +53,119 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType, ref, onMounted, onUnmounted } from 'vue';
-import { type Job } from '~/types/interfaces';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, defineProps, defineEmits } from 'vue';
+import type { PropType } from 'vue';
+import type { Job } from '~/types/interfaces';
 import { marked } from 'marked';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore'
 import '~/assets/buttons.css';
 
-export default defineComponent({
-  props: {
-    job: {
-      type: Object as PropType<Job>,
-      required: true
-    }
-  },
-  async setup({ job }) {
-    const showRequirements = ref(false);
-    const showFullSummary = ref(false);
-    const showContent = ref(true);
-    const userAction = ref<boolean | null>(null);
-    const store = useJsaStore();
-    const userLoggedIn = store.authUser !== null;
+const props = defineProps({
+  job: {
+    type: Object as PropType<Job>,
+    required: true
+  }
+});
 
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        showContent.value = true;
-      }
-    };
+const store = useJsaStore();
+const userLoggedIn = store.authUser !== null;
+const showRequirements = ref(false);
+const showFullSummary = ref(false);
+const showContent = ref(true);
+const userAction = ref<boolean | null>(null);
 
-    onUnmounted(() => {
-      window.removeEventListener('resize', handleResize);
-    });
+const emitInterestSet = defineEmits(['interestSet']);
 
-    onMounted(async () => {
-      window.addEventListener('resize', handleResize);
-      const result = await getUserInterest();
-      if (result) {
-        userAction.value = result.interested;
-      }
-    });
+onMounted(async () => {
+  window.addEventListener('resize', handleResize);
+  const result = await getUserInterest();
+  if (result) {
+    userAction.value = result.interested;
+  }
+});
 
-    const toggleCard = () => {
-      if (window.innerWidth <= 768) {
-        showContent.value = !showContent.value;
-      }
-    };
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
-    const getScoreColor = (score: number) => {
-      return score >= 85
-        ? '#59C9A5' // Green
-        : score > 75
-          ? '#93c1b2' // Gray-Green
-          : '#888' // Gray      
-    }
+const handleResize = () => {
+  if (window.innerWidth > 768) {
+    showContent.value = true;
+  }
+};
 
-    const toggleRequirements = () => {
-      showRequirements.value = !showRequirements.value;
-    };
+const toggleCard = () => {
+  if (window.innerWidth <= 768) {
+    showContent.value = !showContent.value;
+  }
+};
 
-    const toggleSummary = () => {
-      showFullSummary.value = !showFullSummary.value;
-    };
+const getScoreColor = (score: number) => {
+  return score >= 85 ? '#59C9A5' : score > 75 ? '#93c1b2' : '#888';
+};
 
-    const setUserInterest = async (interested: boolean | null) => {
-      try {
-        const uid = store.authUser?.id || '';
-        if (!uid || uid === '') return;
+const toggleRequirements = () => {
+  showRequirements.value = !showRequirements.value;
+};
 
-        const result = await PersistentDataService.setUserInterest(uid, job.id, interested);
-        userAction.value = interested;
-        console.log("Interest set:", result);
-      } catch (error) {
-        console.error("Failed to set user interest:", error);
-      }
-    };
+const toggleSummary = () => {
+  showFullSummary.value = !showFullSummary.value;
+};
 
-    const getUserInterest = async () => {
-      try {
-        const uid = store.authUser?.id || '';
-        if (!uid || uid === '') return;
+const setUserInterest = async (interested: boolean | null) => {
+  try {
+    const uid = store.authUser?.id || '';
+    if (!uid) return;
 
-        const result = await PersistentDataService.getUserInterest(uid, job.id);
+    const result = await PersistentDataService.setUserInterest(uid, props.job.id, interested);
+    userAction.value = interested;
 
-        return result;
-      } catch (error) {
-        console.error("Failed to get user interest:", error);
-      }
-    };
+    emitInterestSet('interestSet', props.job.id, interested);
+  } catch (error) {
+    console.error("Failed to set user interest:", error);
+  }
+};
 
-    return {
-      showContent, toggleCard,
-      showRequirements, toggleRequirements,
-      showFullSummary, toggleSummary,
-      userAction, setUserInterest,
-      getScoreColor,
-      userLoggedIn
-    };
-  },
-  computed: {
-    truncatedDescription(): string {
-      return this.truncate(this.job.description, 200)
-    },
-    isOlder(): boolean {
-      const todayDate = new Date().toISOString().split('T')[0]
-      return this.job.date_posted < todayDate || this.job.date_pulled < todayDate
-    },
-  },
-  methods: {
-    renderMarkdown(text: string) {
-      return marked(text)
-    },
-    truncate(text: string, length: number) {
-      if (text.length > length) {
-        return text.substring(0, length) + '...'
-      }
-      return text
-    },
-    round(value: number): number {
-      return Math.round(value)
-    },
-    openInBrowser(event: MouseEvent) {
-      event.preventDefault();
-      const url = (event.target as HTMLAnchorElement)?.href;
-      window.open(url, '_blank');
-    }
-  },
+const getUserInterest = async () => {
+  try {
+    const uid = store.authUser?.id || '';
+    if (!uid) return null;
 
-})
+    const result = await PersistentDataService.getUserInterest(uid, props.job.id);
+    return result;
+  } catch (error) {
+    console.error("Failed to get user interest:", error);
+    return null;
+  }
+};
+
+const renderMarkdown = (text: string) => {
+  return marked(text);
+};
+
+const truncate = (text: string, length: number) => {
+  if (text.length > length) {
+    return text.substring(0, length) + '...';
+  }
+  return text;
+};
+
+const round = (value: number) => {
+  return Math.round(value);
+};
+
+const openInBrowser = (event: MouseEvent) => {
+  event.preventDefault();
+  const url = (event.target as HTMLAnchorElement)?.href;
+  window.open(url, '_blank');
+};
+
+const isOlder = () => {
+  const todayDate = new Date().toISOString().split('T')[0];
+  return props.job.date_posted < todayDate || props.job.date_pulled < todayDate;
+};
 </script>
 
 <style scoped>

@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <Header @filter="handleFilter" />
+    <Header @filter="updateVisibleJobs" />
     <div class="job-list">
-      <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" />
+      <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestSet="interestUpdatedOnJob" />
     </div>
     <div v-if="visibleJobs.length === 0" class="no-jobs">
       <p>{{ noJobsMessage }} </p>
@@ -28,8 +28,11 @@ const visibleJobs = ref<Job[]>([]);
 const noJobsMessage = ref<string>('Loading jobs...');
 
 const intervalId = ref<number>();
+const currentFilter = ref<string>('latestSearch');
 
-const handleFilter = (filterType: string) => {
+const updateVisibleJobs = (filterType: string) => {
+  console.log('Visible jobs were:', visibleJobs.value);
+  currentFilter.value = filterType;
   switch (filterType) {
     case 'latestSearch':
       visibleJobs.value = allJobs.value.filter(job => job.user_interested == null);
@@ -113,6 +116,18 @@ const fetchJobs = async (loggedInUserId: string | null) => {
   }
 };
 
+const interestUpdatedOnJob = (jobId: string, interested: boolean | null) => {
+  const job = allJobs.value.find(job => job.id === jobId);
+  if (job) {
+    job.user_interested = interested;
+  }
+  recalculateVisibleJobs();
+}
+
+const recalculateVisibleJobs = () => {
+  updateVisibleJobs(currentFilter.value);
+}
+
 watch(() => store.selectedUserId, (newVal) => {
   const loggedInUserId = store.authUser?.id || null;
   if (loggedInUserId !== null) {
@@ -138,10 +153,11 @@ onMounted(async () => {
   const userShouldOnboard = await shouldRedirectToOnboarding();
   if (userShouldOnboard) {
     router.push("/onboarding");
-  } 
+  }
 
   const loggedInUserId = store.authUser?.id || null;
   await fetchJobs(loggedInUserId)
+  recalculateVisibleJobs();
 
   intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 })

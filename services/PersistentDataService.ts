@@ -56,10 +56,14 @@ export default class PersistentDataService {
   static async fetchJobsForUsers(users: { id: string }[]) {
     const userIds = users.map((user) => user.id);
 
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
     const { data, error } = await supabase
       .from("recent_high_score_jobs")
       .select("*")
-      .in("user_id", userIds);
+      .in("user_id", userIds)
+      .gte("created_at", twoDaysAgo.toISOString());
 
     if (error) {
       console.error("Error fetching jobs for users:", error);

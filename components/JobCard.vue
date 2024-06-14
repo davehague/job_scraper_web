@@ -40,7 +40,7 @@
     <a :href="job.url" @click="openInBrowser">View Job</a>
 
     <!-- Action buttons -->
-    <div class="action-buttons">
+    <div v-if="userLoggedIn" class="action-buttons">
       <button v-if="userAction !== false" @click="setUserInterest(userAction === true ? null : true)"
         class="button-primary">
         {{ userAction === true ? 'Saved' : 'Save' }}
@@ -74,6 +74,7 @@ export default defineComponent({
     const showContent = ref(true);
     const userAction = ref<boolean | null>(null);
     const store = useJsaStore();
+    const userLoggedIn = store.authUser !== null;
 
     const handleResize = () => {
       if (window.innerWidth > 768) {
@@ -84,7 +85,6 @@ export default defineComponent({
     onUnmounted(() => {
       window.removeEventListener('resize', handleResize);
     });
-
 
     onMounted(async () => {
       window.addEventListener('resize', handleResize);
@@ -147,7 +147,8 @@ export default defineComponent({
       showRequirements, toggleRequirements,
       showFullSummary, toggleSummary,
       userAction, setUserInterest,
-      getScoreColor
+      getScoreColor,
+      userLoggedIn
     };
   },
   computed: {
@@ -194,6 +195,7 @@ export default defineComponent({
   overflow: hidden;
   box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.2);
   min-height: 640px;
+  max-width: 500px;
 }
 
 .job-card.older-job {

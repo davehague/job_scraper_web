@@ -57,7 +57,6 @@ export interface Job {
     user_id: string
     job_id: string
     interested: boolean
-    searched_title: string
     score: number
     desire_score: number
     experience_score: number

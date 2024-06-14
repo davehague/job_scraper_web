@@ -7,8 +7,11 @@
       <template #default>
         <h2>Welcome, we're glad you're here. Let's get started.</h2>
         <p class="instructions">Paste your resume here. This will help us tailor job recommendations to you.</p>
-        <textarea v-model="formData.resume" rows="20" style="width: 100%;"
+        <textarea v-model="formData.resume" rows="15" style="width: 100%;"
           placeholder="Paste your resume here"></textarea>
+          <p class="instructions">What are you looking for in your next job?</p>
+        <textarea v-model="formData.nextRole" rows="5" style="width: 100%;"
+          placeholder="Are you looking to pivot to a new career? Take the next step in your current career?  Stay in the same role but switch companies?  What have you done to make progress toward your next step?"></textarea>
       </template>
     </OnboardingScreen>
 
@@ -123,6 +126,7 @@ onMounted(async () => {
 
 const formData = ref({
   resume: '',
+  nextRole: '',
   name: '',
   remotePreference: 'YES',
   location: '',
@@ -142,9 +146,10 @@ const submitResume = async () => {
   console.log('User ID:', uid);
   if (!uid || uid === '') return;
 
+  const fullResume = `${formData.value.resume}\n\n${formData.value.nextRole}`;
   const baseUser = {
     id: uid,
-    resume: formData.value.resume,
+    resume: fullResume,
   };
 
   try {

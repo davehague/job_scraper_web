@@ -36,7 +36,7 @@ const updateVisibleJobs = (filterType: string) => {
   switch (filterType) {
     case 'latestSearch':
       visibleJobs.value = allJobs.value.filter(job => job.user_interested == null);
-      noJobsMessage.value = 'No jobs found. Is your profile filled out completely? If you\'re still experiencing a problem please contact David!';
+      noJobsMessage.value = 'No jobs found, yet! If you just signed up please refresh in 1-2 minutes.  If you\'re still experiencing a problem please contact David!';
       break;
     case 'savedResults':
       visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && job.user_interested);

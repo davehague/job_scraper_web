@@ -63,7 +63,7 @@ const handleClick = (filterType: string) => {
 
 const fetchRoles = async () => {
   const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
-  publicUsers.value = items;
+  publicUsers.value = items.sort((a, b) => a.name.localeCompare(b.name));
   const userId = publicUsers.value[0].id;
   store.setSelectedUserId(userId);
   selectedPublicUser.value = userId;

@@ -10,7 +10,6 @@ import { ref } from 'vue'
 
 const showSignUp = ref(false)
 
-
 const toggleAuth = () => {
   showSignUp.value = !showSignUp.value
 }

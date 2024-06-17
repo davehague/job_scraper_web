@@ -53,20 +53,20 @@
     <div>
       <div class="label-container">
         <label>Stop Words (comma separated):</label>
-        <InfoTooltip text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  
+        <InfoTooltip text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  We won't show you jobs where your stop words appear in the title.
           <br><br><b>Example:</b> If you're looking for your first developer job, you don't want jobs that say 'Senior', 'Sr.', or 'III' 
           in the title <br><br><b>Example</b>: If you don't want to be a manager you would ask to filter out jobs with 'manager', 'supervisor', 
-          or 'lead' in the title" />
+          or 'lead' in the title." />
       </div>
       <input v-model="stopWords" type="text" placeholder="Enter stop words" />
     </div>
     <div>
       <div class="label-container">
         <label>Skill Words (comma separated):</label>
-        <InfoTooltip text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.<br><br>
+        <InfoTooltip text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.  This will only improve results, not disqualify jobs.<br><br>
               <b>Example:</b>  I'm a CNC machinist.  I'll know I've got a potentially good job if I see the words 'CNC', 'CAM programming' 
               or 'PLC programming'<br><br><b>Example:</b>  I'm a developer.  I'll know I've got a potentially good job if I see the words 'Java', 
-              'Agile',  or 'Pull requests'" />
+              'Agile',  or 'Pull requests'." />
       </div>
       <input v-model="skillWords" type="text" placeholder="Enter skill words" />
     </div>
@@ -74,7 +74,7 @@
       <div class="label-container">
         <label>Other Requirements (comma separated):</label>
         <InfoTooltip text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
-          Not all jobs list these things, but we can highlight the ones that do." />
+          Not all jobs list these things, but we can highlight the ones that do. This will only improve results, not disqualify jobs." />
       </div>
       <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
     </div>
@@ -84,7 +84,7 @@
       <div class="label-container">
         <label>Minimum Salary:</label>
         <InfoTooltip
-          text="If the job lists the salary, we won't show it to you if the max offer is below your minimum" />
+          text="If the job lists the salary, we won't show it to you if the max offer is below your minimum." />
       </div>
       <input v-model="minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
 

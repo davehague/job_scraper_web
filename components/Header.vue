@@ -8,9 +8,9 @@
         <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedPublicUser">
           <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
         </select>
-        <div class="user-details" v-if="store.authUser">
+        <div class="user-details" @click="toggleProfileMenu" v-if="store.authUser">
           <div class="username">{{ userName }}</div>
-          <img src="/public/profile.png" class="profile-pic" @click="toggleProfileMenu" />
+          <img src="/public/profile.png" class="profile-pic"/>
           <div v-if="showMenu" class="dropdown-menu">
             <button @click="goToProfile">Profile</button>
             <button @click="signOut">Sign Out</button>

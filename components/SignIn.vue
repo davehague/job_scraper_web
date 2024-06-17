@@ -15,7 +15,7 @@
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign Up</p>
       </form>
-      <NuxtLink to="/">Skip sign in for now</NuxtLink>
+      <button class="link-button" @click="logout">Skip sign in for now</button>
     </div>
   </div>
 </template>
@@ -73,13 +73,19 @@ export default {
         errorMessage.value = (error as Error).message
         console.error('Sign-in error:', error)
       }
-    }
+    };
+
+    const logout = async () => {
+      await supabase.auth.signOut();
+      router.push('/');
+    };
 
     return {
       email,
       password,
       errorMessage,
-      signIn
+      signIn,
+      logout
     }
   }
 }

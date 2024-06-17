@@ -20,8 +20,7 @@
       <div class="job-comp" v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! /
     1000) }}k</div>
 
-      <div class="job-source" v-if="job.date_posted">Posted on {{ job.date_posted }} on {{ job.job_site }}</div>
-      <div class="job-source" v-else-if="job.date_pulled">Pulled on {{ job.date_pulled }} from {{ job.job_site }}</div>
+      <div class="job-source">{{ jobRecencyText() }}</div>
 
       <!-- Summary -->
       <h4>Summary</h4>
@@ -89,6 +88,19 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
+
+const jobRecencyText = () => {
+  const todayDate = new Date().toISOString().split('T')[0];
+  const date = props.job.date_posted || props.job.date_pulled;
+  const dateDiff = Math.floor((Date.parse(todayDate) - Date.parse(date)) / (1000 * 60 * 60 * 24));
+
+  if (dateDiff === 0) {
+    if (props.job.date_posted) return 'Posted today!';
+    return 'Pulled today!';
+  }
+
+  return props.job.date_posted ? `Posted ${dateDiff} day(s) ago` : `Pulled ${dateDiff} day(s) ago`;
+};
 
 const handleResize = () => {
   if (window.innerWidth > 768) {

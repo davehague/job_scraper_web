@@ -2,16 +2,14 @@
 <template>
   <div :class="['job-card', { 'older-job': isOlder }]">
     <div class="title-and-score">
+
       <h2 class="title" @click="toggleCard">{{ job.title }}</h2>
-      <div :title="'Overall Score: ' + job.overall_score
-    + '\nDesire Score: ' + job.desire_score
-    + '\nExperience Score: ' + job.experience_score
-    + '\nMeets Requirements Score: ' + job.meets_requirements_score
-    + '\nMeets Experience Score: ' + job.meets_experience_score
-    + '\n\nGuidance: ' + job.guidance" class="score-circle"
-        :style="{ backgroundColor: getScoreColor(job.overall_score) }">
-        <span class="score-text">{{ job.overall_score }}</span>
-      </div>
+
+      <Tooltip :content="tooltipContent">
+        <div class="score-circle" :style="{ backgroundColor: getScoreColor(job.overall_score) }">
+          <span class="score-text">{{ job.overall_score }}</span>
+        </div>
+      </Tooltip>
     </div>
     <div class="content-container" v-if="showContent">
       <div class="company">
@@ -76,6 +74,17 @@ const showContent = ref(true);
 const userAction = ref<boolean | null>(null);
 
 const emitInterestSet = defineEmits(['interestSet']);
+
+const tooltipContent = computed(() => {
+  const g = props.job.guidance.replace(/\./g, '.<br><br>');
+  return `Overall Score: ${props.job.overall_score}<br>
+Desire Score: ${props.job.desire_score}<br>
+Experience Score: ${props.job.experience_score}<br>
+Meets Requirements Score: ${props.job.meets_requirements_score}<br>
+Meets Experience Score: ${props.job.meets_experience_score}<br>
+<br>
+Guidance: ${g}`;
+});
 
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
@@ -193,6 +202,7 @@ const isOlder = () => {
   box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.2);
   min-height: 640px;
   max-width: 500px;
+  overflow: visible;
 }
 
 .job-card.older-job {

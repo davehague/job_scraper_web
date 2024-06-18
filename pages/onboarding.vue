@@ -9,7 +9,7 @@
         <p class="instructions">Paste your resume here. This will help us tailor job recommendations to you.</p>
         <textarea v-model="formData.resume" rows="15" style="width: 100%;"
           placeholder="Paste your resume here"></textarea>
-          <p class="instructions">What are you looking for in your next job?</p>
+        <p class="instructions">What are you looking for in your next job?</p>
         <textarea v-model="formData.nextRole" rows="5" style="width: 100%;"
           placeholder="Are you looking to pivot to a new career? Take the next step in your current career?  Stay in the same role but switch companies?  What have you done to make progress toward your next step?"></textarea>
       </template>
@@ -93,7 +93,8 @@
 
       <div class="label-container">
         <label>Other Requirements (comma separated):</label>
-        <InfoTooltip text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
+        <InfoTooltip
+          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
           Not all jobs list these things, but we can highlight the ones that do. This will only improve results, not disqualify jobs." />
       </div>
       <input v-model="formData.candidateRequirements" type="text" placeholder="Enter other requirements" />
@@ -107,7 +108,7 @@ import { useRouter } from 'vue-router';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
-import { shouldRedirectToOnboarding } from '@/utils/helpers.ts';
+import { shouldRedirectToOnboarding, consolidateText } from '@/utils/helpers.ts';
 
 const router = useRouter();
 const store = useJsaStore();
@@ -156,17 +157,22 @@ const submitResume = async () => {
     const result = await PersistentDataService.upsertUser(baseUser as User);
     console.log(result);
 
-    // Call the GCP function, silent and in the background
-    const gcpResponse = fetch('/api/onboarding', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ user_id: uid, resume: formData.value.resume }),
-    });
+    let suggestedConfigsResult = await getSuggestedUserConfigs(formData.value.resume, formData.value.nextRole);
+    let content = suggestedConfigsResult;
+    console.log('Suggested configs:', content);
 
-    console.log('GCP Response:', gcpResponse);
+    let values = content.split('\n');
+    if (values.length === 4) {
 
+      let configs = values.map((v: string) => v.split(':').map((item: string) => item.trim()));
+      let valid = configs.every((config: string[]) => config.length === 2);
+      if (valid) {
+        formData.value.jobTitles = configs[0][1];
+        formData.value.stopWords = configs[1][1];
+        formData.value.skillWords = configs[2][1];
+        formData.value.candidateRequirements = configs[3][1];
+      }
+    }
   } catch (error) {
     console.error('Error in processing:', error);
   } finally {
@@ -175,8 +181,61 @@ const submitResume = async () => {
   }
 };
 
+const getSuggestedUserConfigs = async (resume: string, nextRole: string) => {
+  const prompt = `
+Given the following user resume: <resume>${consolidateText(resume)}</resume>
+And what the user is looking for in their next role: <nextRole>${nextRole}</nextRole>
+Answer the following in a bulleted list
+Job Titles: What would the top 3 job titles this candidate may be looking for? Use a comma separated list
+Stop Words: What are 3 words, phrases, or title modifiers that may appear in the title of a job that a job search engine might find but wouldn't actually be a good job fit for this person? Use a comma separated list
+Skill Words: What are 3 words, phrases, or skills that this person would see in a job posting that would let them know it's a good fit? Use a comma separated list
+Must Haves: What are 3 company "must haves" that this person may desire. Be creative here. Use a comma separated list
+
+For each of the above, only include a single sentence response with no explanation and format it in a comma separated list
+
+Example:
+Job Titles: Job Title 1, Job Title 2, Job Title 3
+Stop words: Senior, Manager, Lead
+Skill words: Software Development Lifecycle (SDLC), Agile, Software Testing
+Must Haves: 401k, health insurance, focus on training
+`;
+  try {
+    const response = await fetch('/api/openrouter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "mistralai/mistral-7b-instruct:free",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+      }),
+    });
+
+    console.log('API response:', response);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const responseData = await response.json();
+    console.log('API response data:', responseData);
+
+    if (responseData.success) {
+      return responseData.data.choices[0].message.content;
+
+    } else {
+      console.error('Error from OpenRouter:', responseData.message);
+      return "\n";
+    }
+  } catch (error) {
+    console.error('Failed to fetch suggested configs:', error);
+    return "\n";
+  }
+};
+
+
 const submitPersonalInfo = async () => {
-  console.log('Submitting personal info:', formData.value);
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
   console.log('User ID:', uid);
@@ -225,6 +284,9 @@ const submitJobInfo = async () => {
 
     const candidateRequirements = createConfigs(uid, 'candidate_requirements', formData.value.candidateRequirements, 3);
     performInsert(candidateRequirements);
+
+    generateJobs(uid);
+
   } catch (error) {
     console.error('Error saving user configuration:', error);
   } finally {
@@ -232,6 +294,18 @@ const submitJobInfo = async () => {
     await handleSubmit();
   }
 };
+
+const generateJobs = (uid: string) => {
+  console.log('Generating jobs for user...');
+  // Intentionally not awaiting this
+  const gcpResponse = fetch('/api/onboarding', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_id: uid, resume: formData.value.resume }),
+  });
+}
 
 const clearConfigs = async (uid: string) => {
   try {

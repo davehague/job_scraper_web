@@ -31,7 +31,6 @@ const intervalId = ref<number>();
 const currentFilter = ref<string>('latestSearch');
 
 const updateVisibleJobs = (filterType: string) => {
-  console.log('Visible jobs were:', visibleJobs.value);
   currentFilter.value = filterType;
   switch (filterType) {
     case 'latestSearch':

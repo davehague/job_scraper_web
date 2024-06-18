@@ -10,3 +10,8 @@ export const shouldRedirectToOnboarding = async () => {
   }
   return false;
 };
+
+export const consolidateText = (text: string): string => {
+  const consolidatedText = text.replace(/\s+/g, ' ').trim();
+  return consolidatedText;
+};

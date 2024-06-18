@@ -109,7 +109,6 @@ const fetchJobs = async (loggedInUserId: string | null) => {
     } else {
       visibleJobs.value = jobs.filter(job => job.user_id === loggedInUserId);
     }
-
   } catch (error) {
     console.error("Error fetching jobs:", error);
   }
@@ -125,6 +124,9 @@ const interestUpdatedOnJob = (jobId: string, interested: boolean | null) => {
 
 const recalculateVisibleJobs = () => {
   updateVisibleJobs(currentFilter.value);
+  if (store.selectedUserId != null) {
+    visibleJobs.value = allJobs.value.filter(job => job.user_id === store.selectedUserId);
+  }
 }
 
 watch(() => store.selectedUserId, (newVal) => {

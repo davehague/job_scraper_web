@@ -76,7 +76,10 @@ const userAction = ref<boolean | null>(null);
 const emitInterestSet = defineEmits(['interestSet']);
 
 const tooltipContent = computed(() => {
-  const g = props.job.guidance.replace(/\./g, '.<br><br>');
+  let g = ''
+  if (props.job.guidance)
+    g = props.job.guidance.replace(/\./g, '.<br><br>');
+  
   return `Overall Score: ${props.job.overall_score}<br>
 Desire Score: ${props.job.desire_score}<br>
 Experience Score: ${props.job.experience_score}<br>

@@ -57,7 +57,7 @@ export default class PersistentDataService {
     const userIds = users.map((user) => user.id);
 
     const daysAgo = new Date();
-    daysAgo.setDate(daysAgo.getDate() - 5);
+    daysAgo.setDate(daysAgo.getDate() - 3);
 
     const { data, error } = await supabase
       .from("recent_high_score_jobs")

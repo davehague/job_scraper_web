@@ -7,7 +7,7 @@
       </div>
       <div v-else>
         <h2>Sign Up</h2>
-        <form @submit.prevent="signUp">
+        <form @submit.prevent="signUpWithEmail">
           <div class="form-group">
             <label for="email">Email:</label>
             <input v-model="email" type="email" id="email" required />
@@ -16,106 +16,99 @@
             <label for="password">Password:</label>
             <input v-model="password" type="password" id="password" required />
           </div>
-          <button type="submit" class="auth-button">Sign Up</button>
+          <button type="submit" class="auth-button">Sign up</button>
+          <button type="button" @click="signUpWithGoogle" class="google-auth-button">Sign up with Google</button>
           <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
           <p class="toggle-auth" @click="toggleAuth">Already have an account? Sign In</p>
         </form>
+
       </div>
 
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { ref, type PropType } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
 import PersistentDataService from '~/services/PersistentDataService';
 import { welcome } from '@/services/EmailTemplates';
 
-export default {
-  props: {
-    toggleAuth: {
-      type: Function as PropType<() => void>,
-      required: true
-    }
-  },
-  setup(props) {
-    const email = ref('');
-    const password = ref('');
-    const errorMessage = ref('');
-    const signUpComplete = ref(false);
+defineProps<{
+  toggleAuth: () => void
+}>()
 
-    const sendWelcomeEmail = async (email: string) => {
-      try {
-        const response = await fetch('/api/sendEmail', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            toEmail: email,
-            subject: `Welcome to the Job App!`,
-            htmlTemplate: welcome,
-          }),
-        });
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const signUpComplete = ref(false)
 
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const result = await response.json();
-        console.log('Member added successfully:', result);
-
-      } catch (error) {
-        console.error('Error adding member:', error);
-      }
+const signUpWithEmail = async () => {
+  try {
+    let existingUser = await PersistentDataService.fetchUserByEmail(email.value);
+    console.log('existingUser', existingUser);
+    if (existingUser) {
+      errorMessage.value = 'Email already exists, please sign in instead.';
+      return;
     }
 
-    const signUp = async () => {
-      try {
-        let existingUser = await PersistentDataService.fetchUserByEmail(email.value);
-        console.log('existingUser', existingUser);
-        if (existingUser) {
-          errorMessage.value = 'Email already exists, please sign in instead.';
-          return;
-        }
+    const { data, error } = await supabase.auth.signUp({
+      email: email.value,
+      password: password.value
+    })
 
-        const { data, error } = await supabase.auth.signUp({
-          email: email.value,
-          password: password.value
-        })
-
-        if (data && data.user != null) {
-          // sendWelcomeEmail(email.value);
-          console.log('Sign-up successful:', data);
-          const { error: userCreateError } = await supabase
-            .from('users')
-            .insert({ id: data.user?.id, email: email.value })
-
-          if (userCreateError) {
-            throw userCreateError
-          }
-
-          signUpComplete.value = true
+    if (data && data.user != null) {
+      console.log('Sign-up successful:', data);
+      await handlePostSignUp(data.user?.id, email.value)
         } else {
-          throw error;
-        }
-      } catch (error) {
-        errorMessage.value = (error as Error).message
-        console.error('Sign-up error:', error)
-      }
+      throw error;
     }
-
-    return {
-      email,
-      password,
-      errorMessage,
-      signUp,
-      signUpComplete,
-    }
+  } catch (error) {
+    errorMessage.value = (error as Error).message
+    console.error('Sign-up error:', error)
   }
 }
+
+const signUpWithGoogle = async () => {
+  console.log('signing up with google');
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        queryParams: {
+          access_type: 'offline', // To get a refresh token
+          prompt: 'consent', // To re-prompt the user to select a Google account
+        },
+      },
+    });
+
+    console.log('data', data);
+    console.log('error', error); 
+
+    if (error) {
+      throw error;
+    }
+    
+  } catch (error) {
+    console.error('Error during Google sign-in:', (error as Error).message);
+  }
+};
+
+const handlePostSignUp = async (userId: string, userEmail: string, userName?: string) => {
+  const { error: userCreateError } = await supabase
+    .from('users')
+    .insert({ id: userId, userEmail: email, name: userName })
+
+  if (userCreateError) {
+    throw userCreateError
+  }
+
+  signUpComplete.value = true
+}
+
 </script>
+
 
 <style scoped>
 .auth-container {
@@ -183,5 +176,19 @@ input {
 
 .thank-you-message {
   margin-bottom: 20px;
+}
+
+.google-auth-button {
+  background-color: #4285F4;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.google-auth-button:hover {
+  background-color: #357ae8;
 }
 </style>

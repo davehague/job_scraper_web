@@ -42,6 +42,7 @@ export interface Job {
     is_public: boolean
     send_emails: string
     onboarding_complete: boolean
+    is_admin: boolean
   }
 
   export interface UserConfig {

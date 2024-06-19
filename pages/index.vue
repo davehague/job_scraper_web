@@ -104,10 +104,11 @@ const fetchJobs = async (loggedInUserId: string | null) => {
       return (dateB - dateA) || (b.overall_score - a.overall_score);
     })
 
-    if (loggedInUserId === null) {
-      visibleJobs.value = jobs.filter(job => job.user_id === store.selectedUserId);
-    } else {
-      visibleJobs.value = jobs.filter(job => job.user_id === loggedInUserId);
+    if (loggedInUserId === null || store.dbUser?.is_admin) {
+      visibleJobs.value = allJobs.value.filter(job => job.user_id === store.selectedUserId);
+    }
+    else {
+      visibleJobs.value = allJobs.value.filter(job => job.user_id === loggedInUserId);
     }
   } catch (error) {
     console.error("Error fetching jobs:", error);
@@ -124,21 +125,29 @@ const interestUpdatedOnJob = (jobId: string, interested: boolean | null) => {
 
 const recalculateVisibleJobs = () => {
   updateVisibleJobs(currentFilter.value);
-  if (store.selectedUserId != null) {
+  if (!store.authUser && store.selectedUserId != null) {
     visibleJobs.value = allJobs.value.filter(job => job.user_id === store.selectedUserId);
   }
 }
 
 watch(() => store.selectedUserId, (newVal) => {
+  handleNewUserId(newVal);
+});
+
+const handleNewUserId = async (newVal: string) => {
   const loggedInUserId = store.authUser?.id || null;
-  if (loggedInUserId !== null) {
+  if (loggedInUserId !== null && !store.dbUser?.is_admin) {
     return;
+  }
+
+  if (store.dbUser?.is_admin) {
+    await fetchJobs(newVal);
   }
 
   if (newVal != null) {
     visibleJobs.value = allJobs.value.filter(job => job.user_id === newVal);
   }
-});
+};
 
 onUnmounted(() => {
   clearInterval(intervalId.value);
@@ -160,7 +169,7 @@ onMounted(async () => {
   await fetchJobs(loggedInUserId)
   recalculateVisibleJobs();
 
-  intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
+  // intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 })
 </script>
 

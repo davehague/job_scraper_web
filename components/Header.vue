@@ -5,8 +5,11 @@
         <h2 class="app-name">Jobs App</h2>
       </div>
       <div class="right">
-        <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedPublicUser">
+        <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedUser">
           <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
+        </select>
+        <select v-if="userIsAdmin" id="roles" v-model="selectedUser">
+          <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.email }}</option>
         </select>
         <div class="user-details" @click="toggleProfileMenu" v-if="store.authUser">
           <div class="username">{{ userName }}</div>
@@ -49,27 +52,38 @@ const selectedLink = ref('latestSearch');
 
 const router = useRouter()
 const publicUsers = ref<DBUser[]>([]);
+const allUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
-const selectedPublicUser = ref('');
+const selectedUser = ref('');
 const store = useJsaStore();
 const userName = ref('');
 
 const userIsNotLoggedIn = ref(false);
+const userIsAdmin = ref(false);
 
 const handleClick = (filterType: string) => {
   selectedLink.value = filterType;
   emitFilter('filter', filterType);
 };
 
-const fetchRoles = async () => {
-  const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
-  publicUsers.value = items.sort((a, b) => a.name.localeCompare(b.name));
-  const userId = publicUsers.value[0].id;
-  store.setSelectedUserId(userId);
-  selectedPublicUser.value = userId;
+const fetchRoles = async (type: string) => {
+  if (type === 'public') {
+    const items = await PersistentDataService.fetchPublicUsers() as DBUser[]; 
+    publicUsers.value = items.sort((a, b) => a.name.localeCompare(b.name));
+    const userId = publicUsers.value[0].id;
+    store.setSelectedUserId(userId);
+    selectedUser.value = userId;
+  }
+  else if (type === 'all') {
+    let items = await PersistentDataService.fetchNonPublicUsers() as DBUser[];
+    allUsers.value = items.sort((a, b) => a.email.localeCompare(b.email));
+    const userId = allUsers.value.filter(user => user.email === store.authUser?.email)[0].id;
+    store.setSelectedUserId(userId);
+    selectedUser.value = userId;
+  }
 }
 
-const checkUser = async () => {
+const checkUserLoginStatus = async () => {
   const result = await supabase.auth.getUser();
   if (result.error != null) {
     store.signOutUser();
@@ -102,11 +116,16 @@ const toggleProfileMenu = () => {
 }
 
 onMounted(async () => {
-  await fetchRoles();
-  await checkUser();
+  await checkUserLoginStatus();
 
   if (!store.authUser) {
     userIsNotLoggedIn.value = true;
+    await fetchRoles('public');
+  }
+
+  if (store.dbUser?.is_admin) {
+    userIsAdmin.value = true;
+    await fetchRoles('all');
   }
 
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
@@ -114,7 +133,8 @@ onMounted(async () => {
   });
 })
 
-watch(selectedPublicUser, (newVal) => {
+watch(selectedUser, (newVal) => {
+  console.log('Setting a new selected user:', newVal);
   store.setSelectedUserId(newVal);
 })
 </script>

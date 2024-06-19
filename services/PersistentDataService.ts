@@ -53,6 +53,18 @@ export default class PersistentDataService {
     return data;
   }
 
+  static async fetchNonPublicUsers() {
+    const query = supabase.from("users").select("*").neq("is_public", true);;
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
   static async fetchJobsForUsers(users: { id: string }[]) {
     const userIds = users.map((user) => user.id);
 
@@ -70,7 +82,7 @@ export default class PersistentDataService {
       throw error;
     }
 
-    console.log("Fetched jobs for public users:", data);
+    console.log("Fetched jobs for users:", users, data);
     return data;
   }
 

@@ -32,7 +32,6 @@
 import { ref } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
 import PersistentDataService from '~/services/PersistentDataService';
-import { welcome } from '@/services/EmailTemplates';
 
 defineProps<{
   toggleAuth: () => void
@@ -73,12 +72,17 @@ const signUpWithGoogle = async () => {
   console.log('signing up with google');
 
   try {
+    const runtimeConfig = useRuntimeConfig()
+    const redirectUrl = runtimeConfig.public.baseURL + '/auth/callback';
+
+    console.log('signing up with google, will redirect to ', redirectUrl);
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         queryParams: {
           access_type: 'offline', // To get a refresh token
-          prompt: 'consent', // To re-prompt the user to select a Google account
+          prompt: 'consent', // To re-prompt the user to select a Google account,
+          redirectTo: redirectUrl,
         },
       },
     });
@@ -89,7 +93,7 @@ const signUpWithGoogle = async () => {
     if (error) {
       throw error;
     }
-    
+
   } catch (error) {
     console.error('Error during Google sign-in:', (error as Error).message);
   }

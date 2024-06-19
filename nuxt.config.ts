@@ -34,6 +34,11 @@ export default defineNuxtConfig({
     },
   },
   modules: ["@pinia/nuxt"],
+  runtimeConfig: {
+    public: {
+      baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    },
+  },
   plugins: ["~/plugins/analytics.client.ts"],
   css: ["~/assets/global.css", "@fortawesome/fontawesome-free/css/all.css"],
 });

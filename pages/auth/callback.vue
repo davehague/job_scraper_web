@@ -9,46 +9,70 @@ import { supabase } from "@/utils/supabaseClient";
 import { useRouter, useRoute } from 'vue-router';
 import { onMounted } from "vue";
 
+const parseHash = (hash: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+  hash.substring(1).split('&').forEach((param: string) => {
+    const [key, value] = param.split('=');
+    params[key] = decodeURIComponent(value);
+  });
+  return params;
+};
+
 const router = useRouter();
-const route = useRoute();
 
 const handleOAuthCallback = async () => {
-  const code = route.query.code as string;
+  const hash = window.location.hash;
+  const params = parseHash(hash);
 
-  if (code) {
+  const accessToken = params.access_token;
+  const refreshToken = params.refresh_token;
+
+  if (accessToken && refreshToken) {
     try {
-      const response = await fetch('/api/exchange-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
+      // Set the Supabase session using the tokens
+      const { data, error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
       });
 
-      const sessionData = await response.json();
-      if (sessionData && sessionData.user) {
-        console.log('Google sign-up successful:', sessionData.user);
-        const uid = sessionData.user.id;
-        const email = sessionData.user.email || '';
-        const name = sessionData.user.user_metadata?.full_name || '';
-        await handlePostSignUp(uid, email, name);
-        router.push('/'); 
+      if (error) {
+        throw error;
       }
+
+      const user = data.user;
+      console.log('Google sign-up successful:', user);
+      const uid = user?.id;
+      const email = user?.email;
+      const name = user?.user_metadata?.full_name || '';
+
+      if(!uid) {
+        throw new Error('User ID not found in session data.');
+      }
+
+      if(!email) {
+        throw new Error('Email not found in session data.');
+      }
+
+      await handlePostSignUp(uid, email, name);
+
+      router.push('/'); 
     } catch (error) {
       console.error('Error during session exchange:', error);
     }
   } else {
-    console.error('No code found in query parameters.');
+    console.error('Access token or refresh token not found in URL hash.');
   }
 };
+
 
 const handlePostSignUp = async (userId: string, userEmail: string, userName?: string) => {
   const { error: userCreateError } = await supabase
     .from('users')
-    .insert({ id: userId, email: userEmail, name: userName })
+    .insert({ id: userId, email: userEmail, name: userName });
 
   if (userCreateError) {
-    throw userCreateError
+    console.error('Error creating user:', userCreateError.message);
+    throw userCreateError;
   }
 };
 

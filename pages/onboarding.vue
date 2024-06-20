@@ -1,104 +1,171 @@
 <template>
-  <div>
-    <!-- Resume screen -->
-    <OnboardingScreen v-if="currentScreen === 1" :onSubmit="submitResume" :isLastScreen="currentScreen === totalScreens"
-      :showBackButton="currentScreen > 1" :onBack="handleBack">
+  <div class="onboarding-container">
+    <div class="sidebar">
+      <ul>
+        <li :class="{ active: currentScreen === 1 }">
+          <span class="checkmark-complete" v-if="currentScreen > 1">✔</span>
+          <span class="checkmark" v-else></span>
+          Resume
+        </li>
+        <li :class="{ active: currentScreen === 2 }">
+          <span class="checkmark-complete" v-if="currentScreen > 2">✔</span>
+          <span class="checkmark" v-else></span>
+          Role Information
+        </li>
+        <li :class="{ active: currentScreen === 3 }">
+          <span class="checkmark-complete" v-if="currentScreen > 3">✔</span>
+          <span class="checkmark" v-else></span>
+          Additional Search Info
+        </li>
+        <li :class="{ active: currentScreen === 4 }">
+          <span class="checkmark-complete" v-if="currentScreen > 4">✔</span>
+          <span class="checkmark" v-else></span>
+          About You
+        </li>
+      </ul>
+    </div>
+    <div class="container">
+      <!-- Resume -->
+      <OnboardingScreen v-if="currentScreen === 1" :onSubmit="submitResume"
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
 
-      <template #default>
-        <h2>Welcome, we're glad you're here. Let's get started.</h2>
-        <p class="instructions">Paste your resume here. This will help us tailor job recommendations to you.</p>
-        <textarea v-model="formData.resume" rows="15" style="width: 100%;"
-          placeholder="Paste your resume here"></textarea>
-        <p class="instructions">What are you looking for in your next job?</p>
-        <textarea v-model="formData.nextRole" rows="5" style="width: 100%;"
-          placeholder="Are you looking to pivot to a new career? Take the next step in your current career?  Stay in the same role but switch companies?  What have you done to make progress toward your next step?"></textarea>
-      </template>
-    </OnboardingScreen>
+        <template #default>
+          <h2>Welcome, we're glad you're here. Let's get started.</h2>
+          <p class="instructions">Paste your up-to-date resume below to help us tailor your job recommendations to your
+            skills and experience.
 
-    <!-- Personal info screen -->
-    <OnboardingScreen v-if="currentScreen === 2" :onSubmit="submitPersonalInfo"
-      :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+          </p>
+          <textarea v-model="formData.resume" rows="20" style="width: 100%;"
+            placeholder="Paste your resume here"></textarea>
+        </template>
+      </OnboardingScreen>
 
-      <template #default>
-        <h2>Tell us a bit about you and where you want your job to be</h2>
-        <p class="instructions">This helps us filter out jobs that don't fit your working style</p>
-        <label for="name">Name:</label>
-        <input id="name" v-model="formData.name" type="text" placeholder="Enter your name">
+      <!-- Role information -->
+      <OnboardingScreen v-if="currentScreen === 2" :onSubmit="submitRoleInfo"
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+        <h2>Tell us some basics about the role you want</h2>
+        <p class="instructions">This helps us filter out jobs that don't fit your current needs</p>
 
-        <label for="remote-preference">Remote Preference:</label>
+        <div class="label-container">
+          <label>Job Titles (top 3, comma separated)</label>
+        </div>
+        <input v-model="formData.jobTitles" type="text" placeholder="Enter job titles" />
+
+        <label for="remote-preference">Remote/hybrid/onsite</label>
         <select id="remote-preference" v-model="formData.remotePreference">
           <option value="YES">Remote OK</option>
           <option value="ONLY">Remote ONLY</option>
           <option value="NO">Local ONLY</option>
         </select>
 
-        <div v-if="formData.remotePreference !== 'ONLY'">
-          <label>Location (City, State, Country):</label>
-          <input id="location" v-model="formData.location" type="text" placeholder="e.g., Worthington, OH, USA">
+        <div class="left-right-container" v-if="formData.remotePreference !== 'ONLY'">
+          <div class="left">
+            <label>Location</label>
+            <input id="location" v-model="formData.location" type="text" placeholder="City, state, country">
+          </div>
+          <div class="right">
+            <label>Distance (miles)</label>
+            <input id="distance" v-model="formData.distance" type="text" placeholder="20">
+          </div>
 
-          <label>Distance (miles):</label>
-          <input id="distance" v-model="formData.distance" type="text" placeholder="e.g., 25">
         </div>
+
+        <div class="left-right-container">
+          <div class="left">
+            <div class="label-container">
+              <label>Minimum Salary (US dollars)</label>
+            </div>
+            <input v-model="formData.minSalary" type="text" placeholder="Minimum salary" @blur="formatMinSalary"
+              @focus="removeFormatting" />
+          </div>
+          <div class="right"></div>
+        </div>
+      </OnboardingScreen>
+
+      <!-- Additional search info -->
+      <OnboardingScreen v-if="currentScreen === 3" :onSubmit="submitAdditionalSearchInfo"
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+        <h2>Now, let's dig into what you're looking for</h2>
+        <p class="instructions">This will help us find the best matches for your career goals. Use commas to separate
+          entries
+          in each field.</p>
 
         <div class="label-container">
-          <label>Minimum Salary:</label>
-          <InfoTooltip
-            text="If the job lists the salary, we won't show it to you if the max offer is below your minimum" />
+          <label>List the top 2-5 skills that show that a job is a good fit for you</label>
         </div>
-        <input v-model="formData.minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
+        <input v-model="formData.skillWords" type="text" />
 
-        <div>
-          <label>
-            Send me emails about new jobs</label>
-          <select v-model="formData.sendEmails">
-            <option value="never">Never</option>
-            <option value="daily">Daily</option>
-            <option value="immediately">Immediately</option>
-          </select>
+        <div class="label-container">
+          <label>List 2-5 skills that show that a job is a NOT a good fit for you</label>
         </div>
-      </template>
-    </OnboardingScreen>
+        <input v-model="formData.skillStopWords" type="text" />
 
-    <!-- Job info screen -->
-    <OnboardingScreen v-if="currentScreen === 3" :onSubmit="submitJobInfo"
-      :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
-      <h2>Now, what are you looking for?</h2>
-      <p class="instructions">This will really help narrow it down</p>
+        <div class="label-container">
+          <label>List any job titles or descriptors (senior, manager, etc.) that you're NOT looking for</label>
+        </div>
+        <input v-model="formData.stopWords" type="text" />
 
-      <div class="label-container">
-        <label>Job Titles (top 3, comma separated):</label>
-        <InfoTooltip
-          text="What are the top 3 job titles you'd like to target?  If you don't know, you can simply list your recent job titles.  
-          This is what you would type into a job search engine. There may be some overlap and duplication in the titles." />
-      </div>
-      <input v-model="formData.jobTitles" type="text" placeholder="Enter job titles" />
+        <div class="label-container">
+          <label>List any must haves (health insurance, 401k, bonus, etc.)</label>
+        </div>
+        <input v-model="formData.candidateRequirements" type="text" placeholder="Enter other requirements" />
+      </OnboardingScreen>
 
-      <div class="label-container">
-        <label>Stop Words (comma separated):</label>
-        <InfoTooltip text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  We won't show you jobs where your stop words appear in the title.
-          <br><br><b>Example:</b> If you're looking for your first developer job, you don't want jobs that say 'Senior', 'Sr.', or 'III' 
-          in the title <br><br><b>Example</b>: If you don't want to be a manager you would ask to filter out jobs with 'manager', 'supervisor', 
-          or 'lead' in the title." />
-      </div>
-      <input v-model="formData.stopWords" type="text" placeholder="Enter stop words" />
+      <!-- About you -->
+      <OnboardingScreen v-if="currentScreen === 4" :onSubmit="submitAboutYou"
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
 
-      <div class="label-container">
-        <label>Skill Words (comma separated):</label>
-        <InfoTooltip text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.  This will only improve results, not disqualify jobs.<br><br>
-              <b>Example:</b>  I'm a CNC machinist.  I'll know I've got a potentially good job if I see the words 'CNC', 'CAM programming' 
-              or 'PLC programming'<br><br><b>Example:</b>  I'm a developer.  I'll know I've got a potentially good job if I see the words 'Java', 
-              'Agile',  or 'Pull requests'." />
-      </div>
-      <input v-model="formData.skillWords" type="text" placeholder="Enter skill words" />
+        <template #default>
+          <h2>Finally, tell us a little bit about yourself</h2>
+          <label for="name">Name</label>
+          <input id="name" v-model="formData.name" type="text" placeholder="Enter your name">
 
-      <div class="label-container">
-        <label>Other Requirements (comma separated):</label>
-        <InfoTooltip
-          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
-          Not all jobs list these things, but we can highlight the ones that do. This will only improve results, not disqualify jobs." />
-      </div>
-      <input v-model="formData.candidateRequirements" type="text" placeholder="Enter other requirements" />
-    </OnboardingScreen>
+          <label for="intention">Where are you in your job search?</label>
+          <div class="checkbox-rows">
+            <div class="checkbox-row">
+              <input type="checkbox" id="curious" name="intention" value="curious" v-model="formData.intentions">
+              <label for="curious">Just curious about the market and what's out there</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="new-grad" name="intention" value="new-grad" v-model="formData.intentions">
+              <label for="new-grad">New grad or career changer looking for my first role</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="passive-employed" name="intention" value="passive-employed"
+                v-model="formData.intentions">
+              <label for="passive-employed">Currently employed and passively looking for my next role -- I'll apply if
+                the right opportunity comes to my attention</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="active-employed" name="intention" value="active-employed"
+                v-model="formData.intentions">
+              <label for="active-employed">Currently employed but actively ready to move on</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="active-unemployed" name="intention" value="active-unemployed"
+                v-model="formData.intentions">
+              <label for="active-unemployed">Experienced but unemployed and actively looking for my next role</label>
+            </div>
+          </div>
+
+          <label>Email notifications</label>
+          <div class="checkbox-rows">
+            <div class="checkbox-row">
+              <input type="radio" id="never" name="email" value="never" v-model="formData.sendEmails">
+              <label for="never">Never</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="radio" id="daily" name="email" value="daily" v-model="formData.sendEmails">
+              <label for="daily">Daily (default)</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="radio" id="immediately" name="email" value="immediately" v-model="formData.sendEmails">
+              <label for="immediately">Instantaneous</label>
+            </div>
+          </div>
+        </template>
+      </OnboardingScreen>
+    </div>
   </div>
 </template>
 
@@ -114,7 +181,7 @@ const router = useRouter();
 const store = useJsaStore();
 
 const currentScreen = ref(1);
-const totalScreens = ref(3);
+const totalScreens = ref(4);
 
 onMounted(async () => {
   const userShouldOnboard = await shouldRedirectToOnboarding();
@@ -127,7 +194,6 @@ onMounted(async () => {
 
 const formData = ref({
   resume: '',
-  nextRole: '',
   name: '',
   remotePreference: 'YES',
   location: '',
@@ -135,9 +201,11 @@ const formData = ref({
   jobTitles: '',
   stopWords: '',
   skillWords: '',
+  skillStopWords: '',
   candidateRequirements: '',
-  minSalaryInput: '',
-  sendEmails: 'daily'
+  minSalary: '',
+  sendEmails: 'daily',
+  intentions: [],
 });
 
 const submitResume = async () => {
@@ -147,7 +215,7 @@ const submitResume = async () => {
   console.log('User ID:', uid);
   if (!uid || uid === '') return;
 
-  const fullResume = `${formData.value.resume}\n\n${formData.value.nextRole}`;
+  const fullResume = `${formData.value.resume}`;
   const baseUser = {
     id: uid,
     resume: fullResume,
@@ -157,7 +225,7 @@ const submitResume = async () => {
     const result = await PersistentDataService.upsertUser(baseUser as User);
     console.log(result);
 
-    let suggestedConfigsResult = await getSuggestedUserConfigs(formData.value.resume, formData.value.nextRole);
+    let suggestedConfigsResult = await getSuggestedUserConfigs(formData.value.resume);
     let content = suggestedConfigsResult;
     console.log('Suggested configs:', content);
 
@@ -170,34 +238,49 @@ const submitResume = async () => {
         formData.value.jobTitles = configs[0][1];
         formData.value.stopWords = configs[1][1];
         formData.value.skillWords = configs[2][1];
-        formData.value.candidateRequirements = configs[3][1];
+        formData.value.skillStopWords = configs[3][1];
       }
     }
   } catch (error) {
     console.error('Error in processing:', error);
   } finally {
-    console.log('User saved successfully');
+    console.log('Resume saved successfully');
     await handleSubmit();
   }
 };
 
-const getSuggestedUserConfigs = async (resume: string, nextRole: string) => {
+const getSuggestedUserConfigs = async (resume: string) => {
   const prompt = `
+You are a helpful no-nonsense assistant. You listen to directions carefully and follow them to the letter. 
+
 Given the following user resume: <resume>${consolidateText(resume)}</resume>
-And what the user is looking for in their next role: <nextRole>${nextRole}</nextRole>
 Answer the following in a bulleted list
 Job Titles: What would the top 3 job titles this candidate may be looking for? Use a comma separated list
 Stop Words: What are 3 words, phrases, or title modifiers that may appear in the title of a job that a job search engine might find but wouldn't actually be a good job fit for this person? Use a comma separated list
 Skill Words: What are 3 words, phrases, or skills that this person would see in a job posting that would let them know it's a good fit? Use a comma separated list
-Must Haves: What are 3 company "must haves" that this person may desire. Be creative here. Use a comma separated list
+Skill Stop Words: What are 3 words, phrases, or skills that this person would see in a job posting that would let them know it's NOT a good fit? Use a comma separated list
 
-For each of the above, only include a single sentence response with no explanation and format it in a comma separated list
+ONLY include a single sentence response for each question and format it in a comma separated list.  Examples follow.
 
-Example:
+Example (mid-level software engineer):
 Job Titles: Job Title 1, Job Title 2, Job Title 3
 Stop words: Senior, Manager, Lead
 Skill words: Software Development Lifecycle (SDLC), Agile, Software Testing
-Must Haves: 401k, health insurance, focus on training
+Skill Stop Words: Product Management, Marketing, Sales
+
+Example (senior software QA):
+Job Titles: QA Engineer, Senior QA Engineer, QA Manager
+Stop words: Developer, Analyst, Architect
+Skill words: Selenium, JIRA, TestRail
+Skill Stop Words: Java, C++, Python
+
+Example (sales development representative):
+Job Titles: SDR, Sales Development Representative, Business Development Representative
+Stop words: Account Executive, Account Manager, Sales Manager
+Skill words: Cold calling, CRM, SalesForce
+Skill Stop Words: Marketing, Product Management, Software Development
+
+DO NOT INCLUDE EXPLANATION OR CONTEXT IN YOUR REPLY. ONLY INCLUDE THE BULLETED LIST OF ANSWERS.
 `;
   try {
     const response = await fetch('/api/openrouter', {
@@ -235,7 +318,7 @@ Must Haves: 401k, health insurance, focus on training
 };
 
 
-const submitPersonalInfo = async () => {
+const submitRoleInfo = async () => {
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
   console.log('User ID:', uid);
@@ -243,26 +326,29 @@ const submitPersonalInfo = async () => {
 
   const baseUser = {
     id: uid,
-    name: formData.value.name,
     remote_preference: formData.value.remotePreference,
     location: formData.value.location,
     distance: formData.value.distance,
-    send_emails: formData.value.sendEmails,
     min_salary: minSalary.value,
   };
 
   try {
     const result = await PersistentDataService.upsertUser(baseUser as User)
-    console.log(result);
+    console.log('User updated: ', result);
+
+    clearConfigsByKey(uid, 'job_titles');
+    const titles = createConfigs(uid, 'job_titles', formData.value.jobTitles, 3);
+    performInsert(titles);
+
   } catch (error) {
-    console.error('Error saving user configuration:', error);
+    console.error('Error in processing:', error);
   } finally {
-    console.log('User saved successfully');
+    console.log('Role info saved successfully');
     await handleSubmit();
   }
 };
 
-const submitJobInfo = async () => {
+const submitAdditionalSearchInfo = async () => {
   console.log('Submitting job info:', formData.value.jobTitles);
 
   const loggedInUser = await store.getAuthUser();
@@ -271,26 +357,59 @@ const submitJobInfo = async () => {
   if (!uid || uid === '') return;
 
   try {
-    clearConfigs(uid);
-
-    const titles = createConfigs(uid, 'job_titles', formData.value.jobTitles, 3);
-    performInsert(titles);
-
-    const stopWords = createConfigs(uid, 'stop_words', formData.value.stopWords);
-    performInsert(stopWords);
-
+    clearConfigsByKey(uid, 'skill_words');
     const skillWords = createConfigs(uid, 'skill_words', formData.value.skillWords);
     performInsert(skillWords);
 
-    const candidateRequirements = createConfigs(uid, 'candidate_requirements', formData.value.candidateRequirements, 3);
+    clearConfigsByKey(uid, 'skill_stop_words');
+    const skillStopWords = createConfigs(uid, 'skill_stop_words', formData.value.skillStopWords);
+    performInsert(skillStopWords);
+
+    clearConfigsByKey(uid, 'stop_words');
+    const stopWords = createConfigs(uid, 'stop_words', formData.value.stopWords);
+    performInsert(stopWords);
+
+    clearConfigsByKey(uid, 'candidate_requirements');
+    const candidateRequirements = createConfigs(uid, 'candidate_requirements', formData.value.candidateRequirements);
     performInsert(candidateRequirements);
 
-    generateJobs(uid);
+  } catch (error) {
+    console.error('Error in processing:', error);
+  } finally {
+    console.log('Additional search info saved successfully');
+    await handleSubmit();
+  }
+};
+
+const submitAboutYou = async () => {
+  const loggedInUser = await store.getAuthUser();
+  const uid = loggedInUser?.id;
+  console.log('User ID:', uid);
+  if (!uid || uid === '') return;
+
+  const baseUser = {
+    id: uid,
+    name: formData.value.name,
+    send_emails: formData.value.sendEmails,
+  };
+
+  try {
+    const result = await PersistentDataService.upsertUser(baseUser as User)
+    console.log('User updated: ', result);
+
+    // TODO: Saving this chunk of code until I decide where to save the intentions
+    // clearConfigsByKey(uid, 'job_titles');
+    // const titles = createConfigs(uid, 'job_titles', formData.value.jobTitles, 3);
+    // performInsert(titles);
+
+    console.log('Where are you in your job search? ', formData.value.intentions);
+
+    generateJobs(uid); // Intentionally not awaiting this
 
   } catch (error) {
-    console.error('Error saving user configuration:', error);
+    console.error('Error in processing:', error);
   } finally {
-    console.log('User saved successfully');
+    console.log('About you saved successfully');
     await handleSubmit();
   }
 };
@@ -298,18 +417,27 @@ const submitJobInfo = async () => {
 const generateJobs = (uid: string) => {
   console.log('Generating jobs for user...');
   // Intentionally not awaiting this
+  const resumePlus = `
+    <full_resume>${formData.value.resume}</full_resume>\n
+    <user_intentions>${formData.value.intentions.join(',')}</user_intentions>\n
+    <desired_job_keywords>${formData.value.skillWords}</desired_job_keywords>\n
+    <undesired_job_keywords>${formData.value.skillStopWords}</undesired_job_keywords>\n
+    <desired_job_titles>${formData.value.jobTitles}</desired_job_titles>\n
+    <undesired_job_titles>${formData.value.stopWords}</undesired_job_titles>\n
+    `;
+
   const gcpResponse = fetch('/api/onboarding', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ user_id: uid, resume: formData.value.resume }),
+    body: JSON.stringify({ user_id: uid, resume: resumePlus }),
   });
 }
 
-const clearConfigs = async (uid: string) => {
+const clearConfigsByKey = async (uid: string, key: string) => {
   try {
-    const configs = await PersistentDataService.fetchUserConfigs(uid);
+    const configs = await PersistentDataService.fetchUserConfigsByKey(uid, key);
 
     if (configs.length === 0) return;
     else { console.log('Deleting user configuration:', configs); }
@@ -388,9 +516,9 @@ const handleBack = () => {
 
 const minSalary = ref(0);
 const formatMinSalary = () => {
-  const numericValue = parseInt(formData.value.minSalaryInput.replace(/[^0-9]/g, ''));
+  const numericValue = parseInt(formData.value.minSalary.replace(/[^0-9]/g, ''));
   minSalary.value = isNaN(numericValue) ? 0 : numericValue;
-  formData.value.minSalaryInput = minSalary.value.toLocaleString('en-US', {
+  formData.value.minSalary = minSalary.value.toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
@@ -399,14 +527,81 @@ const formatMinSalary = () => {
 };
 
 const removeFormatting = () => {
-  formData.value.minSalaryInput = minSalary.value.toString();
+  formData.value.minSalary = minSalary.value.toString();
 };
 </script>
 
 <style scoped>
+.onboarding-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  height: 70vh;
+  flex: 1;
+  padding: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+  margin-left: 20px;
+  height: 70vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sidebar li:hover {
+  cursor: default;
+}
+
+.sidebar li.active {
+  font-weight: bold;
+}
+
+li .checkmark,
+li .checkmark-complete {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5px;
+}
+
+.checkmark-complete {
+  color: #28a745;
+  font-weight: bold;
+}
+
+/* Container */
+.content {
+  flex-grow: 1;
+  overflow: auto;
+}
+
 h2 {
   text-align: left;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .instructions {
@@ -425,20 +620,65 @@ label {
   text-align: left;
   display: block;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-top: 16px;
+  margin-bottom: 4px;
 }
 
 input[type="text"],
 input[type="email"],
 input[type="number"],
+input[type="checkbox"],
+input[type="radio"],
 select,
-textarea,
-input[type="checkbox"] {
-  margin-bottom: 20px;
+textarea {
+  margin-bottom: 16px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Role information Onboarding screen */
+.left-right-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: space-between
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+}
+
+/* Abput you Onboarding screen */
+.checkbox-rows {
+  margin-top: 8px;
+}
+
+.checkbox-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.checkbox-row label {
+  margin: 0;
+  display: flex;
+  font-weight: 400;
+  flex: 1;
+}
+
+.checkbox-row input {
+  flex: 0;
 }
 </style>

@@ -168,6 +168,22 @@ export default class PersistentDataService {
     return data;
   }
 
+  static async fetchUserConfigsByKey(userId: string, key: string): Promise<UserConfig[] | []> {
+    const query = supabase
+      .from("user_configs")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("key", key);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching user_configs:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
   static async updateUserConfig(config: UserConfig) {
     const query = supabase.from("user_configs").upsert([config]).select();
     const { data, error } = await query;

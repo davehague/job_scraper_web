@@ -83,19 +83,28 @@ const signIn = async () => {
 };
 
 const signInWithGoogle = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
-    },
-  });
+  try {
+    const runtimeConfig = useRuntimeConfig()
+    const redirectUrl = runtimeConfig.public.baseURL + '/auth/callback';
 
-  if (error) {
-    console.error('Error during Google sign-in:', error.message);
-    errorMessage.value = error.message;
+    console.log('signing up with google, will redirect to ', redirectUrl);
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline', // To get a refresh token
+          prompt: 'consent', // To re-prompt the user to select a Google account,
+        },
+      },
+    });
+    
+    if (error) {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error('Error during Google sign-in:', (error as Error).message);
   }
 };
 

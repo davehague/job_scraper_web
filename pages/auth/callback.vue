@@ -8,6 +8,7 @@
 import { supabase } from "@/utils/supabaseClient";
 import { useRouter, useRoute } from 'vue-router';
 import { onMounted } from "vue";
+import PersistentDataService from "~/services/PersistentDataService";
 
 const parseHash = (hash: string): Record<string, string> => {
   const params: Record<string, string> = {};
@@ -45,17 +46,16 @@ const handleOAuthCallback = async () => {
       const email = user?.email;
       const name = user?.user_metadata?.full_name || '';
 
-      if(!uid) {
+      if (!uid) {
         throw new Error('User ID not found in session data.');
       }
 
-      if(!email) {
+      if (!email) {
         throw new Error('Email not found in session data.');
       }
 
       await handlePostSignUp(uid, email, name);
 
-      router.push('/'); 
     } catch (error) {
       console.error('Error during session exchange:', error);
     }
@@ -66,14 +66,22 @@ const handleOAuthCallback = async () => {
 
 
 const handlePostSignUp = async (userId: string, userEmail: string, userName?: string) => {
-  const { error: userCreateError } = await supabase
-    .from('users')
-    .insert({ id: userId, email: userEmail, name: userName });
+  const dbUser = await PersistentDataService.fetchUserByEmail(userEmail);
+  if (dbUser) {
+    console.log('User already exists in DB:', dbUser);
 
-  if (userCreateError) {
-    console.error('Error creating user:', userCreateError.message);
-    throw userCreateError;
+  } else { // Create a new user
+    const { error: userCreateError } = await supabase
+      .from('users')
+      .insert({ id: userId, email: userEmail, name: userName });
+
+    if (userCreateError) {
+      console.error('Error creating user:', userCreateError.message);
+      throw userCreateError;
+    }
   }
+
+  router.push('/');
 };
 
 onMounted(() => {

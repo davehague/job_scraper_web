@@ -103,15 +103,33 @@ onUnmounted(() => {
 
 const jobRecencyText = () => {
   const todayDate = new Date().toISOString().split('T')[0];
-  const date = props.job.date_posted || props.job.date_pulled;
-  const dateDiff = Math.floor((Date.parse(todayDate) - Date.parse(date)) / (1000 * 60 * 60 * 24));
+  const datePosted = props.job.date_posted;
+  const datePulled = props.job.date_pulled;
 
-  if (dateDiff === 0) {
-    if (props.job.date_posted) return 'Posted today!';
-    return 'Pulled today!';
+  const dateDiff = (date1: string, date2: string) => Math.floor((Date.parse(date1) - Date.parse(date2)) / (1000 * 60 * 60 * 24));
+
+  const datePostedDiff = datePosted ? dateDiff(todayDate, datePosted) : null;
+  const datePulledDiff = dateDiff(todayDate, datePulled);
+
+  const dayText = (diff: number | null) => {
+    if (diff === null) return '';
+    if (diff === 0) return 'today!';
+    if (diff === 1) return 'yesterday';
+    return `${diff} days ago`;
+  };
+
+  const pulledText = `Pulled ${dayText(datePulledDiff)}`;
+
+  if (datePosted === datePulled) {
+    return pulledText;
   }
 
-  return props.job.date_posted ? `Posted ${dateDiff} day(s) ago` : `Pulled ${dateDiff} day(s) ago`;
+  if (datePosted) {
+    const postedText = dayText(datePostedDiff);
+    return `${pulledText} (posted ${postedText})`;
+  }
+
+  return pulledText;
 };
 
 const handleResize = () => {

@@ -2,7 +2,7 @@
 import { defineEventHandler, readBody } from 'h3';
 
 export default defineEventHandler(async (event) => {
-  const { model, messages } = await readBody(event);
+  const { model, messages, max_tokens} = await readBody(event);
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 
   try {
@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
       body: JSON.stringify({
         model: model || 'mistralai/mistral-7b-instruct:free',
         messages: messages,
+        max_tokens: max_tokens || 300,
       }),
     });
 

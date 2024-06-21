@@ -141,6 +141,18 @@ export default class PersistentDataService {
   }
 
   // ============= userProfile.vue ============= //
+  static async fetchUserById(id: string): Promise<User | null> {
+    const query = supabase.from("users").select("*").eq("id", id);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching user by id:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
   static async upsertUser(user: User) {
     const query = supabase.from("users").upsert([user]).select();
     const { data, error } = await query;

@@ -255,24 +255,10 @@ You are a helpful no-nonsense assistant. You listen to directions carefully and 
 
 Given the following user resume: <resume>${consolidateText(resume)}</resume>
 Answer the following in a bulleted list
-Job Titles: What would the top 3 job titles this candidate may be looking for? Use a comma separated list
-Stop Words: What are 3 words, phrases, or title modifiers that may appear in the title of a job that a job search engine might find but wouldn't actually be a good job fit for this person? Use a comma separated list
-Skill Words: What are 3 words, phrases, or skills that this person would see in a job posting that would let them know it's a good fit? Use a comma separated list
-Skill Stop Words: What are 3 words, phrases, or skills that this person would see in a job posting that would let them know it's NOT a good fit? Use a comma separated list
-
-ONLY include a single sentence response for each question and format it in a comma separated list.  Examples follow.
-
-Example (mid-level software engineer):
-Job Titles: Job Title 1, Job Title 2, Job Title 3
-Stop words: Senior, Manager, Lead
-Skill words: Software Development Lifecycle (SDLC), Agile, Software Testing
-Skill Stop Words: Product Management, Marketing, Sales
-
-Example (senior software QA):
-Job Titles: QA Engineer, Senior QA Engineer, QA Manager
-Stop words: Developer, Analyst, Architect
-Skill words: Selenium, JIRA, TestRail
-Skill Stop Words: Java, C++, Python
+Job Titles: What would the top three job titles this candidate may be looking for? Use a comma separated list
+Stop Words: What are a few words or title modifiers that may appear in the title of a job that would signify a bad job fit for this person? Use a comma separated list
+Skill Words: What a a few skills that this person would see in a job posting that would let them know it's a good fit? Use a comma separated list
+Skill Stop Words: What are a few skills that this person could see in a job posting that would let them know it's NOT a good fit? Use a comma separated list
 
 Example (sales development representative):
 Job Titles: SDR, Sales Development Representative, Business Development Representative
@@ -280,7 +266,11 @@ Stop words: Account Executive, Account Manager, Sales Manager
 Skill words: Cold calling, CRM, SalesForce
 Skill Stop Words: Marketing, Product Management, Software Development
 
-DO NOT INCLUDE EXPLANATION OR CONTEXT IN YOUR REPLY. ONLY INCLUDE THE BULLETED LIST OF ANSWERS.
+Fill out this form below, and nothing else for the user based on their resume.  Do not give explanations, and keep each line short and to the point.
+Job Titles: (your answer in comma separated list format)
+Stop words: (your answer in comma separated list format)
+Skill words: (your answer in comma separated list format)
+Skill Stop Words: (your answer in comma separated list format)
 `;
   try {
     const response = await fetch('/api/openrouter', {
@@ -289,7 +279,8 @@ DO NOT INCLUDE EXPLANATION OR CONTEXT IN YOUR REPLY. ONLY INCLUDE THE BULLETED L
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct:free",
+        model: "anthropic/claude-3-haiku",
+        max_tokens: 100,
         messages: [
           { role: "user", content: prompt }
         ],

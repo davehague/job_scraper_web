@@ -151,6 +151,11 @@ async function save() {
   const uid = store.authUser?.id || '';
   if (!uid || uid === '') return;
 
+  if (uid != store.selectedUserId) {
+    console.error('Unauthorized to save user profile');
+    return;
+  }
+
   const baseUser = {
     id: uid,
     location: location.value,
@@ -262,14 +267,24 @@ onMounted(async () => {
 
   await store.refreshDBUser();
 
-  name.value = store.dbUser?.name || '';
-  email.value = store.authUser?.email || '';
-  emailFrequency.value = store.dbUser?.send_emails || 'never';
-  remotePreference.value = store.dbUser?.remote_preference || 'YES';
-  location.value = store.dbUser?.location || '';
-  distance.value = store.dbUser?.distance || 0;
-  resume.value = store.dbUser?.resume || '';
-  minSalary.value = store.dbUser?.min_salary || 0;
+  let user = store.dbUser;
+  if (store.dbUser?.is_admin) {
+    user = await PersistentDataService.fetchUserById(store.selectedUserId);
+  }
+
+  if (!user) {
+    console.error('User not found');
+    return;
+  }
+
+  name.value = user.name || '';
+  email.value = user.email || '';
+  emailFrequency.value = user.send_emails || 'never';
+  remotePreference.value = user.remote_preference || 'YES';
+  location.value = user.location || '';
+  distance.value = user.distance || 0;
+  resume.value = user.resume || '';
+  minSalary.value = user.min_salary || 0;
   minSalaryInput.value = minSalary.value.toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -277,8 +292,7 @@ onMounted(async () => {
     maximumFractionDigits: 0,
   });
 
-
-  userConfigs.value = await PersistentDataService.fetchUserConfigs(store.authUser?.id || '');
+  userConfigs.value = await PersistentDataService.fetchUserConfigs(user.id || '');
 
   const jobTitlesConfig = userConfigs.value.filter(config => config.key === 'job_titles');
   jobTitles.value = jobTitlesConfig.map(config => config.string_value).join(', ');

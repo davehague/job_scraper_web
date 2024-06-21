@@ -345,9 +345,9 @@ const submitRoleInfo = async () => {
     const result = await PersistentDataService.upsertUser(baseUser as User)
     console.log('User updated: ', result);
 
-    clearConfigsByKey(uid, 'job_titles');
+    await clearConfigsByKey(uid, 'job_titles');
     const titles = createConfigs(uid, 'job_titles', formData.value.jobTitles, 3);
-    performInsert(titles);
+    await performInsert(titles);
 
   } catch (error) {
     console.error('Error in processing:', error);
@@ -367,21 +367,21 @@ const submitAdditionalSearchInfo = async () => {
   if (!uid || uid === '') return;
 
   try {
-    clearConfigsByKey(uid, 'skill_words');
+    await clearConfigsByKey(uid, 'skill_words');
     const skillWords = createConfigs(uid, 'skill_words', formData.value.skillWords);
-    performInsert(skillWords);
+    await performInsert(skillWords);
 
-    clearConfigsByKey(uid, 'skill_stop_words');
+    await clearConfigsByKey(uid, 'skill_stop_words');
     const skillStopWords = createConfigs(uid, 'skill_stop_words', formData.value.skillStopWords);
-    performInsert(skillStopWords);
+    await performInsert(skillStopWords);
 
-    clearConfigsByKey(uid, 'stop_words');
+    await clearConfigsByKey(uid, 'stop_words');
     const stopWords = createConfigs(uid, 'stop_words', formData.value.stopWords);
-    performInsert(stopWords);
+    await performInsert(stopWords);
 
-    clearConfigsByKey(uid, 'candidate_requirements');
+    await clearConfigsByKey(uid, 'candidate_requirements');
     const candidateRequirements = createConfigs(uid, 'candidate_requirements', formData.value.candidateRequirements);
-    performInsert(candidateRequirements);
+    await performInsert(candidateRequirements);
 
   } catch (error) {
     console.error('Error in processing:', error);
@@ -415,9 +415,9 @@ const submitAboutYou = async () => {
     console.log('User updated: ', result);
 
     // TODO: Saving this chunk of code until I decide where to save the intentions
-    // clearConfigsByKey(uid, 'job_titles');
+    // await clearConfigsByKey(uid, 'job_titles');
     // const titles = createConfigs(uid, 'job_titles', formData.value.jobTitles, 3);
-    // performInsert(titles);
+    // await performInsert(titles);
 
     console.log('Where are you in your job search? ', formData.value.intentions);
 
@@ -486,11 +486,11 @@ const createConfigs = (uid: string, key: string, newValue: string, maxValues = 9
   return configs;
 };
 
-async function performInsert(configs: UserConfig[]) {
+const performInsert = async (configs: UserConfig[]) => {
   for (const config of configs) {
     await PersistentDataService.insertUserConfig(config);
   }
-}
+};
 
 const updateUserCompletedOnboarding = async () => {
   const loggedInUser = await store.getAuthUser();

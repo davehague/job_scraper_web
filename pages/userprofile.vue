@@ -1,107 +1,121 @@
 <template>
-  <button @click="cancel" class="back-btn">
-    <i class="fas fa-arrow-left"></i>
-  </button>
-
-  <div class="user-profile">
-    <h2>Personal Info</h2>
-    <div>
-      <label>Name:</label>
-      <input v-model="name" type="text" />
-    </div>
-    <div>
-      <label>Email:</label>
-      <input v-model="email" type="email" disabled />
-    </div>
-    <div>
-      <label>
-        Send me emails about new jobs</label>
-      <select v-model="emailFrequency">
-        <option value="never">Never</option>
-        <option value="daily">Daily</option>
-        <option value="immediately">Immediately</option>
-      </select>
-    </div>
-
-    <h2>Professional Info</h2>
-    <div>
-
-      <div class="label-container">
-        <label>Job Titles (top 3, comma separated):</label>
-        <InfoTooltip
-          text="What are the top 3 job titles you'd like to target?  If you don't know, you can simply list your recent job titles.  
-          This is what you would type into a job search engine. There may be some overlap and duplication in the titles." />
+  <Header />
+  <div class="page-container">
+    <button @click="cancel" class="back-btn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <div class="user-profile">
+      <h2>Profile</h2>
+      <div class="account-info">
+        <div class="account-details">
+          <div class="input-group">
+            <label>Name:</label>
+            <input v-model="name" type="text" />
+          </div>
+          <div class="input-group">
+            <label>Email:</label>
+            <input v-model="email" type="email" disabled />
+          </div>
+          <div class="input-group">
+            <label>
+              Send me emails about new jobs
+            </label>
+            <select v-model="emailFrequency">
+              <option value="never">Never</option>
+              <option value="daily">Daily</option>
+              <option value="immediately">Immediately</option>
+            </select>
+          </div>
+        </div>
+        <div class="profile-image">
+          <img src="/public/profile.png" class="profile-pic" />
+        </div>
       </div>
-      <input v-model="jobTitles" type="text" placeholder="Enter job titles" />
-    </div>
 
-    <div>
-      <label>Remote:</label>
-      <select v-model="remotePreference">
-        <option value="YES">Remote OK</option>
-        <option value="ONLY">Remote ONLY</option>
-        <option value="NO">Local ONLY</option>
-      </select>
-    </div>
-    <div v-if="remotePreference !== 'ONLY'">
-      <label>Location (City, State, Country):</label>
-      <input v-model="location" type="text" />
-      <label>Distance (miles):</label>
-      <input v-model="distance" type="number" />
-    </div>
+      <h2>Professional Info</h2>
+      <div class="professional-info">
+        <div class="input-group">
+          <div class="label-container">
+            <label>Job Titles (top 3, comma separated):</label>
+            <InfoTooltip
+              text="What are the top 3 job titles you'd like to target?  If you don't know, you can simply list your recent job titles.  
+              This is what you would type into a job search engine. There may be some overlap and duplication in the titles." />
+          </div>
+          <input v-model="jobTitles" type="text" placeholder="Enter job titles" />
+        </div>
 
-    <div>
-      <div class="label-container">
-        <label>Stop Words (comma separated):</label>
-        <InfoTooltip text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  We won't show you jobs where your stop words appear in the title.
-          <br><br><b>Example:</b> If you're looking for your first developer job, you don't want jobs that say 'Senior', 'Sr.', or 'III' 
-          in the title <br><br><b>Example</b>: If you don't want to be a manager you would ask to filter out jobs with 'manager', 'supervisor', 
-          or 'lead' in the title." />
+        <div class="input-group">
+          <label>Remote:</label>
+          <select v-model="remotePreference">
+            <option value="YES">Remote OK</option>
+            <option value="ONLY">Remote ONLY</option>
+            <option value="NO">Local ONLY</option>
+          </select>
+        </div>
+        <div v-if="remotePreference !== 'ONLY'" class="input-group input-group-row">
+          <div class="input-item">
+            <label>Location (City, State, Country):</label>
+            <input v-model="location" type="text" />
+          </div>
+          <div class="input-item">
+            <label>Distance (miles):</label>
+            <input v-model="distance" type="number" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-container">
+            <label>Stop Words (comma separated):</label>
+            <InfoTooltip text="Are there any words that would appear in the TITLE of a job that would let you know you DON'T want that job?  We won't show you jobs where your stop words appear in the title.
+              <br><br><b>Example:</b> If you're looking for your first developer job, you don't want jobs that say 'Senior', 'Sr.', or 'III' 
+              in the title <br><br><b>Example</b>: If you don't want to be a manager you would ask to filter out jobs with 'manager', 'supervisor', 
+              or 'lead' in the title." />
+          </div>
+          <input v-model="stopWords" type="text" placeholder="Enter stop words" />
+        </div>
+        <div class="input-group">
+          <div class="label-container">
+            <label>Skill Words (comma separated):</label>
+            <InfoTooltip text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.  This will only improve results, not disqualify jobs.<br><br>
+                  <b>Example:</b>  I'm a CNC machinist.  I'll know I've got a potentially good job if I see the words 'CNC', 'CAM programming' 
+                  or 'PLC programming'<br><br><b>Example:</b>  I'm a developer.  I'll know I've got a potentially good job if I see the words 'Java', 
+                  'Agile',  or 'Pull requests'." />
+          </div>
+          <input v-model="skillWords" type="text" placeholder="Enter skill words" />
+        </div>
+        <div class="input-group">
+          <div class="label-container">
+            <label>Other Requirements (comma separated):</label>
+            <InfoTooltip text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
+              Not all jobs list these things, but we can highlight the ones that do. This will only improve results, not disqualify jobs." />
+          </div>
+          <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
+        </div>
+
+        <div class="input-group">
+          <div class="label-container">
+            <label>Minimum Salary:</label>
+            <InfoTooltip
+              text="If the job lists the salary, we won't show it to you if the max offer is below your minimum." />
+          </div>
+          <input v-model="minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
+        </div>
+
+        <div class="input-group">
+          <div class="label-container">
+            <label>Resume:</label>
+            <InfoTooltip
+              text="We'll use your resume to match your particular skills against each and every job we show you." />
+          </div>
+          <textarea v-model="resume" rows="10"></textarea>
+        </div>
+
+        <button @click="save">Save</button>
       </div>
-      <input v-model="stopWords" type="text" placeholder="Enter stop words" />
     </div>
-    <div>
-      <div class="label-container">
-        <label>Skill Words (comma separated):</label>
-        <InfoTooltip text="Are there any words that would appear in the DESCRIPTION of a job that would let you know you've got a good fit?  List 2-5 examples.  This will only improve results, not disqualify jobs.<br><br>
-              <b>Example:</b>  I'm a CNC machinist.  I'll know I've got a potentially good job if I see the words 'CNC', 'CAM programming' 
-              or 'PLC programming'<br><br><b>Example:</b>  I'm a developer.  I'll know I've got a potentially good job if I see the words 'Java', 
-              'Agile',  or 'Pull requests'." />
-      </div>
-      <input v-model="skillWords" type="text" placeholder="Enter skill words" />
-    </div>
-    <div>
-      <div class="label-container">
-        <label>Other Requirements (comma separated):</label>
-        <InfoTooltip text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
-          Not all jobs list these things, but we can highlight the ones that do. This will only improve results, not disqualify jobs." />
-      </div>
-      <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
-    </div>
-
-    <div>
-
-      <div class="label-container">
-        <label>Minimum Salary:</label>
-        <InfoTooltip
-          text="If the job lists the salary, we won't show it to you if the max offer is below your minimum." />
-      </div>
-      <input v-model="minSalaryInput" type="text" @blur="formatMinSalary" @focus="removeFormatting" />
-
-    </div>
-
-    <div>
-      <div class="label-container">
-        <label>Resume:</label>
-        <InfoTooltip
-          text="We'll use your resume to match your particular skills against each and every job we show you." />
-      </div>
-      <textarea v-model="resume" rows="10"></textarea>
-    </div>
-
-    <button @click="save">Save</button>
   </div>
 </template>
+
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
@@ -309,19 +323,42 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.page-container {
+  margin: 0 40px;
+  position: relative;
+}
+
 .user-profile {
   max-width: 800px;
-  margin: 20px auto;
+  margin: 0 auto;
   padding: 20px;
-  background: #f9f9f9;
-  border: 1px solid #ccc;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.account-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Center-aligns items vertically */
+  margin-bottom: 20px; /* Adds spacing between Account Information and Professional Info */
+}
+
+.account-details {
+  flex: 1; /* Allows the account details to take up the remaining space */
+  margin-right: 100px; /* Adds space between the account details and the profile image */
+}
+
+.profile-image {
+  flex-shrink: 0; /* Prevents the image from shrinking */
+  align-self: center; /* Aligns the profile image to the center */
 }
 
 .back-btn {
-  position: fixed;
+  position: absolute;
   top: 20px;
-  left: 20px;
+  left: -20px; /* Keeps the button within the left margin */
   padding: 10px;
   color: #333;
   background-color: #555;
@@ -354,18 +391,38 @@ label {
   margin-bottom: 10px;
 }
 
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.input-item {
+  flex: 1;
+}
+
+.input-item:not(:last-child) {
+  margin-right: 20px;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="number"],
 select,
-textarea,
-input[type="checkbox"] {
-  margin-bottom: 20px;
+textarea {
+  width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 100%;
   box-sizing: border-box;
+  font-size: 16px;
+}
+
+textarea {
+  height: 100px;
 }
 
 input:disabled {
@@ -374,17 +431,26 @@ input:disabled {
 }
 
 button {
-  margin-top: 20px;
-  padding: 10px;
+  background-color: #2d4a5d;
+  color: white;
+  padding: 10px 20px;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+button:hover {
+  background-color: #3a6075;
 }
 
 button i {
   color: white;
+}
+
+.profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #eee;
 }
 </style>

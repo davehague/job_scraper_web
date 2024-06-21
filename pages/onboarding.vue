@@ -27,7 +27,8 @@
     <div class="container">
       <!-- Resume -->
       <OnboardingScreen v-if="currentScreen === 1" :onSubmit="submitResume"
-        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
+        :isSubmitting="isSubmitting">
 
         <template #default>
           <h2>Welcome, we're glad you're here. Let's get started.</h2>
@@ -42,7 +43,8 @@
 
       <!-- Role information -->
       <OnboardingScreen v-if="currentScreen === 2" :onSubmit="submitRoleInfo"
-        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
+        :isSubmitting="isSubmitting">
         <h2>Tell us some basics about the role you want</h2>
         <p class="instructions">This helps us filter out jobs that don't fit your current needs</p>
 
@@ -84,7 +86,8 @@
 
       <!-- Additional search info -->
       <OnboardingScreen v-if="currentScreen === 3" :onSubmit="submitAdditionalSearchInfo"
-        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
+        :isSubmitting="isSubmitting">
         <h2>Now, let's dig into what you're looking for</h2>
         <p class="instructions">This will help us find the best matches for your career goals. Use commas to separate
           entries
@@ -113,7 +116,8 @@
 
       <!-- About you -->
       <OnboardingScreen v-if="currentScreen === 4" :onSubmit="submitAboutYou"
-        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack">
+        :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
+        :isSubmitting="isSubmitting">
 
         <template #default>
           <h2>Finally, tell us a little bit about yourself</h2>
@@ -183,6 +187,8 @@ const store = useJsaStore();
 const currentScreen = ref(1);
 const totalScreens = ref(4);
 
+const isSubmitting = ref(false);
+
 onMounted(async () => {
   const userShouldOnboard = await shouldRedirectToOnboarding();
   if (userShouldOnboard) {
@@ -210,6 +216,7 @@ const formData = ref({
 
 const submitResume = async () => {
   console.log('Submitting resume...');
+  isSubmitting.value = true;
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
   console.log('User ID:', uid);
@@ -310,6 +317,7 @@ Skill Stop Words: (your answer in comma separated list format)
 
 
 const submitRoleInfo = async () => {
+  isSubmitting.value = true;
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
   console.log('User ID:', uid);
@@ -341,6 +349,7 @@ const submitRoleInfo = async () => {
 
 const submitAdditionalSearchInfo = async () => {
   console.log('Submitting job info:', formData.value.jobTitles);
+  isSubmitting.value = true;
 
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
@@ -373,6 +382,7 @@ const submitAdditionalSearchInfo = async () => {
 };
 
 const submitAboutYou = async () => {
+  isSubmitting.value = true;
   const loggedInUser = await store.getAuthUser();
   const uid = loggedInUser?.id;
   console.log('User ID:', uid);
@@ -497,6 +507,7 @@ const handleSubmit = async () => {
   } else {
     currentScreen.value++;
   }
+  isSubmitting.value = false;
 };
 
 const handleBack = () => {

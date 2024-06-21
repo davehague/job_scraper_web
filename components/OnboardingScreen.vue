@@ -4,7 +4,10 @@
       <slot></slot> <!-- Place for form fields -->
       <div class="button-group">
         <button v-if="showBackButton" @click="onBack" class="button-secondary">Back</button>
-        <button type="submit" class="button-primary">{{ isLastScreen ? 'Finish' : 'Next' }}</button>
+        <button type="submit" class="button-primary" :disabled="isSubmitting">
+          {{ isLastScreen ? (isSubmitting ? 'Finishing up...' : 'Finish') : (isSubmitting ? 'Saving...' : 'Next') }}
+        </button>
+
       </div>
     </form>
   </div>
@@ -15,10 +18,11 @@
 import { defineProps, withDefaults, ref } from 'vue';
 
 const props = withDefaults(defineProps<{
-  onSubmit: (data: any) => void;
-  onBack?: () => void;
-  isLastScreen?: boolean;
-  showBackButton?: boolean;
+  onSubmit: (data: any) => void,
+  onBack?: () => void,
+  isLastScreen?: boolean,
+  showBackButton?: boolean,
+  isSubmitting: boolean,
 }>(), {
   onSubmit: (data: any) => { },
   onBack: () => { },
@@ -48,6 +52,7 @@ form {
   flex-direction: column;
   justify-content: flex-start;
 }
+
 .box {
   height: fit-content;
   width: 100%;
@@ -64,5 +69,10 @@ form {
   justify-content: center;
   margin-top: 20px;
   gap: 16px;
+}
+
+.button-primary:disabled {
+  opacity: 0.5; 
+  cursor: not-allowed; 
 }
 </style>

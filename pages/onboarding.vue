@@ -28,7 +28,7 @@
       <!-- Resume -->
       <OnboardingScreen v-if="currentScreen === 1" :onSubmit="submitResume"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :isSubmitting="isSubmitting">
+        :isSubmitting="isSubmitting" :validateForm="validateResumeForm">
 
         <template #default>
           <h2>Welcome, we're glad you're here. Let's get started.</h2>
@@ -44,7 +44,7 @@
       <!-- Role information -->
       <OnboardingScreen v-if="currentScreen === 2" :onSubmit="submitRoleInfo"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :isSubmitting="isSubmitting">
+        :isSubmitting="isSubmitting" :validateForm="validateRoleInfoForm">
         <h2>Tell us some basics about the role you want</h2>
         <p class="instructions">This helps us filter out jobs that don't fit your current needs</p>
 
@@ -117,7 +117,7 @@
       <!-- About you -->
       <OnboardingScreen v-if="currentScreen === 4" :onSubmit="submitAboutYou"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :isSubmitting="isSubmitting">
+        :isSubmitting="isSubmitting" :validateForm="validateAboutYouForm">
 
         <template #default>
           <h2>Finally, tell us a little bit about yourself</h2>
@@ -213,6 +213,10 @@ const formData = ref({
   sendEmails: 'daily',
   intentions: [],
 });
+
+const validateResumeForm = () => {
+  return formData.value.resume.trim().length > 0 ? [] : ['Please paste your resume to continue.'];
+};
 
 const submitResume = async () => {
   console.log('Submitting resume...');
@@ -315,6 +319,12 @@ Skill Stop Words: (your answer in comma separated list format)
   }
 };
 
+const validateRoleInfoForm = () => {
+  const jobTitlesValidation = formData.value.jobTitles.trim().length > 0 ? [] : ['Please enter at least one job title to continue.'];
+  const locationValidation = formData.value.remotePreference === 'ONLY' || formData.value.location.trim().length > 0 ? [] : ['Please enter a location to continue.'];
+  const distanceValidation = formData.value.remotePreference === 'ONLY' || formData.value.distance > 0 ? [] : ['Please enter a distance to continue.'];
+  return [...jobTitlesValidation, ...locationValidation, ...distanceValidation];
+};
 
 const submitRoleInfo = async () => {
   isSubmitting.value = true;
@@ -379,6 +389,12 @@ const submitAdditionalSearchInfo = async () => {
     console.log('Additional search info saved successfully');
     await handleSubmit();
   }
+};
+
+const validateAboutYouForm = () => {
+  const nameValidation = formData.value.name.trim().length > 0 ? [] : ['Please enter your name to continue.'];
+  const intentionsValidation = formData.value.intentions.length > 0 ? [] : ['Please select at least one intention to continue.'];
+  return [...nameValidation, ...intentionsValidation];
 };
 
 const submitAboutYou = async () => {

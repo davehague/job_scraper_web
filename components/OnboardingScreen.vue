@@ -7,7 +7,9 @@
         <button type="submit" class="button-primary" :disabled="isSubmitting">
           {{ isLastScreen ? (isSubmitting ? 'Finishing up...' : 'Finish') : (isSubmitting ? 'Saving...' : 'Next') }}
         </button>
-
+      </div>
+      <div class="form-errors" v-for="error in formErrors">
+        <p class="form-error">{{ error }}</p>
       </div>
     </form>
   </div>
@@ -23,11 +25,13 @@ const props = withDefaults(defineProps<{
   isLastScreen?: boolean,
   showBackButton?: boolean,
   isSubmitting: boolean,
+  validateForm?: () => string[] 
 }>(), {
   onSubmit: (data: any) => { },
   onBack: () => { },
   isLastScreen: false,
-  showBackButton: false
+  showBackButton: false,
+  validateForm: () => [],
 });
 
 const onBack = () => {
@@ -38,10 +42,16 @@ const onBack = () => {
 
 // Dummy ref to represent some kind of data collection, adjust as needed
 const formData = ref({});
+const formErrors = ref<string[]>([]);
 
 const onSubmitLocal = () => {
-  // Call the passed onSubmit function with formData
-  props.onSubmit(formData.value);
+  const result = props.validateForm();
+  if (result.length === 0) {
+    props.onSubmit(formData.value);
+  } else {
+    // Display the error messages with <br> between them
+    formErrors.value = result;
+  }
 };
 </script>
 
@@ -74,5 +84,13 @@ form {
 .button-primary:disabled {
   opacity: 0.5; 
   cursor: not-allowed; 
+}
+
+.form-errors {
+  margin-top: 8px;
+}
+.form-error {
+  color: red;
+  margin: 2px 0;
 }
 </style>

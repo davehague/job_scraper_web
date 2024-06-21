@@ -519,7 +519,7 @@ const handleSubmit = async () => {
   if (currentScreen.value === totalScreens.value) {
     console.log('Onboarding complete.');
     await updateUserCompletedOnboarding();
-    router.push("/");
+    router.push({ path: '/', query: { onboarding: 'true' } });
   } else {
     currentScreen.value++;
   }

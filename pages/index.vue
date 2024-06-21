@@ -1,18 +1,27 @@
 <template>
   <div class="container">
     <Header @filter="updateVisibleJobs" />
-    <div class="job-list">
-      <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestSet="interestUpdatedOnJob" />
+    <div v-if="isOnboarding">
+      <div class="spinner-container">
+        <span class="spinner"></span>
+        <p>{{ loadingMessage }}</p>
+        <p class="small-italic">{{ loadingMessageProgress }}</p>
+      </div>
     </div>
-    <div v-if="visibleJobs.length === 0" class="no-jobs">
-      <p>{{ noJobsMessage }} </p>
+    <div v-else>
+      <div class="job-list" v-if="visibleJobs.length > 0">
+        <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestSet="interestUpdatedOnJob" />
+      </div>
+      <div v-if="visibleJobs.length === 0" class="no-jobs">
+        <p>{{ noJobsMessage }} </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
@@ -20,8 +29,13 @@ import PersistentDataService from '@/services/PersistentDataService';
 import { shouldRedirectToOnboarding } from '@/utils/helpers.ts';
 
 const router = useRouter();
+const route = useRoute();
 const store = useJsaStore();
 const lastRefreshed = ref(Date.now());
+
+const isOnboarding = ref(route.query.onboarding !== undefined);
+const loadingMessage = ref("We're currently searching, gathering results, and finding your best matches.  They'll load here soon!");
+const loadingMessageProgress = ref('Tickling keyboards to wake up job databases...');
 
 const allJobs = ref<Job[]>([]);
 const visibleJobs = ref<Job[]>([]);
@@ -35,7 +49,7 @@ const updateVisibleJobs = (filterType: string) => {
   switch (filterType) {
     case 'latestSearch':
       visibleJobs.value = allJobs.value.filter(job => job.user_interested == null);
-      noJobsMessage.value = 'No jobs found, yet! If you just signed up please refresh in 1-2 minutes.  If you\'re still experiencing a problem please contact David!';
+      noJobsMessage.value = "We're very sorry, but we weren't able to find any jobs with those parameters. Perhaps more will appear on the next run.  If you're still having trouble please refresh the page or reach out to David!";
       break;
     case 'savedResults':
       visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && job.user_interested);
@@ -154,23 +168,64 @@ onUnmounted(() => {
 });
 
 onMounted(async () => {
-  if (!store.authUser)
-    await store.getAuthUser();
-  if (!store.dbUser) {
-    await store.getDBUser();
+  if (!store.authUser) await store.getAuthUser();
+  if (!store.dbUser) await store.getDBUser();
+
+  if (isOnboarding.value) {
+    await fetchJobsRepeatedly();
+  } else {
+    const userShouldOnboard = await shouldRedirectToOnboarding();
+    if (userShouldOnboard) {
+      router.push("/onboarding");
+    }
+
+    const loggedInUserId = store.authUser?.id || null;
+    await fetchJobs(loggedInUserId)
+    recalculateVisibleJobs();
+    // intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
   }
-
-  const userShouldOnboard = await shouldRedirectToOnboarding();
-  if (userShouldOnboard) {
-    router.push("/onboarding");
-  }
-
-  const loggedInUserId = store.authUser?.id || null;
-  await fetchJobs(loggedInUserId)
-  recalculateVisibleJobs();
-
-  // intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
 })
+
+const fetchJobsRepeatedly = async () => {
+  let attempts = 0;
+  const waitingMessages = [
+    "Getting ready to uncover awesome job opportunities!",
+    "Searching the galaxy for the perfect job match...",
+    "Polishing the crystal ball for career insights...",
+    "Summoning job listings from the digital abyss...",
+    "Stirring up a job-hunting potion... Almost done!",
+    "Counting down the seconds until new job arrivals...",
+    "Sending out job-seeking vibes into cyberspace...",
+    "Juggling job listings like a digital circus performer...",
+    "Loading job rockets for launch... T-minus...",
+    "Unveiling career gems from the job treasure chest...",
+    "Tickling keyboards to wake up job databases...",
+    "Job search success! Your future career awaits!"
+  ];
+  const interval = setInterval(async () => {
+    if (attempts >= 12) {  // After 2 minutes, stop trying
+      clearInterval(interval);
+      removeOnboardingParam();
+      updateVisibleJobs('latestSearch');
+      return;
+    }
+    attempts++;
+    loadingMessageProgress.value = waitingMessages[attempts];
+    await fetchJobs(store.authUser?.id || null);
+    if (visibleJobs.value.length > 0) {
+      clearInterval(interval);
+      removeOnboardingParam();
+    }
+  }, 10000);
+};
+
+const removeOnboardingParam = () => {
+  isOnboarding.value = false;
+  const query = { ...route.query };
+  delete query.onboarding;
+  router.replace({ query });
+};
+
 </script>
 
 <style scoped>
@@ -210,5 +265,36 @@ onMounted(async () => {
   color: #333;
   margin: 0;
   font-size: 16px;
+}
+
+/* Onboarding */
+.small-italic {
+  font-size: 14px;
+  color: #555;
+  margin-top: 0;
+  font-style: italic;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

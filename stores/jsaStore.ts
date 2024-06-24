@@ -66,6 +66,7 @@ export const useJsaStore = defineStore("jsaStore", {
     signOutUser() {
       this.authUser = null;
       this.dbUser = null;
+      this.selectedUserId = "";
     },
   },
 });

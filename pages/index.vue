@@ -86,11 +86,10 @@ const transformDataToJobs = (data: any[]): Job[] => {
     comp_max: item.comp_max,
     comp_currency: item.comp_currency,
     emails: item.emails,
-    description: item.description,
     date_pulled: item.date_pulled,
+
     user_id: item.user_id,
     user_interested: item.interested,
-
     overall_score: parseInt(item.score, 10),
     desire_score: parseInt(item.desire_score, 10),
     experience_score: parseInt(item.experience_score, 10),

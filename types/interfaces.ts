@@ -15,7 +15,6 @@ export interface Job {
     comp_max: number | null
     comp_currency: string | null
     emails: string | null
-    description: string
     date_pulled: string
 
     user_id: string

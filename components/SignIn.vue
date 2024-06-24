@@ -56,6 +56,12 @@ const signIn = async () => {
       email: email.value,
       password: password.value
     });
+    
+    if (error){
+      console.error('Sign-in error:', error)
+      errorMessage.value = error.message
+    }
+    
     // Remainder is handled by onAuthStateChange
   } catch (error) {
     errorMessage.value = (error as Error).message

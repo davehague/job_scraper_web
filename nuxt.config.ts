@@ -45,7 +45,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      baseURL: process.env.BASE_URL || 'http://localhost:3000',
+      baseURL: process.env.BASE_URL || 'https://localhost:3000',
     },
   },
   plugins: ["~/plugins/analytics.client.ts"],

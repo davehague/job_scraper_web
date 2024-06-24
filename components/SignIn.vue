@@ -28,6 +28,8 @@ import { useRouter } from '#app'
 import { supabase } from "@/utils/supabaseClient";
 import { handlePostSignIn } from '~/utils/helpers';
 import { GoogleSignInButton, type CredentialResponse, decodeCredential } from "vue3-google-signin";
+import PersistentDataService from '~/services/PersistentDataService';
+import { type User as DBUser } from '~/types/interfaces';
 
 defineProps<{
   toggleAuth: () => void
@@ -74,6 +76,15 @@ const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
           provider: 'google',
           token: response.credential
         })
+
+        // Update the user's profile pic
+        if(data && data.user && data.user.id) {
+          let user = {
+            id: data.user.id,
+            avatar_url: data.user.user_metadata.avatar_url
+          }
+          PersistentDataService.upsertUser(user as DBUser)
+        }
         // Remainder is handled by onAuthStateChange
       } catch {
         console.error('Error signing in with Google credential');

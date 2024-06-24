@@ -1,6 +1,12 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  devServer: {
+    https: {
+      key: './localhost-key.pem',
+      cert: './localhost.pem',
+    }
+  },
   app: {
     head: {
       title: "Jobs!",
@@ -33,7 +39,10 @@ export default defineNuxtConfig({
       ],
     },
   },
-  modules: ["@pinia/nuxt"],
+  modules: ["@pinia/nuxt", 'nuxt-vue3-google-signin'],
+  googleSignIn: {
+    clientId: process.env.GOOGLE_SIGNIN_CLIENT_ID || 'NOT SET, CHECK .ENV FILE'
+  },
   runtimeConfig: {
     public: {
       baseURL: process.env.BASE_URL || 'http://localhost:3000',
@@ -41,4 +50,4 @@ export default defineNuxtConfig({
   },
   plugins: ["~/plugins/analytics.client.ts"],
   css: ["~/assets/global.css", "@fortawesome/fontawesome-free/css/all.css"],
-});
+} as any);

@@ -12,7 +12,8 @@
           <input v-model="password" type="password" id="password" required />
         </div>
         <button type="submit" class="auth-button">Sign In</button>
-        <button type="button" @click="signInWithGoogle" class="google-auth-button">Sign in with Google</button>
+        <GoogleSignInButton class="google-signin" @success="handleGoogleLoginSuccess" @error="handleGoogleLoginError">
+        </GoogleSignInButton>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign up</p>
       </form>
@@ -22,16 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from '#app'
 import { supabase } from "@/utils/supabaseClient";
-import { useJsaStore } from '@/stores/jsaStore';
-import PersistentDataService from '~/services/PersistentDataService';
-import { type User as DBUser } from '~/types/interfaces';
-import { shouldRedirectToOnboarding } from '~/utils/helpers.ts';
-import type { AuthUser } from '@supabase/supabase-js';
+import { handlePostSignIn } from '~/utils/helpers';
+import { GoogleSignInButton, type CredentialResponse, decodeCredential } from "vue3-google-signin";
 
-const props = defineProps<{
+defineProps<{
   toggleAuth: () => void
 }>()
 
@@ -40,12 +38,11 @@ const password = ref('')
 const errorMessage = ref('')
 
 const router = useRouter()
-const store = useJsaStore()
 
 onMounted(() => {
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
-      console.log('Google sign-in successful:', session.user)
+      console.log('Sign-in successful:', session.user)
       await handlePostSignIn(session.user)
     }
   })
@@ -57,74 +54,38 @@ const signIn = async () => {
       email: email.value,
       password: password.value
     });
-
-    if (data && data.user != null) {
-      console.log('Sign-in successful:', data)
-      store.setAuthUser(data.user);
-      store.getDBUser(); // Pre-fetch the DB user
-
-      let dbUser = await PersistentDataService.singleRecordFetch('users', data.user.id);
-      store.setDBUser(dbUser as DBUser);
-
-      const userShouldOnboard = await shouldRedirectToOnboarding();
-      if (userShouldOnboard) {
-        router.push("/onboarding");
-      } else {
-        router.push("/");
-      }
-
-    } else {
-      throw error;
-    }
+    // Remainder is handled by onAuthStateChange
   } catch (error) {
     errorMessage.value = (error as Error).message
     console.error('Sign-in error:', error)
   }
 };
 
-const signInWithGoogle = async () => {
-  try {
-    const runtimeConfig = useRuntimeConfig()
-    const redirectUrl = runtimeConfig.public.baseURL + '/auth/callback';
+const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
+  const { credential } = response;
+  if (credential) {
+    let decodedCredential = decodeCredential(credential);
+    console.log('decodedCredential', decodedCredential);
 
-    console.log('signing up with google, will redirect to ', redirectUrl);
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-        queryParams: {
-          access_type: 'offline', // To get a refresh token
-          prompt: 'consent', // To re-prompt the user to select a Google account,
-        },
-      },
-    });
-    
-    if (error) {
-      throw error;
+    if (response.credential) {
+      try {
+        console.log('Logging in to supabase with google credential');
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: response.credential
+        })
+        // Remainder is handled by onAuthStateChange
+      } catch {
+        console.error('Error signing in with Google credential');
+        handleGoogleLoginError();
+      }
     }
-
-  } catch (error) {
-    console.error('Error during Google sign-in:', (error as Error).message);
   }
 };
 
-const handlePostSignIn = async (user: AuthUser) => {
-  try {
-    store.setAuthUser(user);
-    store.getDBUser(); // Pre-fetch the DB user
-    let dbUser = await PersistentDataService.singleRecordFetch('users', user.id);
-    store.setDBUser(dbUser as DBUser);
-
-    const userShouldOnboard = await shouldRedirectToOnboarding();
-    if (userShouldOnboard) {
-      router.push("/onboarding");
-    } else {
-      router.push("/");
-    }
-  } catch (error) {
-    console.error('Error handling post-sign-in:', error);
-    errorMessage.value = (error as Error).message;
-  }
+const handleGoogleLoginError = () => {
+  console.error("Login with Google failed");
+  errorMessage.value = 'There was some problem logging in with Google';
 };
 
 const logout = async () => {
@@ -197,17 +158,7 @@ input {
   text-decoration: underline;
 }
 
-.google-auth-button {
-  background-color: #4285F4;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.google-auth-button:hover {
-  background-color: #357ae8;
+.google-signin {
+  margin-top: 20px;
 }
 </style>

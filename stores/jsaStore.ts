@@ -38,13 +38,23 @@ export const useJsaStore = defineStore("jsaStore", {
         return this.dbUser;
       } else if (this.authUser != null) {
         console.log("Fetching user from DB with ID =", this.authUser.id);
-        const data = await PersistentDataService.singleRecordFetch(
-          "users",
-          this.authUser.id
-        );
 
-        this.dbUser = data;
-        return this.dbUser;
+        try {
+          const data = await PersistentDataService.singleRecordFetch(
+            "users",
+            this.authUser.id
+          );
+          if (data == null) {
+            console.log("User not found in DB");
+            return null;
+          } else {
+            console.log("User found in DB", data);
+            this.dbUser = data;
+            return this.dbUser;
+          }
+        } catch {
+          console.error("Error fetching user from DB:");
+        }
       }
     },
     setAuthUser(user: AuthUser | null) {

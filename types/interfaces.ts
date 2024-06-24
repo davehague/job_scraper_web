@@ -43,6 +43,7 @@ export interface Job {
     send_emails: string
     onboarding_complete: boolean
     is_admin: boolean
+    avatar_url: string
   }
 
   export interface UserConfig {

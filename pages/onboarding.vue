@@ -178,7 +178,7 @@ import { useRouter } from 'vue-router';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
-import { shouldRedirectToOnboarding, consolidateText } from '@/utils/helpers.ts';
+import { shouldRedirectToOnboarding, consolidateText } from '@/utils/helpers';
 
 const router = useRouter();
 const store = useJsaStore();

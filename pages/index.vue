@@ -26,7 +26,7 @@ import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
-import { shouldRedirectToOnboarding } from '@/utils/helpers.ts';
+import { shouldRedirectToOnboarding } from '@/utils/helpers';
 
 const router = useRouter();
 const route = useRoute();

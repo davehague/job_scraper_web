@@ -29,8 +29,6 @@
         @click="handleClick('latestSearch')">Latest Search</button>
       <button class="link" :class="{ selected: selectedLink === 'savedResults' }"
         @click="handleClick('savedResults')">Saved Results</button>
-      <!-- <button class="link" :class="{ selected: selectedLink === 'viewApplied' }"
-        @click="handleClick('viewApplied')">View Applied</button> -->
       <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
         @click="handleClick('viewDiscards')">View Discards</button>
     </div>
@@ -38,28 +36,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
-import { useRouter } from '#app'
-import { type User as DBUser } from '@/types/interfaces'
-import { useJsaStore } from '@/stores/jsaStore'
+import { ref, onMounted, watch, computed } from 'vue';
+import { useRouter } from '#app';
+import { type User as DBUser } from '@/types/interfaces';
+import { useJsaStore } from '@/stores/jsaStore';
 import PersistentDataService from '@/services/PersistentDataService';
-
-import { supabase } from "@/utils/supabaseClient";
-import { type AuthChangeEvent, type Session } from "@supabase/supabase-js";
+import { supabase } from '@/utils/supabaseClient';
+import { type AuthChangeEvent, type Session } from '@supabase/supabase-js';
+import { useUserStore } from '@/stores/userStore'; // Import the user store
 
 const emitFilter = defineEmits(['filter']);
 const selectedLink = ref('latestSearch');
 
-const router = useRouter()
+const router = useRouter();
 const publicUsers = ref<DBUser[]>([]);
 const allUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
 const selectedUser = ref('');
 const store = useJsaStore();
+const userStore = useUserStore(); // Use the user store
 const userName = ref('');
 const userProfileURL = computed(() => {
-  return store.dbUser?.avatar_url || '/profile.png'
-})
+  return store.dbUser?.avatar_url || '/profile.png';
+});
 
 const userIsNotLoggedIn = ref(false);
 const userIsAdmin = ref(false);
@@ -71,20 +70,19 @@ const handleClick = (filterType: string) => {
 
 const fetchRoles = async (type: string) => {
   if (type === 'public') {
-    const items = await PersistentDataService.fetchPublicUsers() as DBUser[]; 
+    const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
     publicUsers.value = items.sort((a, b) => a.name.localeCompare(b.name));
     const userId = publicUsers.value[0].id;
     store.setSelectedUserId(userId);
     selectedUser.value = userId;
-  }
-  else if (type === 'all') {
+  } else if (type === 'all') {
     let items = await PersistentDataService.fetchNonPublicUsers() as DBUser[];
     allUsers.value = items.sort((a, b) => a.email.localeCompare(b.email));
     const userId = allUsers.value.filter(user => user.email === store.authUser?.email)[0].id;
     store.setSelectedUserId(userId);
     selectedUser.value = userId;
   }
-}
+};
 
 const checkUserLoginStatus = async () => {
   const result = await supabase.auth.getUser();
@@ -96,27 +94,28 @@ const checkUserLoginStatus = async () => {
   store.setAuthUser(result.data.user);
   await store.getDBUser(); // Pre-fetch the DB user
   userName.value = store.dbUser?.name && store.dbUser.name.length > 0 ? store.dbUser.name : store.dbUser?.email || '';
-}
+  userStore.setProfilePicUrl(userProfileURL.value); // Set profile picture URL in the user store
+};
 
 const signOut = async () => {
   const result = await supabase.auth.signOut();
-  if (result.error != null) console.error('Sign-out error:', result)
+  if (result.error != null) console.error('Sign-out error:', result);
 
   store.signOutUser();
-  router.push('/login')
-}
+  router.push('/login');
+};
 
 const goToSignIn = () => {
-  router.push('/login')
-}
+  router.push('/login');
+};
 
 const goToProfile = () => {
-  router.push('/userprofile')
-}
+  router.push('/userprofile');
+};
 
 const toggleProfileMenu = () => {
-  showMenu.value = !showMenu.value
-}
+  showMenu.value = !showMenu.value;
+};
 
 onMounted(async () => {
   await checkUserLoginStatus();
@@ -134,12 +133,12 @@ onMounted(async () => {
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     store.setAuthUser(session?.user || null);
   });
-})
+});
 
 watch(selectedUser, (newVal) => {
   console.log('Setting a new selected user:', newVal);
   store.setSelectedUserId(newVal);
-})
+});
 </script>
 
 <style scoped>

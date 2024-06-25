@@ -15,7 +15,6 @@ export interface Job {
     comp_max: number | null
     comp_currency: string | null
     emails: string | null
-    description: string
     date_pulled: string
 
     user_id: string
@@ -43,6 +42,7 @@ export interface Job {
     send_emails: string
     onboarding_complete: boolean
     is_admin: boolean
+    avatar_url: string
   }
 
   export interface UserConfig {

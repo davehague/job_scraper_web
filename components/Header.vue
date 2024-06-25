@@ -13,7 +13,7 @@
         </select>
         <div class="user-details" @click="toggleProfileMenu" v-if="store.authUser">
           <div class="username">{{ userName }}</div>
-          <img src="/public/profile.png" class="profile-pic"/>
+          <img :src="userProfileURL" class="profile-pic" alt="User profile picture"/>
           <div v-if="showMenu" class="dropdown-menu">
             <button @click="goToProfile">Profile</button>
             <button @click="signOut">Sign Out</button>
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from '#app'
 import { type User as DBUser } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
@@ -57,6 +57,9 @@ const showMenu = ref(false);
 const selectedUser = ref('');
 const store = useJsaStore();
 const userName = ref('');
+const userProfileURL = computed(() => {
+  return store.dbUser?.avatar_url || '/profile.png'
+})
 
 const userIsNotLoggedIn = ref(false);
 const userIsAdmin = ref(false);

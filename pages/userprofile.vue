@@ -165,7 +165,7 @@ async function save() {
   const uid = store.authUser?.id || '';
   if (!uid || uid === '') return;
 
-  if (uid != store.selectedUserId) {
+  if (store.selectedUserId.length > 0 && (uid != store.selectedUserId)) {
     console.error('Unauthorized to save user profile');
     return;
   }

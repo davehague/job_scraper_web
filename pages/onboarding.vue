@@ -51,7 +51,7 @@
         <div class="label-container">
           <label>Job Titles (top 3, comma separated)</label>
         </div>
-        <input v-model="formData.jobTitles" type="text" placeholder="Enter job titles" />
+        <input v-model="formData.jobTitles" type="text" :placeholder=jobTitlesPlaceholder />
 
         <label for="remote-preference">Remote/hybrid/onsite</label>
         <select id="remote-preference" v-model="formData.remotePreference">
@@ -90,23 +90,22 @@
         :isSubmitting="isSubmitting">
         <h2>Now, let's dig into what you're looking for</h2>
         <p class="instructions">This will help us find the best matches for your career goals. Use commas to separate
-          entries
-          in each field.</p>
+          entries in each field.</p>
 
         <div class="label-container">
           <label>List the top 2-5 skills that show that a job is a good fit for you</label>
         </div>
-        <input v-model="formData.skillWords" type="text" />
+        <input v-model="formData.skillWords" type="text" :placeholder=skillWordsPlaceholder  />
 
         <div class="label-container">
           <label>List 2-5 skills that show that a job is a NOT a good fit for you</label>
         </div>
-        <input v-model="formData.skillStopWords" type="text" />
+        <input v-model="formData.skillStopWords" type="text" :placeholder=skillStopWordsPlaceholder  />
 
         <div class="label-container">
           <label>List any job titles or descriptors (senior, manager, etc.) that you're NOT looking for</label>
         </div>
-        <input v-model="formData.stopWords" type="text" />
+        <input v-model="formData.stopWords" type="text" :placeholder=stopWordsPlaceholder />
 
         <div class="label-container">
           <label>List any must haves (health insurance, 401k, bonus, etc.)</label>
@@ -179,7 +178,7 @@ import { useRouter } from 'vue-router';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
-import { shouldRedirectToOnboarding, consolidateText } from '@/utils/helpers.ts';
+import { shouldRedirectToOnboarding, consolidateText } from '@/utils/helpers';
 
 const router = useRouter();
 const store = useJsaStore();
@@ -214,6 +213,12 @@ const formData = ref({
   intentions: [],
 });
 
+
+let jobTitlesPlaceholder = 'Enter job titles ';
+let stopWordsPlaceholder = 'Exclude titles with certain keywords ';
+let skillWordsPlaceholder = 'Keywords to look for in a job description ';
+let skillStopWordsPlaceholder = 'Keywords to avoid in a job description ';
+
 const validateResumeForm = () => {
   return formData.value.resume.trim().length > 0 ? [] : ['Please paste your resume to continue.'];
 };
@@ -246,10 +251,10 @@ const submitResume = async () => {
       let configs = values.map((v: string) => v.split(':').map((item: string) => item.trim()));
       let valid = configs.every((config: string[]) => config.length === 2);
       if (valid) {
-        formData.value.jobTitles = configs[0][1];
-        formData.value.stopWords = configs[1][1];
-        formData.value.skillWords = configs[2][1];
-        formData.value.skillStopWords = configs[3][1];
+        jobTitlesPlaceholder = cleanSuggestedTextFromPlaceholder(jobTitlesPlaceholder) + `(e.g. ${configs[0][1]})`;        
+        stopWordsPlaceholder = cleanSuggestedTextFromPlaceholder(stopWordsPlaceholder) + `(e.g. ${configs[1][1]})`;
+        skillWordsPlaceholder = cleanSuggestedTextFromPlaceholder(skillWordsPlaceholder) + `(e.g. ${configs[2][1]})`;
+        skillStopWordsPlaceholder = cleanSuggestedTextFromPlaceholder(skillStopWordsPlaceholder) + `(e.g. ${configs[3][1]})`;
       }
     }
   } catch (error) {
@@ -258,6 +263,10 @@ const submitResume = async () => {
     console.log('Resume saved successfully');
     await handleSubmit();
   }
+};
+
+const cleanSuggestedTextFromPlaceholder = (text: string) => {
+  return text.substring(0, text.indexOf('(e.g.') > 0 ? text.indexOf('(e.g.') : text.length);
 };
 
 const getSuggestedUserConfigs = async (resume: string) => {
@@ -519,7 +528,7 @@ const handleSubmit = async () => {
   if (currentScreen.value === totalScreens.value) {
     console.log('Onboarding complete.');
     await updateUserCompletedOnboarding();
-    router.push("/");
+    router.push({ path: '/', query: { onboarding: 'true' } });
   } else {
     currentScreen.value++;
   }

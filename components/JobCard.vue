@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, defineProps, defineEmits } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import type { PropType } from 'vue';
 import type { Job } from '~/types/interfaces';
 import { marked } from 'marked';

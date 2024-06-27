@@ -89,7 +89,7 @@ const fetchRoles = async (type: string) => {
 const checkUserLoginStatus = async () => {
   const result = await supabase.auth.getUser();
   if (result.error != null) {
-    store.signOutUser();
+    await store.signOutUser();
     return;
   }
 
@@ -99,10 +99,7 @@ const checkUserLoginStatus = async () => {
 }
 
 const signOut = async () => {
-  const result = await supabase.auth.signOut();
-  if (result.error != null) console.error('Sign-out error:', result)
-
-  store.signOutUser();
+  await store.signOutUser();
   router.push('/login')
 }
 

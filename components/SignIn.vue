@@ -30,6 +30,7 @@ import { handlePostSignIn } from '~/utils/helpers';
 import { GoogleSignInButton, type CredentialResponse, decodeCredential } from "vue3-google-signin";
 import PersistentDataService from '~/services/PersistentDataService';
 import { type User as DBUser } from '~/types/interfaces';
+import { useJsaStore } from '@/stores/jsaStore'
 
 defineProps<{
   toggleAuth: () => void
@@ -39,6 +40,7 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 
+const store = useJsaStore();
 const router = useRouter()
 
 onMounted(() => {
@@ -106,7 +108,7 @@ const handleGoogleLoginError = () => {
 };
 
 const logout = async () => {
-  await supabase.auth.signOut();
+  await store.signOutUser();
   router.push('/');
 };
 </script>

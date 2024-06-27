@@ -15,11 +15,16 @@
     "@supabase/supabase-js": "^2.43.2",
     "@vercel/analytics": "^1.2.2",
     "marked": "^12.0.2",
+    "mixpanel-browser": "^2.53.0",
     "node-mailjet": "^6.0.5",
     "nuxt": "^3.11.2",
     "nuxt-vue3-google-signin": "^0.0.11",
     "pinia": "^2.1.7",
     "vue": "^3.4.27",
     "vue-router": "^4.3.2"
+  },
+  "devDependencies": {
+    "@types/mixpanel": "^2.14.9",
+    "@types/mixpanel-browser": "^2.49.0"
   }
 }

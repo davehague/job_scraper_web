@@ -4,6 +4,18 @@ import { type User as DBUser } from "~/types/interfaces";
 import PersistentDataService from "~/services/PersistentDataService";
 import { useRouter } from "#app";
 
+export const setMixpanelUser = (dbUser: DBUser | null | undefined) => {
+  if (dbUser != null && dbUser != undefined) {
+    const { $mixpanel } = useNuxtApp() as any; // Mixpanel plugin
+    $mixpanel.identify(dbUser.id);
+    $mixpanel.people.set({ name: dbUser.name, email: dbUser.email, is_admin: dbUser.is_admin });
+  }
+};
+
+export const resetMixpanelUser = () => {
+  const { $mixpanel } = useNuxtApp() as any; // Mixpanel plugin
+  $mixpanel.reset();
+};
 
 export const handlePostSignIn = async (user: AuthUser) => {
   try {
@@ -55,7 +67,7 @@ const createOrSetDBUser = async (user: AuthUser) => {
 
 export const shouldRedirectToOnboarding = async () => {
   const store = useJsaStore();
-  
+
   const loggedInUser = await store.getAuthUser();
   const dbUser = await store.getDBUser();
 

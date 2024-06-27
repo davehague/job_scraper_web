@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { type User as AuthUser } from "@supabase/supabase-js";
 import { type User as DBUser } from "@/types/interfaces";
 import PersistentDataService from "~/services/PersistentDataService";
+import { setMixpanelUser, resetMixpanelUser } from '~/utils/helpers';
 
 export const useJsaStore = defineStore("jsaStore", {
   state: () => ({
@@ -50,6 +51,7 @@ export const useJsaStore = defineStore("jsaStore", {
           } else {
             console.log("User found in DB", data);
             this.dbUser = data;
+            setMixpanelUser(this.dbUser);
             return this.dbUser;
           }
         } catch {
@@ -62,11 +64,18 @@ export const useJsaStore = defineStore("jsaStore", {
     },
     setDBUser(user: DBUser | null) {
       this.dbUser = user;
+      if (user != null) {
+        setMixpanelUser(user);
+      }
     },
-    signOutUser() {
+    async signOutUser() {
+      const result = await supabase.auth.signOut();
+      if (result.error != null) console.error('Sign-out error:', result)
+
       this.authUser = null;
       this.dbUser = null;
       this.selectedUserId = "";
+      resetMixpanelUser();
     },
   },
 });

@@ -46,8 +46,11 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       baseURL: process.env.BASE_URL || 'https://localhost:3000',
+      mixpanelToken: process.env.MIXPANEL_TOKEN || 'NOT SET, CHECK .ENV FILE'
     },
   },
-  plugins: ["~/plugins/analytics.client.ts"],
+  plugins: ["~/plugins/analytics.client.ts", 
+    { src: '~/plugins/mixpanel.ts', mode: 'client' }
+  ],
   css: ["~/assets/global.css", "@fortawesome/fontawesome-free/css/all.css"],
 } as any);

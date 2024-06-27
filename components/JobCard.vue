@@ -59,6 +59,8 @@ import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore'
 import '~/assets/buttons.css';
 
+const { $mixpanel } = useNuxtApp() as any;
+
 const props = defineProps({
   job: {
     type: Object as PropType<Job>,
@@ -79,7 +81,7 @@ const tooltipContent = computed(() => {
   let g = ''
   if (props.job.guidance)
     g = props.job.guidance.replace(/\./g, '.<br><br>');
-  
+
   return `Overall Score: ${props.job.overall_score}<br>
 Desire Score: ${props.job.desire_score}<br>
 Experience Score: ${props.job.experience_score}<br>
@@ -201,6 +203,8 @@ const round = (value: number) => {
 const openInBrowser = (event: MouseEvent) => {
   event.preventDefault();
   const url = (event.target as HTMLAnchorElement)?.href;
+  $mixpanel.track('Job clicked', { job_id: props.job.id, job_url: props.job.url, job_site: props.job.job_site });
+
   window.open(url, '_blank');
 };
 

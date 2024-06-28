@@ -194,7 +194,7 @@ onMounted(async () => {
   if (userShouldOnboard) {
     router.push("/onboarding");
   } else {
-    router.push("/");
+    router.push("/home");
   }
 });
 
@@ -556,7 +556,7 @@ const handleSubmit = async () => {
   if (currentScreen.value === totalScreens.value) {
     console.log('Onboarding complete.');
     await updateUserCompletedOnboarding();
-    router.push({ path: '/', query: { onboarding: 'true' } });
+    router.push({ path: '/home', query: { onboarding: 'true' } });
   } else {
     currentScreen.value++;
   }

@@ -109,7 +109,7 @@ const handleGoogleLoginError = () => {
 
 const logout = async () => {
   await store.signOutUser();
-  router.push('/');
+  router.push('/login');
 };
 </script>
 

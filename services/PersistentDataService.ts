@@ -40,7 +40,7 @@ export default class PersistentDataService {
     return data.length > 0 ? data[0] : null;
   }
 
-  // ============= index.vue ============= //
+  // ============= base.vue ============= //
   static async fetchPublicUsers() {
     const query = supabase.from("users").select("*").eq("is_public", true);
     const { data, error } = await query;

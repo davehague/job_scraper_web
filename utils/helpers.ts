@@ -30,7 +30,7 @@ export const handlePostSignIn = async (user: AuthUser) => {
     if (userShouldOnboard) {
       router.push("/onboarding");
     } else {
-      router.push("/");
+      router.push("/home");
     }
   } catch (error) {
     console.error("Error handling post-sign-in:", error);

@@ -179,7 +179,7 @@ async function save() {
     console.error('Error saving user configuration:', error);
   } finally {
     console.log('User saved successfully');
-    router.push('/')
+    router.push('/home')
   }
 }
 
@@ -257,7 +257,7 @@ function reconcileConfigs(key: string, newValue: string, maxValues = 99) {
 }
 
 function cancel() {
-  router.push('/')
+  router.push('/home')
 }
 
 onMounted(async () => {

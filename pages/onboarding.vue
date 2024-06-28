@@ -1,4 +1,5 @@
 <template>
+  <FloatingBackButton :action="cancel" />
   <div class="onboarding-container">
     <div class="sidebar">
       <ul>
@@ -214,6 +215,10 @@ const formData = ref({
   intentions: [],
 });
 
+const cancel = () => {
+  store.signOutUser();
+  router.push('/login')
+}
 
 let jobTitlesPlaceholder = 'Enter job titles ';
 let stopWordsPlaceholder = 'Exclude titles with certain keywords ';

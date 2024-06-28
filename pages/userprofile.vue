@@ -1,8 +1,5 @@
 <template>
-  <button @click="cancel" class="back-btn">
-    <i class="fas fa-arrow-left"></i>
-  </button>
-
+  <FloatingBackButton :action="cancel" />
   <div class="user-profile">
     <h2>Personal Info</h2>
     <div>
@@ -256,7 +253,7 @@ function reconcileConfigs(key: string, newValue: string, maxValues = 99) {
   return { toUpdate, toInsert, toDelete };
 }
 
-function cancel() {
+const cancel = () => {
   router.push('/home')
 }
 
@@ -316,29 +313,6 @@ onMounted(async () => {
   background: #f9f9f9;
   border: 1px solid #ccc;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.back-btn {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  padding: 10px;
-  color: #333;
-  background-color: #555;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-}
-
-.back-btn:hover {
-  background-color: #333;
-  color: #fff;
 }
 
 .label-container {

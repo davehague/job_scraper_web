@@ -87,6 +87,7 @@
       <!-- Additional search info -->
       <OnboardingScreen v-if="currentScreen === 3" :onSubmit="submitAdditionalSearchInfo"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
+        :validateForm="validateAdditionalSearchInfoForm"
         :isSubmitting="isSubmitting">
         <h2>Now, let's dig into what you're looking for</h2>
         <p class="instructions">This will help us find the best matches for your career goals. Use commas to separate
@@ -178,7 +179,7 @@ import { useRouter } from 'vue-router';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
-import { shouldRedirectToOnboarding, consolidateText } from '@/utils/helpers';
+import { shouldRedirectToOnboarding, consolidateText, isNumeric } from '@/utils/helpers';
 
 const router = useRouter();
 const store = useJsaStore();
@@ -220,7 +221,9 @@ let skillWordsPlaceholder = 'Keywords to look for in a job description ';
 let skillStopWordsPlaceholder = 'Keywords to avoid in a job description ';
 
 const validateResumeForm = () => {
-  return formData.value.resume.trim().length > 0 ? [] : ['Please paste your resume to continue.'];
+  const minLengthValidation = formData.value.resume.trim().length < 500 ? ['Please expand upon your experience, education, and goals (min length is 500 characters).'] : [];
+  const maxLengthValidation = formData.value.resume.trim().length > 15000 ? ['Please shorten your resume (max lengh is 15,000 characters).'] : [];
+  return [...minLengthValidation, ...maxLengthValidation];
 };
 
 const submitResume = async () => {
@@ -329,10 +332,24 @@ Skill Stop Words: (your answer in comma separated list format)
 };
 
 const validateRoleInfoForm = () => {
-  const jobTitlesValidation = formData.value.jobTitles.trim().length > 0 ? [] : ['Please enter at least one job title to continue.'];
-  const locationValidation = formData.value.remotePreference === 'ONLY' || formData.value.location.trim().length > 0 ? [] : ['Please enter a location to continue.'];
-  const distanceValidation = formData.value.remotePreference === 'ONLY' || formData.value.distance > 0 ? [] : ['Please enter a distance to continue.'];
-  return [...jobTitlesValidation, ...locationValidation, ...distanceValidation];
+  const jobTitlesMinLength = formData.value.jobTitles.trim().length == 0 ? ['Please enter at least one job title to continue.'] : [];
+  const jobTitlesMaxLength = formData.value.jobTitles.trim().length > 300 ? ['Please enter a maximum of 300 characters for job titles.'] : []; 
+  const jobTitlesMaxCount = formData.value.jobTitles.split(',').length > 3 ? ['Please enter a maximum of three job titles.'] : [];
+
+  const locationMinLength = formData.value.remotePreference != 'ONLY' && formData.value.location.trim().length == 0 ? ['Please enter a location to continue.'] : [];
+  const locationMaxLength = formData.value.location.trim().length > 200 ? ['Please enter a maximum of 200 characters for location.'] : [];
+
+  const distanceIsNumeric = !isNumeric(formData.value.distance) ? ['Please enter a numeric value for distance.'] : [];
+  const distanceMinValue = formData.value.remotePreference != 'ONLY' && formData.value.distance <= 0 ? ['Please enter a positive integer for distance.'] : [];
+  const distanceMaxValue = formData.value.remotePreference != 'ONLY' && formData.value.distance > 200 ? ['Maximum distance is 200 miles.'] : [];
+
+  const salaryMinValue =  minSalary.value < 0 ? ['Please enter a positive integer for salary.'] : [];
+  const salaryMaxValue = minSalary.value > 1000000 ? ['Maximum salary value is $1,000,000.'] : [];
+
+  return [...jobTitlesMinLength, ...jobTitlesMaxLength, ...jobTitlesMaxCount, 
+    ...locationMinLength, ...locationMaxLength, 
+    ...distanceIsNumeric, ...distanceMinValue, ...distanceMaxValue,
+    ...salaryMinValue, ...salaryMaxValue];
 };
 
 const submitRoleInfo = async () => {
@@ -364,6 +381,15 @@ const submitRoleInfo = async () => {
     console.log('Role info saved successfully');
     await handleSubmit();
   }
+};
+
+const validateAdditionalSearchInfoForm = () => {
+  const skillWordsMaxLength = formData.value.skillWords.trim().length > 300 ? ['Please enter a maximum of 300 characters for good-fit skill words.'] : [];
+  const skillStopWordsMaxLength = formData.value.skillStopWords.trim().length > 300 ? ['Please enter a maximum of 300 characters for non-fit skill stop words.'] : [];
+  const stopWordsMaxLength = formData.value.stopWords.trim().length > 300 ? ['Please enter a maximum of 300 characters for job and title descriptors.'] : [];
+  const candidateRequirementsMaxLength = formData.value.candidateRequirements.trim().length > 300 ? ['Please enter a maximum of 300 characters for must havese.'] : [];
+
+  return [...skillWordsMaxLength, ...skillStopWordsMaxLength, ...stopWordsMaxLength, ...candidateRequirementsMaxLength];
 };
 
 const submitAdditionalSearchInfo = async () => {
@@ -401,9 +427,11 @@ const submitAdditionalSearchInfo = async () => {
 };
 
 const validateAboutYouForm = () => {
-  const nameValidation = formData.value.name.trim().length > 0 ? [] : ['Please enter your name to continue.'];
+  const nameMinLength = formData.value.name.trim().length == 0 ? ['Please enter your name to continue.'] : [];
+  const nameMaxLength = formData.value.name.trim().length > 150 ? ['Please enter a maximum of 150 characters for your name.'] : [];
+
   const intentionsValidation = formData.value.intentions.length > 0 ? [] : ['Please select at least one intention to continue.'];
-  return [...nameValidation, ...intentionsValidation];
+  return [...nameMinLength, ...nameMaxLength, ...intentionsValidation];
 };
 
 const submitAboutYou = async () => {

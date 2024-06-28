@@ -81,3 +81,7 @@ export const consolidateText = (text: string): string => {
   const consolidatedText = text.replace(/\s+/g, " ").trim();
   return consolidatedText;
 };
+
+export const isNumeric = (value: any): boolean => {
+  return !isNaN(parseFloat(value)) && isFinite(value);
+};

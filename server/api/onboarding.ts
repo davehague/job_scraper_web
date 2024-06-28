@@ -1,14 +1,24 @@
-import { defineEventHandler, readBody } from 'h3';
+import { defineEventHandler, readBody, createError } from 'h3';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { user_id, resume } = body;
 
   try {
+    const apiKey = process.env.GOOGLE_CLOUD_FUNCTION_API_KEY
+  
+    if (!apiKey) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Server configuration error: API key is missing'
+      })
+    }
+
     const response = await fetch('https://us-east4-jobsapp-426213.cloudfunctions.net/jobs_app_function', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-API-Key': apiKey
       },
       body: JSON.stringify({ user_id, resume }),
     });

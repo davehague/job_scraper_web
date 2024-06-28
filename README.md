@@ -16,7 +16,7 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file to store your Supabase connection, Mailjet keys (if you want to send email), and OpenRouter key (used during onboarding)
+Create a `.env` file to store your secrets
 
 ```bash
 SUPABASE_URL=https://<project_url>.supabase.co
@@ -26,7 +26,8 @@ MJ_APIKEY_PRIVATE=e3e4...
 OPENROUTER_API_KEY=sk-...
 BASE_URL=https://localhost:3000
 GOOGLE_SIGNIN_CLIENT_ID=6129...
-MIXPANEL_TOKEN=
+MIXPANEL_TOKEN=6af...
+GOOGLE_CLOUD_FUNCTION_API_KEY=AIz...
 ```
 
 ## Dev Guidance

@@ -40,6 +40,22 @@ export default class PersistentDataService {
     return data.length > 0 ? data[0] : null;
   }
 
+  static async updateLastLogin(userId: string) {
+    const query = supabase
+      .from("users")
+      .update({ last_login: new Date() })
+      .eq("id", userId)
+      .select();
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error updating last login:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
   // ============= base.vue ============= //
   static async fetchPublicUsers() {
     const query = supabase.from("users").select("*").eq("is_public", true);

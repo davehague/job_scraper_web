@@ -24,7 +24,8 @@ export const handlePostSignIn = async (user: AuthUser) => {
 
     console.log("Handling post-sign-in", user);
     store.setAuthUser(user);
-    await createOrSetDBUser(user);
+    const dbUser = await createOrSetDBUser(user);
+    PersistentDataService.updateLastLogin(dbUser!.id); // No need to await
 
     const userShouldOnboard = await shouldRedirectToOnboarding();
     if (userShouldOnboard) {

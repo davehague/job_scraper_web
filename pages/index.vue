@@ -96,10 +96,7 @@ const checkIfConfirmingEmail = async () => {
     } catch (error) {
       console.error('Error during session exchange:', error);
     }
-  } else {
-    console.error('Access token or refresh token not found in URL hash.');
   }
-
 }
 </script>
 

@@ -22,7 +22,8 @@
         <h2>See it in Action</h2>
         <div class="screenshot-container">
           <img class="landscape" :src="jobCardScreenshot" alt="Job Cards Screen" />
-          <img class="portrait" :src="guidanceScreenshot" alt="Job Guidance Feature" />
+          <br /><br />
+          <img :src="guidanceScreenshot" alt="Job Guidance Feature" />
         </div>
       </section>
 
@@ -147,13 +148,7 @@ h1 {
 }
 
 .landscape {
-  min-height: 600px;
-  min-width: 1200px;
-}
-
-.portrait {
-  min-width: 300px;
-  min-height: 600px;
+  min-width: -webkit-fill-available
 }
 
 footer {

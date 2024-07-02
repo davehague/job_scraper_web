@@ -2,7 +2,7 @@
   <div class="auth-container">
     <div class="auth-box">
       <h2>Sign In</h2>
-      <form @submit.prevent="signIn">
+      <form>
         <div class="form-group">
           <label for="email">Email:</label>
           <input v-model="email" type="email" id="email" required />
@@ -11,9 +11,11 @@
           <label for="password">Password:</label>
           <input v-model="password" type="password" id="password" required />
         </div>
-        <button type="submit" class="auth-button">Sign In</button>
+
+        <SubmitButton class="auth-button" defaultText="Sign In" submittingText="Signing In..." :onClick="signIn" />
         <GoogleSignInButton class="google-signin" @success="handleGoogleLoginSuccess" @error="handleGoogleLoginError">
         </GoogleSignInButton>
+        
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign up</p>
       </form>
@@ -58,12 +60,12 @@ const signIn = async () => {
       email: email.value,
       password: password.value
     });
-    
-    if (error){
+
+    if (error) {
       console.error('Sign-in error:', error)
       errorMessage.value = error.message
     }
-    
+
     // Remainder is handled by onAuthStateChange
   } catch (error) {
     errorMessage.value = (error as Error).message
@@ -86,7 +88,7 @@ const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
         })
 
         // Update the user's profile pic
-        if(data && data.user && data.user.id) {
+        if (data && data.user && data.user.id) {
           let user = {
             id: data.user.id,
             avatar_url: data.user.user_metadata.avatar_url

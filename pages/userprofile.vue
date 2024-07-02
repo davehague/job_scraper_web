@@ -70,7 +70,8 @@
     <div>
       <div class="label-container">
         <label>Other Requirements (comma separated):</label>
-        <InfoTooltip text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
+        <InfoTooltip
+          text="Are there any other requirements you absolutely need the job to have?  Health insurance, 401k, education assistance, etc?  
           Not all jobs list these things, but we can highlight the ones that do. This will only improve results, not disqualify jobs." />
       </div>
       <input v-model="candidateRequirements" type="text" placeholder="Enter other requirements" />
@@ -96,7 +97,12 @@
       <textarea v-model="resume" rows="10"></textarea>
     </div>
 
-    <button @click="save">Save</button>
+    <SubmitButton
+      class="submit"
+      defaultText="Save"
+      submittingText="Saving..."
+      :onClick="save"
+    />
   </div>
 </template>
 
@@ -347,7 +353,7 @@ input:disabled {
   background: #f9f9f9;
 }
 
-button {
+.submit {
   margin-top: 20px;
   padding: 10px;
   border: none;
@@ -358,7 +364,7 @@ button {
   justify-content: center;
 }
 
-button i {
+.submit i {
   color: white;
 }
 </style>

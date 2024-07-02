@@ -24,9 +24,7 @@
           <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
           <p class="toggle-auth" @click="toggleAuth">Already have an account? Sign In</p>
         </form>
-
       </div>
-
     </div>
   </div>
 </template>

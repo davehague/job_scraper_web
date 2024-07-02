@@ -1,25 +1,32 @@
 <template>
   <div class="auth-container">
     <div class="auth-box">
-      <h2>Sign In</h2>
-      <form>
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input v-model="email" type="email" id="email" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input v-model="password" type="password" id="password" required />
-        </div>
+      <div v-if="magicLinkComplete">
+        <div class="thank-you-message">Please check your email for a magic link to sign in!</div>
+        <NuxtLink to="/">Return to home</NuxtLink>
+      </div>
+      <div v-else>
+        <h2>Sign In</h2>
+        <form>
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input v-model="email" type="email" id="email" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input v-model="password" type="password" id="password" required />
+            <a href="#" class="link-button link-small" @click="sendMagicLink">Forgot your password? Send a magic
+              link</a>
+          </div>
 
-        <SubmitButton class="auth-button" defaultText="Sign In" submittingText="Signing In..." :onClick="signIn" />
-        <GoogleSignInButton class="google-signin" @success="handleGoogleLoginSuccess" @error="handleGoogleLoginError">
-        </GoogleSignInButton>
+          <SubmitButton class="auth-button" defaultText="Sign In" submittingText="Signing In..." :onClick="signIn" />
+          <GoogleSignInButton class="google-signin" @success="handleGoogleLoginSuccess" @error="handleGoogleLoginError">
+          </GoogleSignInButton>
 
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-        <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign up</p>
-      </form>
-      <button class="link-button" @click="logout">Skip sign in for now</button>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+          <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign up</p>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +47,8 @@ defineProps<{
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const magicLinkComplete = ref(false)
+
 
 const store = useJsaStore();
 const router = useRouter()
@@ -99,9 +108,27 @@ const handleGoogleLoginError = () => {
   errorMessage.value = 'There was some problem logging in with Google';
 };
 
-const logout = async () => {
-  await store.signOutUser();
-  router.push('/login');
+const sendMagicLink = async () => {
+  if (!email.value) {
+    errorMessage.value = 'Please enter your email address';
+    return;
+  }
+  console.log('Sending magic link to', email.value);
+  const config = useRuntimeConfig()
+
+  console.log('config', config.public.baseURL)
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email: email.value
+  })
+
+  console.log('Magic link response:', data)
+  if (error) {
+    console.error('Magic link error:', error)
+    errorMessage.value = 'Something went wrong, please try again later'
+    return;
+  }
+
+  magicLinkComplete.value = true;
 };
 </script>
 
@@ -171,5 +198,16 @@ input {
 
 .google-signin {
   margin-top: 20px;
+}
+
+.link-small {
+  font-size: 12px;
+  font-style: italic;
+  color: #00458a;
+  cursor: pointer;
+}
+
+.thank-you-message {
+  margin-bottom: 20px;
 }
 </style>

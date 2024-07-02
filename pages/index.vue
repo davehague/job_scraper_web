@@ -28,7 +28,8 @@
 
       <section class="target-audience">
         <h2>Perfect for Career Movers</h2>
-        <p>Already employed but looking for your next opportunity? Our tool helps you discreetly find and evaluate new positions that match your skills and aspirations.</p>
+        <p>Already employed but looking for your next opportunity? Our tool helps you discreetly find and evaluate new
+          positions that match your skills and aspirations.</p>
       </section>
     </main>
 
@@ -40,6 +41,8 @@
 
 <script setup lang="ts">
 import { useRouter } from 'nuxt/app'
+import { supabase } from "@/utils/supabaseClient";
+import { handlePostSignIn } from '~/utils/helpers';
 
 const router = useRouter()
 
@@ -48,6 +51,55 @@ const guidanceScreenshot = '/landing/jobs app-guidance.png'
 
 const navigateToSignup = () => {
   router.push('/login')
+}
+
+onMounted(() => {
+  checkIfConfirmingEmail();
+})
+
+const parseHash = (hash: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+  hash.substring(1).split('&').forEach((param: string) => {
+    const [key, value] = param.split('=');
+    params[key] = decodeURIComponent(value);
+  });
+  return params;
+};
+
+const checkIfConfirmingEmail = async () => {
+  const hash = window.location.hash;
+  const params = parseHash(hash);
+
+  const accessToken = params.access_token;
+  const refreshToken = params.refresh_token;
+
+  if (accessToken && refreshToken) {
+    try {
+      // Set the Supabase session using the tokens
+      const { data, error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.user) {
+        console.log('Sign-up completion successful:', data.user);
+        handlePostSignIn(data.user);
+      }
+      else {
+        console.error('Sign-up completion error:', error);
+      }
+
+    } catch (error) {
+      console.error('Error during session exchange:', error);
+    }
+  } else {
+    console.error('Access token or refresh token not found in URL hash.');
+  }
+
 }
 </script>
 
@@ -79,7 +131,9 @@ h1 {
   background-color: #4DAF9C;
 }
 
-.features, .screenshots, .target-audience {
+.features,
+.screenshots,
+.target-audience {
   margin-bottom: 3rem;
 }
 

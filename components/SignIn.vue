@@ -15,7 +15,7 @@
         <SubmitButton class="auth-button" defaultText="Sign In" submittingText="Signing In..." :onClick="signIn" />
         <GoogleSignInButton class="google-signin" @success="handleGoogleLoginSuccess" @error="handleGoogleLoginError">
         </GoogleSignInButton>
-        
+
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="toggle-auth" @click="toggleAuth">Don't have an account? Sign up</p>
       </form>
@@ -28,7 +28,6 @@
 import { ref } from 'vue'
 import { useRouter } from '#app'
 import { supabase } from "@/utils/supabaseClient";
-import { handlePostSignIn } from '~/utils/helpers';
 import { GoogleSignInButton, type CredentialResponse, decodeCredential } from "vue3-google-signin";
 import PersistentDataService from '~/services/PersistentDataService';
 import { type User as DBUser } from '~/types/interfaces';
@@ -44,15 +43,6 @@ const errorMessage = ref('')
 
 const store = useJsaStore();
 const router = useRouter()
-
-onMounted(() => {
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      console.log('Sign-in successful:', session.user)
-      await handlePostSignIn(session.user)
-    }
-  })
-})
 
 const signIn = async () => {
   try {

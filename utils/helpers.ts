@@ -8,7 +8,11 @@ export const setMixpanelUser = (dbUser: DBUser | null | undefined) => {
   if (dbUser != null && dbUser != undefined) {
     const { $mixpanel } = useNuxtApp() as any; // Mixpanel plugin
     $mixpanel.identify(dbUser.id);
-    $mixpanel.people.set({ name: dbUser.name, email: dbUser.email, is_admin: dbUser.is_admin });
+    $mixpanel.people.set({
+      name: dbUser.name,
+      email: dbUser.email,
+      is_admin: dbUser.is_admin,
+    });
   }
 };
 
@@ -24,7 +28,31 @@ export const handlePostSignIn = async (user: AuthUser) => {
 
     console.log("Handling post-sign-in", user);
     store.setAuthUser(user);
-    const dbUser = await createOrSetDBUser(user);
+
+    let dbUser = await store.getDBUser();
+    if (dbUser === null || dbUser === undefined) {
+      console.log("Creating new user in DB...");
+      const baseUser = {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.full_name || null,
+        avatar_url: user.user_metadata?.avatar_url || null,
+      };
+
+      const result = await PersistentDataService.upsertUser(baseUser as DBUser);
+      console.log("Upsert user result:", result);
+      if (result.error) {
+        console.error("Error creating user:", result.error);
+        return;
+      }
+
+      dbUser = result;
+      store.setDBUser(result);
+    }
+
+    console.log("Store auth user: ", store.authUser);
+    console.log("Store db user: ", store.dbUser);
+
     PersistentDataService.updateLastLogin(dbUser!.id); // No need to await
 
     const userShouldOnboard = await shouldRedirectToOnboarding();
@@ -36,34 +64,6 @@ export const handlePostSignIn = async (user: AuthUser) => {
   } catch (error) {
     console.error("Error handling post-sign-in:", error);
   }
-};
-
-const createOrSetDBUser = async (user: AuthUser) => {
-  const store = useJsaStore();
-
-  store.setAuthUser(user);
-  let dbUser = await store.getDBUser();
-  console.log("Create Or Set DB User:", dbUser);
-  if (dbUser === null || dbUser === undefined) {
-    console.log("Creating new user in DB...");
-    const baseUser = {
-      id: user.id,
-      email: user.email,
-      name: user.user_metadata?.full_name || null,
-      avatar_url: user.user_metadata?.avatar_url || null,
-    };
-
-    const result = await PersistentDataService.upsertUser(baseUser as DBUser);
-    if (result.error) {
-      console.error("Error creating user:", result.error);
-      return;
-    }
-
-    dbUser = result.data;
-    store.setDBUser(result.data);
-  }
-
-  return dbUser;
 };
 
 export const shouldRedirectToOnboarding = async () => {

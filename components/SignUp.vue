@@ -7,7 +7,7 @@
       </div>
       <div v-else>
         <h2>Sign Up</h2>
-        <form @submit.prevent="signUpWithEmail">
+        <form>
           <div class="form-group">
             <label for="email">Email:</label>
             <input v-model="email" type="email" id="email" required />
@@ -16,9 +16,11 @@
             <label for="password">Password:</label>
             <input v-model="password" type="password" id="password" required />
           </div>
-          <button type="submit" class="auth-button">Sign up</button>
+
+          <SubmitButton class="auth-button" defaultText="Sign up" submittingText="Signing Up..." :onClick="signUpWithEmail" />
           <GoogleSignInButton class="google-signin" @success="handleGoogleLoginSuccess" @error="handleGoogleLoginError">
           </GoogleSignInButton>
+
           <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
           <p class="toggle-auth" @click="toggleAuth">Already have an account? Sign In</p>
         </form>
@@ -34,7 +36,7 @@ import { ref } from 'vue'
 import { supabase } from "@/utils/supabaseClient";
 import PersistentDataService from '~/services/PersistentDataService';
 import { GoogleSignInButton, type CredentialResponse, decodeCredential } from "vue3-google-signin";
-import { handlePostSignIn } from '~/utils/helpers';
+
 
 defineProps<{
   toggleAuth: () => void
@@ -44,15 +46,6 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const signUpComplete = ref(false)
-
-onMounted(() => {
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      console.log('Sign-in successful:', session.user)
-      await handlePostSignIn(session.user)
-    }
-  })
-})
 
 const signUpWithEmail = async () => {
   try {
@@ -67,14 +60,17 @@ const signUpWithEmail = async () => {
       email: email.value,
       password: password.value
     })
+
+    if (data && data.user != null) {
+      signUpComplete.value = true;
+    }
+    else {
+      console.error('Sign-up error:', error)
+      errorMessage.value = 'There was some problem signing up';
+    }
+
     // Remainder is handled by onAuthStateChange
 
-    // if (data && data.user != null) {
-    //   console.log('Sign-up successful:', data);
-    //   await handlePostSignUp(data.user?.id, email.value)
-    //     } else {
-    //   throw error;
-    // }
   } catch (error) {
     errorMessage.value = (error as Error).message
     console.error('Sign-up error:', error)
@@ -107,19 +103,6 @@ const handleGoogleLoginError = () => {
   console.error("Login with Google failed");
   errorMessage.value = 'There was some problem logging in with Google';
 };
-
-// const handlePostSignUp = async (userId: string, userEmail: string, userName?: string) => {
-//   const { error: userCreateError } = await supabase
-//     .from('users')
-//     .insert({ id: userId, email: userEmail, name: userName })
-
-//   if (userCreateError) {
-//     throw userCreateError
-//   }
-
-//   signUpComplete.value = true
-// }
-
 </script>
 
 

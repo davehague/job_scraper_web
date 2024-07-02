@@ -44,6 +44,7 @@ export interface Job {
     is_admin: boolean
     avatar_url: string
     last_login: string
+    intentions: string
   }
 
   export interface UserConfig {

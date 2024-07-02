@@ -450,19 +450,12 @@ const submitAboutYou = async () => {
     id: uid,
     name: formData.value.name,
     send_emails: formData.value.sendEmails,
+    intentions: formData.value.intentions.join(','),
   };
 
   try {
     const result = await PersistentDataService.upsertUser(baseUser as User)
     console.log('User updated: ', result);
-
-    // TODO: Saving this chunk of code until I decide where to save the intentions
-    // await clearConfigsByKey(uid, 'job_titles');
-    // const titles = createConfigs(uid, 'job_titles', formData.value.jobTitles, 3);
-    // await performInsert(titles);
-
-    console.log('Where are you in your job search? ', formData.value.intentions);
-
     generateJobs(uid); // Intentionally not awaiting this
 
   } catch (error) {

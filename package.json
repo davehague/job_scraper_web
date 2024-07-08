@@ -24,7 +24,10 @@
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.45.1",
     "@types/mixpanel": "^2.14.9",
-    "@types/mixpanel-browser": "^2.49.0"
+    "@types/mixpanel-browser": "^2.49.0",
+    "@types/node": "^20.14.9",
+    "@types/wait-on": "^5.3.4"
   }
 }

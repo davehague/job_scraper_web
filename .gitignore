@@ -24,3 +24,6 @@ logs
 !.env.example
 localhost-key.pem
 localhost.pem
+
+# Playwright
+playwright-report

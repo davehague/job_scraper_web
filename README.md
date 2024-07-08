@@ -32,4 +32,13 @@ GOOGLE_CLOUD_FUNCTION_API_KEY=AIz...
 
 ## Dev Guidance
 - Built using VS code
+*Recommended Extensions*
+    - Playwright Test for VSCode
+    - Vue - Official
+
 - Code formatting:  Use the official Vue formatter
+
+## Running Playwright tests
+- `npx playwright test` to see tests run headless
+- `npx playwright test --debug` to see tests run with UI
+- Right click a test and choose run or debug to run a single test

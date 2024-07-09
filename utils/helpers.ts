@@ -3,6 +3,7 @@ import type { AuthUser } from "@supabase/supabase-js";
 import { type User as DBUser, type Job } from "~/types/interfaces";
 import PersistentDataService from "~/services/PersistentDataService";
 import { useRouter } from "#app";
+import { marked } from "marked";
 
 export const setMixpanelUser = (dbUser: DBUser | null | undefined) => {
   if (dbUser != null && dbUser != undefined) {
@@ -115,4 +116,8 @@ export const transformDataToJobs = (data: any[]): Job[] => {
     meets_experience_score: parseInt(item.meets_experience_score, 10),
     guidance: item.guidance,
   }));
+};
+
+export const renderMarkdown = (text: string) => {
+  return marked(text);
 };

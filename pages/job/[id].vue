@@ -48,29 +48,29 @@
                 </div>
                 <div class="column group">
                     <div>
-                        <h2>You may love this job because</h2>
-                        <p>{{ job.guidance }}</p>
+                        <h2>What you may think of this job</h2>
+                        <div v-html="renderMarkdown(youMayGuidance)" />
                     </div>
                     <div>
-                        <h2>The hiring manager might love you for this job because</h2>
-                        <p>{{ job.guidance }}</p>
+                        <h2>What the hiring manager may think</h2>
+                        <div v-html="renderMarkdown(hiringManagerGuidance)" />
                     </div>
                     <div class="guidance">
-                        <p>{{ job.guidance }}</p>
+                        <div v-html="renderMarkdown(overallGuidance)" />
                     </div>
                 </div>
             </div>
 
             <div id="job-and-company">
                 <div class="row">
-                    <div class="content-box">
+                    <div class="content-box column">
                         <h2>Job Post Summary</h2>
-                        <p>{{ job.short_summary }}</p>
+                        <div v-html="renderMarkdown(job.short_summary)" />
                     </div>
                     <div class="column">
                         <div class="content-box column">
                             <h2>Role Requirements</h2>
-                            <p>{{ job.hard_requirements }}</p>
+                            <div v-html="renderMarkdown(job.hard_requirements)" />
                         </div>
 
                         <div class="content-box column">
@@ -85,7 +85,6 @@
                 <button @click="markAsApplied" class="button-primary">Mark as applied</button>
                 <button @click="discardJob" class="button-secondary">Discard</button>
             </div>
-
     </div>
 </template>
 
@@ -94,6 +93,7 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { type Job } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
+import { renderMarkdown } from '~/utils/helpers'
 
 const route = useRoute();
 const router = useRouter();
@@ -115,6 +115,21 @@ const fetchJobDetails = async (id: string) => {
         router.push('/home')
     }
 }
+
+let youMayGuidance = ref('')
+let hiringManagerGuidance = ref('')
+let overallGuidance = ref('')
+
+watch(
+    () => job.value,
+    () => {
+        youMayGuidance.value = job.value?.guidance.split('The hiring manager')[0] || '';
+        hiringManagerGuidance.value = job.value?.guidance.split('The hiring manager')[1] || '';
+        hiringManagerGuidance.value = 'The hiring manager' + hiringManagerGuidance.value.split('Overall')[0] || '';
+        overallGuidance.value = 'Overall' + job.value?.guidance.split('Overall')[1] || '';
+    },
+    { immediate: true }
+)
 
 watch(
     () => store.dbUser,

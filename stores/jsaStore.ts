@@ -1,16 +1,32 @@
 import { defineStore } from "pinia";
 import { type User as AuthUser } from "@supabase/supabase-js";
-import { type User as DBUser } from "@/types/interfaces";
+import { type User as DBUser, type Job } from "@/types/interfaces";
 import PersistentDataService from "~/services/PersistentDataService";
-import { setMixpanelUser, resetMixpanelUser } from '~/utils/helpers';
+import { setMixpanelUser, resetMixpanelUser, transformDataToJobs } from '~/utils/helpers';
 
 export const useJsaStore = defineStore("jsaStore", {
   state: () => ({
     selectedUserId: "",
     authUser: null as AuthUser | null,
     dbUser: null as DBUser | null,
+    currentJobs: [] as Job[],
   }),
   actions: {
+    async refreshJobs(currentUserId: string) {
+      console.log("Refreshing jobs...", this.currentJobs);
+      if (this.currentJobs.length > 0) {
+        console.log("Jobs already loaded, skipping refresh");
+        return;
+      }
+
+      const rawItems = await PersistentDataService.fetchJobsForUser(currentUserId);
+      this.currentJobs = transformDataToJobs(rawItems);
+      console.log("Current jobs from raw items:", this.currentJobs);
+    },
+    getJobById(jobId: string) : Job | undefined {
+      console.log("Getting job by ID:", jobId);
+      return this.currentJobs.find((job) => job.id === jobId);
+    },
     setSelectedUserId(userId: string) {
       this.selectedUserId = userId;
     },
@@ -35,6 +51,8 @@ export const useJsaStore = defineStore("jsaStore", {
       return refreshedUser;
     },
     async getDBUser() {
+      console.log("Getting DB user data...", this.dbUser);
+      console.log('Auth user:', this.authUser)
       if (this.dbUser != null && this.dbUser != undefined) {
         return this.dbUser;
       } else if (this.authUser != null) {

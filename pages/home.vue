@@ -26,7 +26,7 @@ import { type Job } from '@/types/interfaces'
 import Header from '@/components/Header.vue'
 import { useJsaStore } from '@/stores/jsaStore'
 import PersistentDataService from '@/services/PersistentDataService';
-import { shouldRedirectToOnboarding } from '@/utils/helpers';
+import { shouldRedirectToOnboarding, transformDataToJobs } from '@/utils/helpers';
 
 const router = useRouter();
 const route = useRoute();
@@ -69,36 +69,6 @@ const updateVisibleJobs = (filterType: string) => {
   }
 }
 
-const transformDataToJobs = (data: any[]): Job[] => {
-  return data.map(item => ({
-    id: item.id,
-    created_at: item.created_at,
-    title: item.title,
-    company: item.company,
-    short_summary: item.short_summary,
-    hard_requirements: item.hard_requirements,
-    job_site: item.job_site,
-    url: item.url,
-    location: item.location,
-    date_posted: item.date_posted,
-    comp_interval: item.comp_interval,
-    comp_min: item.comp_min,
-    comp_max: item.comp_max,
-    comp_currency: item.comp_currency,
-    emails: item.emails,
-    date_pulled: item.date_pulled,
-
-    user_id: item.user_id,
-    user_interested: item.interested,
-    overall_score: parseInt(item.score, 10),
-    desire_score: parseInt(item.desire_score, 10),
-    experience_score: parseInt(item.experience_score, 10),
-    meets_requirements_score: parseInt(item.meets_requirements_score, 10),
-    meets_experience_score: parseInt(item.meets_experience_score, 10),
-    guidance: item.guidance,
-  }));
-};
-
 const fetchJobs = async (loggedInUserId: string | null) => {
   try {
     let rawItems = [];
@@ -110,8 +80,8 @@ const fetchJobs = async (loggedInUserId: string | null) => {
     }
 
     lastRefreshed.value = Date.now();
-    let jobs = transformDataToJobs(rawItems);
-    allJobs.value = jobs.sort((a, b) => {
+    store.currentJobs = transformDataToJobs(rawItems);
+    allJobs.value = store.currentJobs.sort((a, b) => {
       const dateA = new Date(a.date_posted || a.date_pulled).getTime();
       const dateB = new Date(b.date_posted || b.date_pulled).getTime();
       return (dateB - dateA) || (b.overall_score - a.overall_score);

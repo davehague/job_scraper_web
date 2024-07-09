@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <div v-if="!userIsNotLoggedIn" class="link-row">
+    <div v-if="shouldShowLinkRow" class="link-row">
       <button class="link" :class="{ selected: selectedLink === 'latestSearch' }"
         @click="handleClick('latestSearch')">Latest Search</button>
       <button class="link" :class="{ selected: selectedLink === 'savedResults' }"
@@ -33,6 +33,10 @@
         @click="handleClick('viewApplied')">View Applied</button> -->
       <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
         @click="handleClick('viewDiscards')">View Discards</button>
+    </div>
+    <div v-if="shouldShowBackButton" class="back-row">
+      <i class="fas fa-arrow-left"></i>
+      <button class="link" @click="router.back()">Back to Saved Results</button>
     </div>
   </header>
 </template>
@@ -63,6 +67,15 @@ const userProfileURL = computed(() => {
 
 const userIsNotLoggedIn = ref(false);
 const userIsAdmin = ref(false);
+
+const shouldShowLinkRow = computed(() => {
+  if(userIsNotLoggedIn.value) return false;
+  return !router.currentRoute.value.path.includes('job');
+})
+
+const shouldShowBackButton = computed(() => {
+  return router.currentRoute.value.path.includes('job');
+})
 
 const handleClick = (filterType: string) => {
   selectedLink.value = filterType;
@@ -162,6 +175,21 @@ watch(selectedUser, (newVal) => {
   justify-content: start;
   gap: 48px;
   margin: 20px 40px;
+}
+
+.back-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  gap: 12px;
+  margin: 20px 40px;
+  align-items: center;
+}
+
+i {
+  color: #59C9A5;
+  height: 16px;
+  width: 16px;
 }
 
 .link {

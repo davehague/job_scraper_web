@@ -3,12 +3,10 @@
   <div :class="['job-card', { 'older-job': isOlder }]">
     <div class="title-and-score">
 
-      <h2 class="title" @click="toggleCard">{{ job.title }}</h2>
+      <h2 class="title" @click="openDetails">{{ job.title }}</h2>
 
       <Tooltip :content="tooltipContent">
-        <div class="score-circle" :style="{ backgroundColor: getScoreColor(job.overall_score) }">
-          <span class="score-text">{{ job.overall_score }}</span>
-        </div>
+        <ScoreCircle :overall_score="job.overall_score" />
       </Tooltip>
     </div>
     <div class="content-container" v-if="showContent">
@@ -52,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
 import type { PropType } from 'vue';
 import type { Job } from '~/types/interfaces';
 import { marked } from 'marked';
@@ -69,6 +68,7 @@ const props = defineProps({
 });
 
 const store = useJsaStore();
+const router = useRouter();
 const userLoggedIn = store.authUser !== null;
 const showRequirements = ref(false);
 const showFullSummary = ref(false);
@@ -140,15 +140,10 @@ const handleResize = () => {
   }
 };
 
-const toggleCard = () => {
-  if (window.innerWidth <= 768) {
-    showContent.value = !showContent.value;
-  }
+const openDetails = () => {
+  router.push(`/job/${props.job.id}`);
 };
 
-const getScoreColor = (score: number) => {
-  return score >= 85 ? '#59C9A5' : score > 75 ? '#93c1b2' : '#888';
-};
 
 const toggleRequirements = () => {
   showRequirements.value = !showRequirements.value;
@@ -252,35 +247,11 @@ const isOlder = () => {
   font-size: 24px;
   font-weight: 700;
   width: 80%;
+  cursor: pointer;
 }
 
-.score-circle {
-  align-items: center;
-  background-color: #59C9A5;
-  border-radius: 50%;
-  color: #333;
-  display: flex;
-  font-weight: 700;
-  font-size: 24px;
-  height: 64px;
-  width: 64px;
-  justify-content: center;
-  /* position: absolute; */
-  transition: background-color 0.3s ease;
-}
-
-.score-circle::before {
-  content: '';
-  background-color: #FFF;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  position: absolute;
-}
-
-.score-circle .score-text {
-  position: relative;
-  z-index: 1;
+.title:hover {
+  text-decoration: underline;
 }
 
 .content-container {
@@ -360,8 +331,6 @@ const isOlder = () => {
 
   border: 1px solid #ccc;
 }
-
-
 
 .job-card .icon-saved-active {
   color: red;

@@ -1,6 +1,6 @@
 import { useJsaStore } from "@/stores/jsaStore";
 import type { AuthUser } from "@supabase/supabase-js";
-import { type User as DBUser } from "~/types/interfaces";
+import { type User as DBUser, type Job } from "~/types/interfaces";
 import PersistentDataService from "~/services/PersistentDataService";
 import { useRouter } from "#app";
 
@@ -85,4 +85,34 @@ export const consolidateText = (text: string): string => {
 
 export const isNumeric = (value: any): boolean => {
   return !isNaN(parseFloat(value)) && isFinite(value);
+};
+
+export const transformDataToJobs = (data: any[]): Job[] => {
+  return data.map(item => ({
+    id: item.id,
+    created_at: item.created_at,
+    title: item.title,
+    company: item.company,
+    short_summary: item.short_summary,
+    hard_requirements: item.hard_requirements,
+    job_site: item.job_site,
+    url: item.url,
+    location: item.location,
+    date_posted: item.date_posted,
+    comp_interval: item.comp_interval,
+    comp_min: item.comp_min,
+    comp_max: item.comp_max,
+    comp_currency: item.comp_currency,
+    emails: item.emails,
+    date_pulled: item.date_pulled,
+
+    user_id: item.user_id,
+    user_interested: item.interested,
+    overall_score: parseInt(item.score, 10),
+    desire_score: parseInt(item.desire_score, 10),
+    experience_score: parseInt(item.experience_score, 10),
+    meets_requirements_score: parseInt(item.meets_requirements_score, 10),
+    meets_experience_score: parseInt(item.meets_experience_score, 10),
+    guidance: item.guidance,
+  }));
 };

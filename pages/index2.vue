@@ -15,7 +15,7 @@
             <span class="emphasized">preferences</span>
             and take the guesswork out of your job search with our intelligent job search tool.
           </p>
-          <button class="cta-primary">Sign up now</button>
+          <button @click="navigateToSignup" class="cta-primary">Sign up now</button>
         </div>
         <div class="right">
           <img src="/landing/job-hunt-amico-1.svg" alt="Jobs App Screenshot">

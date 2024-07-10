@@ -16,7 +16,7 @@
       <div class="job-comp" v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! /
     1000) }}k</div>
 
-      <div class="job-source">{{ jobRecencyText() }}</div>
+      <div class="job-source">{{ jobRecencyText(job.date_posted, job.date_pulled) }}</div>
 
       <!-- Summary -->
       <h4>Summary</h4>
@@ -50,12 +50,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import type { PropType } from 'vue';
 import type { Job } from '~/types/interfaces';
 import { marked } from 'marked';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore'
+import { jobRecencyText } from '~/utils/helpers';
 import '~/assets/buttons.css';
 
 const { $mixpanel } = useNuxtApp() as any;
@@ -102,37 +103,6 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
-
-const jobRecencyText = () => {
-  const todayDate = new Date().toISOString().split('T')[0];
-  const datePosted = props.job.date_posted;
-  const datePulled = props.job.date_pulled;
-
-  const dateDiff = (date1: string, date2: string) => Math.floor((Date.parse(date1) - Date.parse(date2)) / (1000 * 60 * 60 * 24));
-
-  const datePostedDiff = datePosted ? dateDiff(todayDate, datePosted) : null;
-  const datePulledDiff = dateDiff(todayDate, datePulled);
-
-  const dayText = (diff: number | null) => {
-    if (diff === null) return '';
-    if (diff === 0) return 'today!';
-    if (diff === 1) return 'yesterday';
-    return `${diff} days ago`;
-  };
-
-  const pulledText = `Pulled ${dayText(datePulledDiff)}`;
-
-  if (datePosted === datePulled) {
-    return pulledText;
-  }
-
-  if (datePosted) {
-    const postedText = dayText(datePostedDiff);
-    return `${pulledText} (posted ${postedText})`;
-  }
-
-  return pulledText;
-};
 
 const handleResize = () => {
   if (window.innerWidth > 768) {

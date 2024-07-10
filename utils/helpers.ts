@@ -121,3 +121,31 @@ export const transformDataToJobs = (data: any[]): Job[] => {
 export const renderMarkdown = (text: string) => {
   return marked(text);
 };
+
+export const jobRecencyText = (datePosted: string, datePulled: string) => {
+  const todayDate = new Date().toISOString().split('T')[0];
+  const dateDiff = (date1: string, date2: string) => Math.floor((Date.parse(date1) - Date.parse(date2)) / (1000 * 60 * 60 * 24));
+
+  const datePostedDiff = datePosted ? dateDiff(todayDate, datePosted) : null;
+  const datePulledDiff = dateDiff(todayDate, datePulled);
+
+  const dayText = (diff: number | null) => {
+    if (diff === null) return '';
+    if (diff === 0) return 'today!';
+    if (diff === 1) return 'yesterday';
+    return `${diff} days ago`;
+  };
+
+  const pulledText = `Pulled ${dayText(datePulledDiff)}`;
+
+  if (datePosted === datePulled) {
+    return pulledText;
+  }
+
+  if (datePosted) {
+    const postedText = dayText(datePostedDiff);
+    return `${pulledText} (posted ${postedText})`;
+  }
+
+  return pulledText;
+};

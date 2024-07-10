@@ -9,10 +9,13 @@
                 <div class="header-right">
                     <div class="title-and-link">
                         <h1>{{ job.title }} - {{ job.company }} ({{ job.location || 'Location not specified' }})</h1>
-                        <button @click="goToJobPost" class="go-to-job">Go to job post</button>
+                        <button @click="goToJobPost" class="go-to-job">
+                            <span class="go-to-job-text">Go to job post</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
                     </div>
                     <div class="meta-info">
-                        <span><b>Post Date:</b> {{ formatDate(job.date_posted) }}</span>
+                        <span><b>Date:</b> {{ jobRecencyText(job.date_posted, job.date_pulled) }}</span>
                         <span><b>Salary:</b> {{ formatSalary(job.comp_min, job.comp_max, job.comp_currency,
                             job.comp_interval)
                             }}</span>
@@ -56,7 +59,8 @@
                         <div v-html="renderMarkdown(hiringManagerGuidance)" />
                     </div>
                     <div class="guidance">
-                        <div v-html="renderMarkdown(overallGuidance)" />
+                        <i class="far fa-lightbulb"></i>
+                        <span v-html="renderMarkdown(overallGuidance)" />
                     </div>
                 </div>
             </div>
@@ -75,16 +79,16 @@
 
                         <div class="content-box column">
                             <h2>About {{ job.company }}</h2>
-                            <p>Company information placeholder</p>
+                            <p>Company information coming soon...</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="actions">
-                <button @click="markAsApplied" class="button-primary">Mark as applied</button>
-                <button @click="discardJob" class="button-secondary">Discard</button>
-            </div>
+            <button @click="takeActionToSetInterest(true)" class="button-primary">Save</button>
+            <button @click="takeActionToSetInterest(false)" class="button-secondary">Discard</button>
+        </div>
     </div>
 </template>
 
@@ -93,7 +97,9 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { type Job } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
-import { renderMarkdown } from '~/utils/helpers'
+import { renderMarkdown } from '@/utils/helpers'
+import { jobRecencyText } from '@/utils/helpers';
+import { setUserInterest } from '@/utils/jobs'
 
 const route = useRoute();
 const router = useRouter();
@@ -143,10 +149,6 @@ watch(
     { immediate: true }
 )
 
-const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString()
-}
-
 const formatSalary = (min: number | null, max: number | null, currency: string | null, interval: string | null): string => {
     if (!min && !max) return 'Not specified'
     const formatNumber = (num: number) => num.toLocaleString('en-US', { style: 'currency', currency: currency || 'USD' })
@@ -164,20 +166,11 @@ const goToJobPost = () => {
     }
 }
 
-const markAsApplied = async () => {
+const takeActionToSetInterest = async (interest: boolean) => {
     if (job.value) {
-        job.value.user_interested = true
-        // Implement API call to update job.user_interested
-        console.log('Marked as applied')
+        await setUserInterest(job.value.id, interest);
     }
-}
-
-const discardJob = async () => {
-    if (job.value) {
-        job.value.user_interested = false
-        // Implement API call to update job.user_interested
-        console.log('Job discarded')
-    }
+    router.push('/home');
 }
 </script>
 
@@ -201,7 +194,7 @@ const discardJob = async () => {
     background-color: #fff;
     display: flex;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     align-items: start;
 }
 
@@ -226,6 +219,10 @@ h1 {
     flex: 1;
 }
 
+.go-to-job-text {
+    margin: 0 8px;
+}
+
 .go-to-job {
     background-color: #DCE0E0;
     color: #040913;
@@ -234,8 +231,9 @@ h1 {
     padding: 10px 20px;
     font-weight: 400;
     cursor: pointer;
-    height: 32px;
+    height: 36px;
     width: 188px;
+    display: flex;
 }
 
 .meta-info {
@@ -248,7 +246,7 @@ h1 {
     border: 4px solid #59C9A5;
     border-radius: 4px;
     display: flex;
-    gap: 24px;
+    gap: 48px;
     padding: 20px;
 }
 
@@ -264,29 +262,46 @@ h1 {
     gap: 24px;
 }
 
+.group {
+    gap: 12px;
+}
+
 .scores-column {
     gap: 0px;
 }
 
-.group {
-    gap: 24px;
+
+.scores-column .score-item:nth-child(even) {
+    background-color: #EEFAF6;
 }
 
-.guidance {
-    background-color: #59c9a535;
+.scores-column .score-item:nth-child(odd) {
+    background-color: #fff;
 }
 
-.guidance p {
-    color: #040913E5;
-}
 
 .score-item {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 10px;
     width: 332px;
+    padding: 8px;
 }
+
+.guidance {
+    background-color: #EEFAF6;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+}
+
+.guidance i {
+    width: 24px;
+    color: #234F5B;
+    height: 32px;
+    padding: 16px;
+}
+
 
 .job-info {
     flex: 2;
@@ -317,12 +332,15 @@ button {
         align-items: start;
         gap: 16px;
     }
+
     .job-details {
         margin: 20px 20px;
     }
+
     .content-box {
         flex-direction: column;
     }
+
     .row {
         flex-direction: column;
     }

@@ -34,9 +34,9 @@
       <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
         @click="handleClick('viewDiscards')">View Discards</button>
     </div>
-    <div v-if="shouldShowBackButton" class="back-row">
+    <div @click="router.back()" v-if="shouldShowBackButton" class="back-row">
       <i class="fas fa-arrow-left"></i>
-      <button class="link" @click="router.back()">Back to Saved Results</button>
+      <button class="link">Back to Saved Results</button>
     </div>
   </header>
 </template>
@@ -184,6 +184,7 @@ watch(selectedUser, (newVal) => {
   gap: 12px;
   margin: 20px 40px;
   align-items: center;
+  cursor: pointer; 
 }
 
 i {
@@ -208,11 +209,16 @@ i {
   width: fit-content;
 }
 
-.link:hover,
-.link:focus {
+.back-row:hover .link,
+.back-row:focus-within .link {
   box-shadow: 0 4px 0 0 #59C9A5;
   color: #FFFFFF;
   outline: none;
+}
+
+.back-row:hover .fas,
+.back-row:focus-within .fas {
+  color: #fff;
 }
 
 .selected {

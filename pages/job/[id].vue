@@ -27,57 +27,57 @@
 
             <div id="personalized-info" class="content-box">
                 <div class="column scores-column">
-                    <h2>Your match scores for this job</h2>
+                    <h2 class="scores-h2">Your match scores for this job</h2>
                     <div class="score-item">
                         <span>Overall Score</span>
-                        <span>{{ job.overall_score }}</span>
+                        <span class="score">{{ job.overall_score }}</span>
                     </div>
                     <div class="score-item">
                         <span>Desire Score</span>
-                        <span>{{ job.desire_score }}</span>
+                        <span class="score">{{ job.desire_score }}</span>
                     </div>
                     <div class="score-item">
                         <span>Experience Score</span>
-                        <span>{{ job.experience_score }}</span>
+                        <span class="score">{{ job.experience_score }}</span>
                     </div>
                     <div class="score-item">
                         <span>Meets Requirements Score</span>
-                        <span>{{ job.meets_requirements_score }}</span>
+                        <span class="score">{{ job.meets_requirements_score }}</span>
                     </div>
                     <div class="score-item">
                         <span>Meets Experience Score</span>
-                        <span>{{ job.meets_experience_score }}</span>
+                        <span class="score">{{ job.meets_experience_score }}</span>
                     </div>
                 </div>
                 <div class="column group">
                     <div>
                         <h2>What you may think of this job</h2>
-                        <div v-html="renderMarkdown(youMayGuidance)" />
+                        <div class="rendered-content" v-html="renderMarkdown(youMayGuidance)" />
                     </div>
                     <div>
                         <h2>What the hiring manager may think</h2>
-                        <div v-html="renderMarkdown(hiringManagerGuidance)" />
+                        <div class="rendered-content" v-html="renderMarkdown(hiringManagerGuidance)" />
                     </div>
                     <div class="guidance">
                         <i class="far fa-lightbulb larger-icon"></i>
-                        <span v-html="renderMarkdown(overallGuidance)" />
+                        <span class="rendered-content" v-html="renderMarkdown(overallGuidance)" />
                     </div>
                 </div>
             </div>
 
             <div id="job-and-company">
                 <div class="row">
-                    <div class="content-box column">
+                    <div class="content-box column single-row-column">
                         <h2>Job Post Summary</h2>
                         <div v-html="renderMarkdown(job.short_summary)" />
                     </div>
                     <div class="column">
-                        <div class="content-box column">
+                        <div class="content-box column single-row-column">
                             <h2>Role Requirements</h2>
                             <div v-html="renderMarkdown(job.hard_requirements)" />
                         </div>
 
-                        <div class="content-box column">
+                        <div class="content-box column single-row-column">
                             <h2>About {{ job.company }}</h2>
                             <p>Company information coming soon...</p>
                         </div>
@@ -257,6 +257,10 @@ h1 {
     flex: 1;
 }
 
+.single-row-column {
+    gap: 0px;
+}
+
 .group {
     gap: 12px;
 }
@@ -265,7 +269,6 @@ h1 {
     gap: 0px;
     flex: 0;
 }
-
 
 .scores-column .score-item:nth-child(even) {
     background-color: #EEFAF6;
@@ -284,6 +287,10 @@ h1 {
     padding: 8px;
 }
 
+.score {
+    font-weight: 600;
+}
+
 .guidance {
     background-color: #EEFAF6;
     display: flex;
@@ -300,7 +307,7 @@ i {
 }
 
 .larger-icon {
-    font-size: 24px;
+    font-size: 32px;
 }
 
 .job-info {
@@ -309,7 +316,11 @@ i {
 
 h2 {
     font-size: 18px;
-    margin-bottom: 10px;
+    margin: 0;
+}
+
+.scores-h2 {
+    margin-bottom: 16px;
 }
 
 .actions {

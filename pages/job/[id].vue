@@ -9,7 +9,7 @@
                 <div class="header-right">
                     <div class="title-and-link">
                         <h1>{{ job.title }} - {{ job.company }} ({{ job.location || 'Location not specified' }})</h1>
-                        <button @click="goToJobPost" class="go-to-job">
+                        <button @click="goToJobPost" class="button-secondary">
                             <span class="go-to-job-text">Go to job post</span>
                             <i class="fas fa-external-link-alt"></i>
                         </button>
@@ -59,7 +59,7 @@
                         <div v-html="renderMarkdown(hiringManagerGuidance)" />
                     </div>
                     <div class="guidance">
-                        <i class="far fa-lightbulb"></i>
+                        <i class="far fa-lightbulb larger-icon"></i>
                         <span v-html="renderMarkdown(overallGuidance)" />
                     </div>
                 </div>
@@ -98,8 +98,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { type Job } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
 import { renderMarkdown } from '@/utils/helpers'
-import { jobRecencyText } from '@/utils/helpers';
+import { jobRecencyText } from '@/utils/helpers'
 import { setUserInterest } from '@/utils/jobs'
+import '@/assets/buttons.css'
+
 
 const route = useRoute();
 const router = useRouter();
@@ -198,6 +200,11 @@ const takeActionToSetInterest = async (interest: boolean) => {
     align-items: start;
 }
 
+.header-left {
+    display: flex;
+    flex: 0;
+}
+
 .header-right {
     display: flex;
     flex-direction: column;
@@ -221,19 +228,6 @@ h1 {
 
 .go-to-job-text {
     margin: 0 8px;
-}
-
-.go-to-job {
-    background-color: #DCE0E0;
-    color: #040913;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-weight: 400;
-    cursor: pointer;
-    height: 36px;
-    width: 188px;
-    display: flex;
 }
 
 .meta-info {
@@ -260,6 +254,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    flex: 1;
 }
 
 .group {
@@ -268,6 +263,7 @@ h1 {
 
 .scores-column {
     gap: 0px;
+    flex: 0;
 }
 
 
@@ -295,13 +291,17 @@ h1 {
     border-radius: 4px;
 }
 
-.guidance i {
-    width: 24px;
+i {
     color: #234F5B;
-    height: 32px;
+}
+
+.guidance i {
     padding: 16px;
 }
 
+.larger-icon {
+    font-size: 24px;
+}
 
 .job-info {
     flex: 2;
@@ -324,6 +324,7 @@ h2 {
 button {
     width: 178px;
     height: 32px;
+    padding: 0;
 }
 
 @media (max-width: 1200px) {

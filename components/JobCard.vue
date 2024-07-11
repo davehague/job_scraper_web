@@ -39,22 +39,24 @@
       <!-- Latest Search -->
       <div v-if="job.user_interested === null && !job.has_applied" class="action-buttons">
         <button @click="markUserInterest(true)" class="button-primary">Save</button>
+        <!-- <button @click="markAsApplied(!job.has_applied)" class="button-primary">Mark as applied</button> -->
         <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
       </div>
       <!-- Saved Results -->
       <div v-else-if="job.user_interested === true && !job.has_applied" class="action-buttons">
         <button @click="markAsApplied(!job.has_applied)" class="button-primary">Mark as applied</button>
-        <button @click="markUserInterest(null)" class="button-secondary">Unsave</button>
+        <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
       </div>
       <!-- View Applied -->
       <div v-if="job.has_applied && (job.user_interested === null || job.user_interested === true)"
         class="action-buttons">
-        <button @click="markAsApplied(!job.has_applied)" class="button-primary">Unmark as applied</button>
+        <button @click="restoreToSaved()" class="button-primary">Move to saved</button>
         <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
       </div>
       <!-- View Discards -->
       <div v-else-if="job.user_interested === false" class="action-buttons">
-        <button @click="markUserInterest(null)" class="button-secondary">Restore</button>
+        <button @click="restoreToSaved()" class="button-primary">Move to saved</button>
+        <button @click="restoreToApplied()" class="button-secondary">Mark as applied</button>
       </div>
     </div>
   </div>
@@ -114,6 +116,16 @@ const toggleRequirements = () => {
 const toggleSummary = () => {
   showFullSummary.value = !showFullSummary.value;
 };
+
+const restoreToSaved = () => {
+  markUserInterest(true);
+  markAsApplied(false);
+}
+
+const restoreToApplied = () => {
+  markUserInterest(true);
+  markAsApplied(true);
+}
 
 const markUserInterest = async (interested: boolean | null) => {
   setUserInterest(props.job.id, interested);

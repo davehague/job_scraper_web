@@ -25,10 +25,10 @@
                 </div>
             </div>
 
-            <div id="personalized-info" class="content-box">
+            <div id="personalized-info" class="content-box" :style="{ borderColor: getScoreColor(job.overall_score) }">
                 <div class="column scores-column">
                     <h2 class="scores-h2">Your match scores for this job</h2>
-                    <div class="score-item">
+                    <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
                         <span>Overall Score</span>
                         <span class="score">{{ job.overall_score }}</span>
                     </div>
@@ -36,7 +36,7 @@
                         <span>Desire Score</span>
                         <span class="score">{{ job.desire_score }}</span>
                     </div>
-                    <div class="score-item">
+                    <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
                         <span>Experience Score</span>
                         <span class="score">{{ job.experience_score }}</span>
                     </div>
@@ -44,7 +44,7 @@
                         <span>Meets Requirements Score</span>
                         <span class="score">{{ job.meets_requirements_score }}</span>
                     </div>
-                    <div class="score-item">
+                    <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
                         <span>Meets Experience Score</span>
                         <span class="score">{{ job.meets_experience_score }}</span>
                     </div>
@@ -58,7 +58,7 @@
                         <h2>What the hiring manager may think</h2>
                         <div class="rendered-content" v-html="renderMarkdown(hiringManagerGuidance)" />
                     </div>
-                    <div class="guidance">
+                    <div class="guidance" :style="{ background: getScoreItemStyle(job.overall_score) }">
                         <i class="far fa-lightbulb larger-icon"></i>
                         <span class="rendered-content" v-html="renderMarkdown(overallGuidance)" />
                     </div>
@@ -67,17 +67,20 @@
 
             <div id="job-and-company">
                 <div class="row">
-                    <div class="content-box column single-row-column">
+                    <div class="content-box column single-row-column"
+                        :style="{ borderColor: getScoreColor(job.overall_score) }">
                         <h2>Job Post Summary</h2>
                         <div v-html="renderMarkdown(job.short_summary)" />
                     </div>
                     <div class="column">
-                        <div class="content-box column single-row-column">
+                        <div class="content-box column single-row-column"
+                            :style="{ borderColor: getScoreColor(job.overall_score) }">
                             <h2>Role Requirements</h2>
                             <div v-html="renderMarkdown(job.hard_requirements)" />
                         </div>
 
-                        <div class="content-box column single-row-column">
+                        <div class="content-box column single-row-column"
+                            :style="{ borderColor: getScoreColor(job.overall_score) }">
                             <h2>About {{ job.company }}</h2>
                             <p>Company information coming soon...</p>
                         </div>
@@ -99,7 +102,7 @@ import { type Job } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
 import { renderMarkdown } from '@/utils/helpers'
 import { jobRecencyText } from '@/utils/helpers'
-import { setUserInterest } from '@/utils/jobs'
+import { setUserInterest, getScoreColor } from '@/utils/jobs'
 import '@/assets/buttons.css'
 
 
@@ -174,6 +177,11 @@ const takeActionToSetInterest = async (interest: boolean) => {
     }
     router.push('/home');
 }
+
+const getScoreItemStyle = (score: number | undefined) => {
+    const color = getScoreColor(score);
+    return `${color}22`; // Add 22 to the end of the color to make it 15% opaque
+};
 </script>
 
 <style scoped>
@@ -269,15 +277,6 @@ h1 {
     gap: 0px;
     flex: 0;
 }
-
-.scores-column .score-item:nth-child(even) {
-    background-color: #EEFAF6;
-}
-
-.scores-column .score-item:nth-child(odd) {
-    background-color: #fff;
-}
-
 
 .score-item {
     display: flex;

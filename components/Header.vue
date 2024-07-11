@@ -36,7 +36,7 @@
     </div>
     <div @click="router.back()" v-if="shouldShowBackButton" class="back-row">
       <i class="fas fa-arrow-left"></i>
-      <button class="link">Back to Saved Results</button>
+      <button class="link">Back to Results</button>
     </div>
   </header>
 </template>

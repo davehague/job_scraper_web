@@ -1,19 +1,15 @@
 <template>
-  <div class="score-circle" :style="{ backgroundColor: getScoreColor() }">
+  <div class="score-circle" :style="{ backgroundColor: getScoreColor(props.overall_score) }">
     <span class="score-text">{{ props.overall_score }}</span>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { getScoreColor } from '@/utils/jobs';
+
 const props = defineProps({
   overall_score: Number
 });
-
-const getScoreColor = () => {
-  if (props.overall_score === undefined) return '#888';
-
-  return props.overall_score >= 85 ? '#59C9A5' : props.overall_score > 75 ? '#93c1b2' : '#888';
-};
 
 </script>
 

@@ -21,7 +21,6 @@
                             }}</span>
                         <span><b>Location Type:</b> {{ job.location ? 'On site' : 'Remote' }}</span>
                     </div>
-
                 </div>
             </div>
 
@@ -88,10 +87,17 @@
                 </div>
             </div>
         </div>
-        <div class="actions">
+        <!-- <div class="actions">
             <button @click="markUserInterest(true)" class="button-primary">Save</button>
             <button @click="markAsApplied(true)" class="button-primary">Mark as applied</button>
             <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
+        </div> -->
+        <div v-if="job">
+            <div class="actions-bar">
+                <div class="actions-container">
+                    <JobActionButtons :job="job" @applied-updated="actionComplete" @interest-updated="actionComplete" />
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -172,19 +178,9 @@ const goToJobPost = () => {
     }
 }
 
-const markUserInterest = async (interest: boolean) => {
-    if (job.value) {
-        await setUserInterest(job.value.id, interest);
-    }
+const actionComplete = () => {
     router.push('/home');
-}
-
-const markAsApplied = async (has_applied: boolean) => {
-    if (job.value) {
-        await setHasApplied(job.value.id, has_applied);
-    }
-    router.push('/home');
-}
+};
 
 const getScoreItemStyle = (score: number | undefined) => {
     const color = getScoreColor(score);
@@ -330,13 +326,19 @@ h2 {
     margin-bottom: 16px;
 }
 
-.actions {
+.actions-bar {
     display: flex;
     gap: 24px;
     padding: 10px 0;
     margin: 20px 0px;
     box-shadow: 4px -6px 20px 0px #0409131A;
     padding-left: 235px;
+}
+
+.actions-container {
+    display: flex;
+    gap: 24px;
+    min-width: 400px;
 }
 
 button {

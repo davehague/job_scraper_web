@@ -36,42 +36,18 @@
 
     <!-- Action buttons -->
     <div v-if="userLoggedIn">
-      <!-- Latest Search -->
-      <div v-if="job.user_interested === null && !job.has_applied" class="action-buttons">
-        <button @click="markUserInterest(true)" class="button-primary">Save</button>
-        <!-- <button @click="markAsApplied(!job.has_applied)" class="button-primary">Mark as applied</button> -->
-        <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
-      </div>
-      <!-- Saved Results -->
-      <div v-else-if="job.user_interested === true && !job.has_applied" class="action-buttons">
-        <button @click="markAsApplied(!job.has_applied)" class="button-primary">Mark as applied</button>
-        <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
-      </div>
-      <!-- View Applied -->
-      <div v-if="job.has_applied && (job.user_interested === null || job.user_interested === true)"
-        class="action-buttons">
-        <button @click="restoreToSaved()" class="button-primary">Move to saved</button>
-        <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
-      </div>
-      <!-- View Discards -->
-      <div v-else-if="job.user_interested === false" class="action-buttons">
-        <button @click="restoreToSaved()" class="button-primary">Move to saved</button>
-        <button @click="restoreToApplied()" class="button-secondary">Mark as applied</button>
-      </div>
+      <JobActionButtons :job="job" @interestUpdated="interestUpdated" @appliedUpdated="appliedUpdated" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, type PropType } from 'vue';
 import { useRouter } from 'vue-router'
-import type { PropType } from 'vue';
 import type { Job } from '@/types/interfaces';
 import { marked } from 'marked';
 import { useJsaStore } from '@/stores/jsaStore'
 import { jobRecencyText } from '@/utils/helpers';
-import { setHasApplied, setUserInterest } from '@/utils/jobs';
-import '@/assets/buttons.css';
 
 const { $mixpanel } = useNuxtApp() as any;
 
@@ -117,24 +93,12 @@ const toggleSummary = () => {
   showFullSummary.value = !showFullSummary.value;
 };
 
-const restoreToSaved = () => {
-  markUserInterest(true);
-  markAsApplied(false);
-}
-
-const restoreToApplied = () => {
-  markUserInterest(true);
-  markAsApplied(true);
-}
-
-const markUserInterest = async (interested: boolean | null) => {
-  setUserInterest(props.job.id, interested);
-  emits('interestUpdated', props.job.id, interested);
+const interestUpdated = (jobId: string, interested: boolean | null) => {
+  emits('interestUpdated', jobId, interested);
 };
 
-const markAsApplied = (hasApplied: boolean) => {
-  setHasApplied(props.job.id, hasApplied);
-  emits('appliedUpdated', props.job.id, hasApplied)
+const appliedUpdated = (jobId: string, hasApplied: boolean) => {
+  emits('appliedUpdated', jobId, hasApplied);
 };
 
 const renderMarkdown = (text: string) => {
@@ -260,20 +224,6 @@ const isOlder = () => {
 
 .expandable-section {
   cursor: pointer;
-}
-
-.job-card .action-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin: 10px 0 0 0;
-  gap: 24px;
-}
-
-.job-card button {
-  border-radius: 4px;
-  padding: 4px 32px;
-  height: 32px;
-  font-weight: 400;
 }
 
 .link-to-job {

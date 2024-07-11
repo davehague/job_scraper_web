@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Header @filter="updateVisibleJobs" />
+    <Header :selectedFilter="currentFilter" @filter="updateVisibleJobs" />
     <div v-if="isOnboarding">
       <div class="spinner-container">
         <span class="spinner"></span>
@@ -10,8 +10,7 @@
     </div>
     <div v-else>
       <div class="job-list" v-if="visibleJobs.length > 0">
-        <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" 
-          @interestUpdated="interestUpdated"
+        <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
           @appliedUpdated="appliedUpdated" />
       </div>
       <div v-if="visibleJobs.length === 0" class="no-jobs">
@@ -159,10 +158,19 @@ onMounted(async () => {
 
     const loggedInUserId = store.authUser?.id || null;
     await fetchJobs(loggedInUserId)
+
+    checkForUrlFilter();
     recalculateVisibleJobs();
     // intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
   }
 })
+
+const checkForUrlFilter = () => {
+  const filter = route.query.filter;
+  if (filter) {
+    currentFilter.value = filter as string;
+  }
+}
 
 const fetchJobsRepeatedly = async () => {
   let attempts = 0;

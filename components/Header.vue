@@ -13,7 +13,7 @@
         </select>
         <div class="user-details" @click="toggleProfileMenu" v-if="store.authUser">
           <div class="username">{{ userName }}</div>
-          <img :src="userProfileURL" class="profile-pic" alt="User profile picture"/>
+          <img :src="userProfileURL" class="profile-pic" alt="User profile picture" />
           <div v-if="showMenu" class="dropdown-menu">
             <button @click="goToProfile">Profile</button>
             <button @click="signOut">Sign Out</button>
@@ -51,8 +51,14 @@ import PersistentDataService from '@/services/PersistentDataService';
 import { supabase } from "@/utils/supabaseClient";
 import { type AuthChangeEvent, type Session } from "@supabase/supabase-js";
 
+const props = withDefaults(defineProps<{
+  selectedFilter?: string
+}>(), {
+  selectedFilter: 'latestSearch'
+})
+
 const emitFilter = defineEmits(['filter']);
-const selectedLink = ref('latestSearch');
+const selectedLink = ref('');
 
 const router = useRouter()
 const publicUsers = ref<DBUser[]>([]);
@@ -69,7 +75,7 @@ const userIsNotLoggedIn = ref(false);
 const userIsAdmin = ref(false);
 
 const shouldShowLinkRow = computed(() => {
-  if(userIsNotLoggedIn.value) return false;
+  if (userIsNotLoggedIn.value) return false;
   return !router.currentRoute.value.path.includes('job');
 })
 
@@ -84,7 +90,7 @@ const handleClick = (filterType: string) => {
 
 const fetchRoles = async (type: string) => {
   if (type === 'public') {
-    const items = await PersistentDataService.fetchPublicUsers() as DBUser[]; 
+    const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
     publicUsers.value = items.sort((a, b) => a.name.localeCompare(b.name));
     const userId = publicUsers.value[0].id;
     store.setSelectedUserId(userId);
@@ -144,12 +150,23 @@ onMounted(async () => {
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     store.setAuthUser(session?.user || null);
   });
+
+  handleClick(props.selectedFilter || 'latestSearch');
 })
 
 watch(selectedUser, (newVal) => {
   console.log('Setting a new selected user:', newVal);
   store.setSelectedUserId(newVal);
 })
+
+watch(() => props.selectedFilter, (newVal) => {
+  const validFilter = ['latestSearch', 'savedResults', 'viewApplied', 'viewDiscards'].includes(newVal);
+  console.log('New filter:', newVal, 'Valid:', validFilter);
+  if (validFilter)
+    handleClick(newVal);
+  }
+)
+
 </script>
 
 <style scoped>
@@ -184,7 +201,7 @@ watch(selectedUser, (newVal) => {
   gap: 12px;
   margin: 20px 40px;
   align-items: center;
-  cursor: pointer; 
+  cursor: pointer;
 }
 
 i {

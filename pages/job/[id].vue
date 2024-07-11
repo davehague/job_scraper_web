@@ -87,15 +87,10 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="actions">
-            <button @click="markUserInterest(true)" class="button-primary">Save</button>
-            <button @click="markAsApplied(true)" class="button-primary">Mark as applied</button>
-            <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
-        </div> -->
         <div v-if="job">
             <div class="actions-bar">
                 <div class="actions-container">
-                    <JobActionButtons :job="job" @applied-updated="actionComplete" @interest-updated="actionComplete" />
+                    <JobActionButtons :job="job" @applied-updated="appliedUpdated" @interest-updated="interestUpdated" />
                 </div>
             </div>
         </div>
@@ -178,8 +173,20 @@ const goToJobPost = () => {
     }
 }
 
-const actionComplete = () => {
-    router.push('/home');
+const appliedUpdated = (jobId: string, applied: boolean) => {
+    if(applied)
+        router.push('/home?filter=viewApplied')
+    else
+        router.push('/home?filter=savedResults')
+};
+
+const interestUpdated = (jobId: string, interest: boolean | null) => {
+    if(interest === null)
+        router.push('/home')
+    else if (interest)
+        router.push('/home?filter=savedResults')
+    else
+        router.push('/home?filter=viewDiscards')
 };
 
 const getScoreItemStyle = (score: number | undefined) => {

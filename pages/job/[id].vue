@@ -89,8 +89,9 @@
             </div>
         </div>
         <div class="actions">
-            <button @click="takeActionToSetInterest(true)" class="button-primary">Save</button>
-            <button @click="takeActionToSetInterest(false)" class="button-secondary">Discard</button>
+            <button @click="markUserInterest(true)" class="button-primary">Save</button>
+            <button @click="markAsApplied(true)" class="button-primary">Mark as applied</button>
+            <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
         </div>
     </div>
 </template>
@@ -102,7 +103,7 @@ import { type Job } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
 import { renderMarkdown } from '@/utils/helpers'
 import { jobRecencyText } from '@/utils/helpers'
-import { setUserInterest, getScoreColor } from '@/utils/jobs'
+import { setUserInterest, setHasApplied, getScoreColor } from '@/utils/jobs'
 import '@/assets/buttons.css'
 
 
@@ -171,9 +172,16 @@ const goToJobPost = () => {
     }
 }
 
-const takeActionToSetInterest = async (interest: boolean) => {
+const markUserInterest = async (interest: boolean) => {
     if (job.value) {
         await setUserInterest(job.value.id, interest);
+    }
+    router.push('/home');
+}
+
+const markAsApplied = async (has_applied: boolean) => {
+    if (job.value) {
+        await setHasApplied(job.value.id, has_applied);
     }
     router.push('/home');
 }

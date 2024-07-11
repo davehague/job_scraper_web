@@ -1,20 +1,16 @@
 <!-- components/JobCard.vue -->
 <template>
   <div :class="['job-card', { 'older-job': isOlder }]">
-    <div class="title-and-score">
-
-      <h2 class="title" @click="openDetails">{{ job.title }}</h2>
-
-      <Tooltip :content="tooltipContent">
-        <ScoreCircle :overall_score="job.overall_score" />
-      </Tooltip>
+    <div class="title-and-score" @click="openDetails">
+      <h2 class="title">{{ job.title }}</h2>
+      <ScoreCircle :overall_score="job.overall_score" />
     </div>
     <div class="content-container" v-if="showContent">
       <div class="company">
         <span>{{ job.company }}</span>&nbsp;<span v-if="job.location">({{ job.location }})</span>
       </div>
       <div class="job-comp" v-if="job.comp_interval">${{ round(job.comp_min! / 1000) }}k to ${{ round(job.comp_max! /
-    1000) }}k</div>
+        1000) }}k</div>
 
       <div class="job-source">{{ jobRecencyText(job.date_posted, job.date_pulled) }}</div>
 
@@ -32,18 +28,34 @@
     </div>
 
     <!-- Job link -->
-    <a :href="job.url" @click="openInBrowser">View Job</a>
+    <div class="link-to-job" @click.prevent="openJobInBrowser(job.url)" @keydown.enter="openJobInBrowser(job.url)"
+      tabindex="0">
+      <a :href="job.url" @click.prevent>View Job</a>
+      <i class="fas fa-external-link-alt"></i>
+    </div>
 
     <!-- Action buttons -->
-    <div v-if="userLoggedIn" class="action-buttons">
-      <button v-if="userAction !== false" @click="setUserInterest(userAction === true ? null : true)"
-        class="button-primary">
-        {{ userAction === true ? 'Saved' : 'Save' }}
-      </button>
-      <button v-if="userAction !== true" @click="setUserInterest(userAction === false ? null : false)"
-        class="button-secondary">
-        {{ userAction === false ? 'Discarded' : 'Discard' }}
-      </button>
+    <div v-if="userLoggedIn">
+      <!-- Latest Search -->
+      <div v-if="job.user_interested === null && !job.has_applied" class="action-buttons">
+        <button @click="markUserInterest(true)" class="button-primary">Save</button>
+        <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
+      </div>
+      <!-- Saved Results -->
+      <div v-else-if="job.user_interested === true && !job.has_applied" class="action-buttons">
+        <button @click="markAsApplied(!job.has_applied)" class="button-primary">Mark as applied</button>
+        <button @click="markUserInterest(null)" class="button-secondary">Unsave</button>
+      </div>
+      <!-- View Applied -->
+      <div v-if="job.has_applied && (job.user_interested === null || job.user_interested === true)"
+        class="action-buttons">
+        <button @click="markAsApplied(!job.has_applied)" class="button-primary">Unmark as applied</button>
+        <button @click="markUserInterest(false)" class="button-secondary">Discard</button>
+      </div>
+      <!-- View Discards -->
+      <div v-else-if="job.user_interested === false" class="action-buttons">
+        <button @click="markUserInterest(null)" class="button-secondary">Restore</button>
+      </div>
     </div>
   </div>
 </template>
@@ -52,12 +64,12 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router'
 import type { PropType } from 'vue';
-import type { Job } from '~/types/interfaces';
+import type { Job } from '@/types/interfaces';
 import { marked } from 'marked';
-import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore'
-import { jobRecencyText } from '~/utils/helpers';
-import '~/assets/buttons.css';
+import { jobRecencyText } from '@/utils/helpers';
+import { setHasApplied, setUserInterest } from '@/utils/jobs';
+import '@/assets/buttons.css';
 
 const { $mixpanel } = useNuxtApp() as any;
 
@@ -74,30 +86,11 @@ const userLoggedIn = store.authUser !== null;
 const showRequirements = ref(false);
 const showFullSummary = ref(false);
 const showContent = ref(true);
-const userAction = ref<boolean | null>(null);
 
-const emitInterestSet = defineEmits(['interestSet']);
-
-const tooltipContent = computed(() => {
-  let g = ''
-  if (props.job.guidance)
-    g = props.job.guidance.replace(/\./g, '.<br><br>');
-
-  return `Overall Score: ${props.job.overall_score}<br>
-Desire Score: ${props.job.desire_score}<br>
-Experience Score: ${props.job.experience_score}<br>
-Meets Requirements Score: ${props.job.meets_requirements_score}<br>
-Meets Experience Score: ${props.job.meets_experience_score}<br>
-<br>
-Guidance: ${g}`;
-});
+const emits = defineEmits(['interestUpdated', 'appliedUpdated']);
 
 onMounted(async () => {
   window.addEventListener('resize', handleResize);
-  const result = await getUserInterest();
-  if (result) {
-    userAction.value = result.interested;
-  }
 });
 
 onUnmounted(() => {
@@ -114,7 +107,6 @@ const openDetails = () => {
   router.push(`/job/${props.job.id}`);
 };
 
-
 const toggleRequirements = () => {
   showRequirements.value = !showRequirements.value;
 };
@@ -123,31 +115,14 @@ const toggleSummary = () => {
   showFullSummary.value = !showFullSummary.value;
 };
 
-const setUserInterest = async (interested: boolean | null) => {
-  try {
-    const uid = store.authUser?.id || '';
-    if (!uid) return;
-
-    const result = await PersistentDataService.setUserInterest(uid, props.job.id, interested);
-    userAction.value = interested;
-
-    emitInterestSet('interestSet', props.job.id, interested);
-  } catch (error) {
-    console.error("Failed to set user interest:", error);
-  }
+const markUserInterest = async (interested: boolean | null) => {
+  setUserInterest(props.job.id, interested);
+  emits('interestUpdated', props.job.id, interested);
 };
 
-const getUserInterest = async () => {
-  try {
-    const uid = store.authUser?.id || '';
-    if (!uid) return null;
-
-    const result = await PersistentDataService.getUserInterest(uid, props.job.id);
-    return result;
-  } catch (error) {
-    console.error("Failed to get user interest:", error);
-    return null;
-  }
+const markAsApplied = (hasApplied: boolean) => {
+  setHasApplied(props.job.id, hasApplied);
+  emits('appliedUpdated', props.job.id, hasApplied)
 };
 
 const renderMarkdown = (text: string) => {
@@ -165,12 +140,9 @@ const round = (value: number) => {
   return Math.round(value);
 };
 
-const openInBrowser = (event: MouseEvent) => {
-  event.preventDefault();
-  const url = (event.target as HTMLAnchorElement)?.href;
+const openJobInBrowser = (url: string) => {
   $mixpanel.track('Job clicked', { job_id: props.job.id, job_url: props.job.url, job_site: props.job.job_site });
-
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 };
 
 const isOlder = () => {
@@ -210,6 +182,7 @@ const isOlder = () => {
   justify-content: space-between;
   align-items: flex-start;
   position: relative;
+  cursor: pointer;
 }
 
 .title {
@@ -289,6 +262,14 @@ const isOlder = () => {
   padding: 4px 32px;
   height: 32px;
   font-weight: 400;
+}
+
+.link-to-job {
+  display: flex;
+  gap: 8px;
+  justify-content: start;
+  align-items: center;
+  cursor: pointer;
 }
 
 .save-button,

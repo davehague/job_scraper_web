@@ -19,6 +19,7 @@ export interface Job {
 
     user_id: string
     user_interested: boolean | null
+    has_applied: boolean
     
     overall_score: number
     desire_score: number
@@ -60,6 +61,7 @@ export interface Job {
     user_id: string
     job_id: string
     interested: boolean
+    has_applied: boolean
     score: number
     desire_score: number
     experience_score: number

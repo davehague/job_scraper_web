@@ -10,7 +10,9 @@
     </div>
     <div v-else>
       <div class="job-list" v-if="visibleJobs.length > 0">
-        <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestSet="interestUpdatedOnJob" />
+        <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" 
+          @interestUpdated="interestUpdated"
+          @appliedUpdated="appliedUpdated" />
       </div>
       <div v-if="visibleJobs.length === 0" class="no-jobs">
         <p>{{ noJobsMessage }} </p>
@@ -48,16 +50,15 @@ const updateVisibleJobs = (filterType: string) => {
   currentFilter.value = filterType;
   switch (filterType) {
     case 'latestSearch':
-      visibleJobs.value = allJobs.value.filter(job => job.user_interested == null);
-      noJobsMessage.value = "We're very sorry, but we weren't able to find any jobs with those parameters. Perhaps more will appear on the next run.  If you're still having trouble please refresh the page or reach out to David!";
+      visibleJobs.value = allJobs.value.filter(job => job.user_interested == null && !job.has_applied);
+      noJobsMessage.value = "No jobs are available at the moment. Please check back later.";
       break;
     case 'savedResults':
-      visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && job.user_interested);
+      visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && job.user_interested && !job.has_applied);
       noJobsMessage.value = 'No saved jobs found.';
       break;
     case 'viewApplied':
-      // TODO: Implement applied
-      visibleJobs.value = [];
+      visibleJobs.value = allJobs.value.filter(job => job.has_applied && job.user_interested !== false);
       noJobsMessage.value = 'No applied jobs found.';
       break;
     case 'viewDiscards':
@@ -98,7 +99,15 @@ const fetchJobs = async (loggedInUserId: string | null) => {
   }
 };
 
-const interestUpdatedOnJob = (jobId: string, interested: boolean | null) => {
+const appliedUpdated = (jobId: string, applied: boolean) => {
+  const job = allJobs.value.find(job => job.id === jobId);
+  if (job) {
+    job.has_applied = applied;
+  }
+  recalculateVisibleJobs();
+}
+
+const interestUpdated = (jobId: string, interested: boolean | null) => {
   const job = allJobs.value.find(job => job.id === jobId);
   if (job) {
     job.user_interested = interested;

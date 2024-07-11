@@ -37,6 +37,10 @@ const props = defineProps({
   position: absolute;
 }
 
+.score-circle:hover {
+  box-shadow: 2px 4px 16px 0px #26323880;
+}
+
 .score-text {
   position: relative;
   z-index: 1;

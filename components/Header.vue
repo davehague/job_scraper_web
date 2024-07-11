@@ -2,7 +2,7 @@
   <header class="header">
     <div class="title-row">
       <div class="left">
-        <h2 class="app-name">Jobs App</h2>
+        <h2 class="app-name">Job Scout</h2>
       </div>
       <div class="right">
         <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedUser">
@@ -29,8 +29,8 @@
         @click="handleClick('latestSearch')">Latest Search</button>
       <button class="link" :class="{ selected: selectedLink === 'savedResults' }"
         @click="handleClick('savedResults')">Saved Results</button>
-      <!-- <button class="link" :class="{ selected: selectedLink === 'viewApplied' }"
-        @click="handleClick('viewApplied')">View Applied</button> -->
+      <button class="link" :class="{ selected: selectedLink === 'viewApplied' }"
+        @click="handleClick('viewApplied')">View Applied</button>
       <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
         @click="handleClick('viewDiscards')">View Discards</button>
     </div>

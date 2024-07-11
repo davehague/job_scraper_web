@@ -109,6 +109,7 @@ export const transformDataToJobs = (data: any[]): Job[] => {
 
     user_id: item.user_id,
     user_interested: item.interested,
+    has_applied: item.has_applied,
     overall_score: parseInt(item.score, 10),
     desire_score: parseInt(item.desire_score, 10),
     experience_score: parseInt(item.experience_score, 10),

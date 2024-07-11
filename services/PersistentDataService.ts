@@ -156,6 +156,21 @@ export default class PersistentDataService {
     return data.length > 0 ? (data[0] as UsersJobs) : null;
   }
 
+  static async setHasApplied(userId: string, jobId: string, has_applied: boolean) {
+    const query = supabase
+      .from("users_jobs")
+      .upsert([{ user_id: userId, job_id: jobId, has_applied }])
+      .select();
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error marking as applied:", error);
+      throw error;
+    }
+
+    return data.length > 0 ? data[0] : null;
+  }
+
   // ============= userProfile.vue ============= //
   static async fetchUserById(id: string): Promise<User | null> {
     const query = supabase.from("users").select("*").eq("id", id);

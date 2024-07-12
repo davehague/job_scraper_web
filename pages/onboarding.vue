@@ -39,6 +39,10 @@
           </p>
           <textarea v-model="formData.resume" rows="20" style="width: 100%;"
             placeholder="Paste your resume here"></textarea>
+          <div>
+            <input type="file" @change="handleFileUpload" accept=".pdf" />
+            <button @click="uploadFile" :disabled="!file">Upload Resume</button>
+          </div>
         </template>
       </OnboardingScreen>
 
@@ -88,8 +92,7 @@
       <!-- Additional search info -->
       <OnboardingScreen v-if="currentScreen === 3" :onSubmit="submitAdditionalSearchInfo"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :validateForm="validateAdditionalSearchInfoForm"
-        :isSubmitting="isSubmitting">
+        :validateForm="validateAdditionalSearchInfoForm" :isSubmitting="isSubmitting">
         <h2>Now, let's dig into what you're looking for</h2>
         <p class="instructions">This will help us find the best matches for your career goals. Use commas to separate
           entries in each field.</p>
@@ -97,12 +100,12 @@
         <div class="label-container">
           <label>List the top 2-5 skills that show that a job is a good fit for you</label>
         </div>
-        <input v-model="formData.skillWords" type="text" :placeholder=skillWordsPlaceholder  />
+        <input v-model="formData.skillWords" type="text" :placeholder=skillWordsPlaceholder />
 
         <div class="label-container">
           <label>List 2-5 skills that show that a job is a NOT a good fit for you</label>
         </div>
-        <input v-model="formData.skillStopWords" type="text" :placeholder=skillStopWordsPlaceholder  />
+        <input v-model="formData.skillStopWords" type="text" :placeholder=skillStopWordsPlaceholder />
 
         <div class="label-container">
           <label>List any job titles or descriptors (senior, manager, etc.) that you're NOT looking for</label>
@@ -215,6 +218,44 @@ const formData = ref({
   intentions: [],
 });
 
+const file = ref<File | null>(null)
+
+const handleFileUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    file.value = target.files[0]
+  }
+}
+
+const uploadFile = async () => {
+  if (!file.value) {
+    console.log('Please select a file first.');
+    return
+  }
+
+  const resumeData = new FormData()
+  resumeData.append('pdfs', file.value)
+
+  try {
+    const response = await fetch('/api/upload-resume', {
+      method: 'POST',
+      body: resumeData
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.statusMessage || 'Upload failed')
+    }
+
+    const result = await response.json()
+    console.log('Upload successful:', result)
+    
+    formData.value.resume = result.text;
+  } catch (error) {
+    console.error('Upload error:', error)
+  }
+}
+
 const cancel = () => {
   store.signOutUser();
   router.push('/login')
@@ -259,7 +300,7 @@ const submitResume = async () => {
       let configs = values.map((v: string) => v.split(':').map((item: string) => item.trim()));
       let valid = configs.every((config: string[]) => config.length === 2);
       if (valid) {
-        jobTitlesPlaceholder = cleanSuggestedTextFromPlaceholder(jobTitlesPlaceholder) + `(e.g. ${configs[0][1]})`;        
+        jobTitlesPlaceholder = cleanSuggestedTextFromPlaceholder(jobTitlesPlaceholder) + `(e.g. ${configs[0][1]})`;
         stopWordsPlaceholder = cleanSuggestedTextFromPlaceholder(stopWordsPlaceholder) + `(e.g. ${configs[1][1]})`;
         skillWordsPlaceholder = cleanSuggestedTextFromPlaceholder(skillWordsPlaceholder) + `(e.g. ${configs[2][1]})`;
         skillStopWordsPlaceholder = cleanSuggestedTextFromPlaceholder(skillStopWordsPlaceholder) + `(e.g. ${configs[3][1]})`;
@@ -338,7 +379,7 @@ Skill Stop Words: (your answer in comma separated list format)
 
 const validateRoleInfoForm = () => {
   const jobTitlesMinLength = formData.value.jobTitles.trim().length == 0 ? ['Please enter at least one job title to continue.'] : [];
-  const jobTitlesMaxLength = formData.value.jobTitles.trim().length > 300 ? ['Please enter a maximum of 300 characters for job titles.'] : []; 
+  const jobTitlesMaxLength = formData.value.jobTitles.trim().length > 300 ? ['Please enter a maximum of 300 characters for job titles.'] : [];
   const jobTitlesMaxCount = formData.value.jobTitles.split(',').length > 3 ? ['Please enter a maximum of three job titles.'] : [];
 
   const locationMinLength = formData.value.remotePreference != 'ONLY' && formData.value.location.trim().length == 0 ? ['Please enter a location to continue.'] : [];
@@ -348,13 +389,13 @@ const validateRoleInfoForm = () => {
   const distanceMinValue = formData.value.remotePreference != 'ONLY' && formData.value.distance <= 0 ? ['Please enter a positive integer for distance.'] : [];
   const distanceMaxValue = formData.value.remotePreference != 'ONLY' && formData.value.distance > 200 ? ['Maximum distance is 200 miles.'] : [];
 
-  const salaryMinValue =  minSalary.value < 0 ? ['Please enter a positive integer for salary.'] : [];
+  const salaryMinValue = minSalary.value < 0 ? ['Please enter a positive integer for salary.'] : [];
   const salaryMaxValue = minSalary.value > 1000000 ? ['Maximum salary value is $1,000,000.'] : [];
 
-  return [...jobTitlesMinLength, ...jobTitlesMaxLength, ...jobTitlesMaxCount, 
-    ...locationMinLength, ...locationMaxLength, 
-    ...distanceIsNumeric, ...distanceMinValue, ...distanceMaxValue,
-    ...salaryMinValue, ...salaryMaxValue];
+  return [...jobTitlesMinLength, ...jobTitlesMaxLength, ...jobTitlesMaxCount,
+  ...locationMinLength, ...locationMaxLength,
+  ...distanceIsNumeric, ...distanceMinValue, ...distanceMaxValue,
+  ...salaryMinValue, ...salaryMaxValue];
 };
 
 const submitRoleInfo = async () => {

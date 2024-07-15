@@ -3,8 +3,8 @@
   <div class="landing-page">
     <header>
       <div class="buttons">
-        <button @click="navigateToSignup" class="cta-primary">Sign up</button>
-        <button @click="navigateToSignup" class="cta-secondary">Log In</button>
+        <button @click="navigateToSignup(true)" class="cta-primary">Sign up</button>
+        <button @click="navigateToSignup()" class="cta-secondary">Log In</button>
       </div>
       <div class="header-left">
         <div class="left">
@@ -15,7 +15,7 @@
             <span class="emphasized">preferences</span>
             and take the guesswork out of your job search with our intelligent job search tool.
           </p>
-          <button @click="navigateToSignup" class="cta-primary">Sign up now</button>
+          <button @click="navigateToSignup(true)" class="cta-primary">Sign up now</button>
         </div>
         <div class="right">
           <img src="/landing/job-hunt-amico-1.svg" alt="Jobs App Screenshot">
@@ -60,7 +60,7 @@
 
       <section class="text-cta">
         <h2 class="center-wrapped">Spend less time searching and more time succeeding with targeted job matches</h2>
-        <button @click="navigateToSignup" class="cta-tertiary">Sign up now</button>
+        <button @click="navigateToSignup(true)" class="cta-tertiary">Sign up now</button>
       </section>
 
       <section class="text-left text-left-features">
@@ -84,7 +84,7 @@
         <div class="column">
           <h2>Maximize your chances of landing the right job with AI-driven insights</h2>
           <img src="/landing/resume-amico-1.svg" alt="Resume with two people shaking hands" />
-          <button @click="navigateToSignup" class="cta-tertiary">Sign up now</button>
+          <button @click="navigateToSignup(true)" class="cta-tertiary">Sign up now</button>
         </div>
         <div class="buffer-line"></div>
       </section>
@@ -110,8 +110,12 @@ import { handlePostSignIn } from '~/utils/helpers';
 
 const router = useRouter()
 
-const navigateToSignup = () => {
-  router.push('/login')
+const navigateToSignup = (shouldGoToSignup = false) => {
+  if (shouldGoToSignup) {
+    router.push('/login?showSignUp=true')
+  } else {
+    router.push('/login')
+  }
 }
 
 onMounted(() => {

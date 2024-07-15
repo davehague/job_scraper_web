@@ -6,11 +6,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { handlePostSignIn } from '~/utils/helpers';
 import { supabase } from "@/utils/supabaseClient";
 import type { Subscription } from '@supabase/supabase-js';
 
+const route = useRoute()
 const showSignUp = ref(false)
 
 const toggleAuth = () => {
@@ -20,6 +22,9 @@ const toggleAuth = () => {
 let authSubscription: Subscription;
 
 onMounted(() => {
+  const showSignUpParam = route.query.showSignUp
+  showSignUp.value = showSignUpParam === 'true'
+
   authSubscription = supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('onAuthStateChange', event, session)
     if (event === 'SIGNED_IN' && session?.user) {

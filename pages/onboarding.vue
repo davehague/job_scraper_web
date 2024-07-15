@@ -40,7 +40,7 @@
           </p>
           <textarea v-model="formData.resume" rows="20" style="width: 100%;"
             placeholder="Paste your resume here"></textarea>
-          <div>
+          <div v-if="userIsAdmin">
             <input type="file" @change="handleFileUpload" accept=".pdf" />
             <button @click="uploadFile" :disabled="!file">Upload Resume</button>
           </div>
@@ -193,6 +193,7 @@ const currentScreen = ref(1);
 const totalScreens = ref(4);
 
 const isSubmitting = ref(false);
+const userIsAdmin = ref(false);
 
 onMounted(async () => {
   const userShouldOnboard = await shouldRedirectToOnboarding();
@@ -201,6 +202,9 @@ onMounted(async () => {
   } else {
     router.push("/home");
   }
+
+  const loggedInUser = await store.getDBUser();
+  userIsAdmin.value = loggedInUser?.is_admin || false;
 });
 
 const formData = ref({

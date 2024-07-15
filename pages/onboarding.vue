@@ -1,6 +1,7 @@
 <template>
   <FloatingBackButton :action="cancel" />
   <div class="onboarding-container">
+    <p class="mobile-status">{{ currentScreen }} / {{ totalScreens }}</p>
     <div class="sidebar">
       <ul>
         <li :class="{ active: currentScreen === 1 }">
@@ -649,6 +650,24 @@ const removeFormatting = () => {
   display: flex;
   flex-direction: column;
   justify-content: start;
+}
+
+.mobile-status {
+  display: none;
+  margin-top: 64px;
+}
+
+@media (max-width: 768px) {
+  .onboarding-container {
+    flex-direction: column;
+  }
+  .mobile-status {
+    display: block;
+  }
+  .sidebar {
+    display: none;
+    background-color: red;
+  }
 }
 
 .sidebar ul {

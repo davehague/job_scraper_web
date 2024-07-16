@@ -1,8 +1,5 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
-  nitro: {
-    preset: 'vercel'
-  },
   devtools: { enabled: true },
   devServer: {
     https: {

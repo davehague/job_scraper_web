@@ -1,5 +1,15 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
+  nitro: {
+    preset: 'vercel',
+    vercel: {
+      functions: {
+        'api/upload-resume.ts': {
+          maxDuration: 60,
+        }
+      }
+    }
+  },
   devtools: { enabled: true },
   devServer: {
     https: {

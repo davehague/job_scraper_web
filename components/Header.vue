@@ -5,9 +5,6 @@
         <h2 class="app-name">Job Scout</h2>
       </div>
       <div class="right">
-        <select v-if="userIsNotLoggedIn" id="roles" v-model="selectedUser">
-          <option v-for="user in publicUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
-        </select>
         <select v-if="userIsAdmin" id="roles" v-model="selectedUser">
           <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.email }}</option>
         </select>
@@ -18,9 +15,6 @@
             <button @click="goToProfile">Profile</button>
             <button @click="signOut">Sign Out</button>
           </div>
-        </div>
-        <div v-else>
-          <button class="sign-in" @click="goToSignIn">Sign In</button>
         </div>
       </div>
     </div>
@@ -34,7 +28,7 @@
       <button class="link" :class="{ selected: selectedLink === 'viewDiscards' }"
         @click="handleClick('viewDiscards')">View Discards</button>
     </div>
-    <div @click="router.back()" v-if="shouldShowBackButton" class="back-row">
+    <div @click="router.push('/home')" v-if="shouldShowBackButton" class="back-row">
       <i class="fas fa-arrow-left"></i>
       <button class="link">Back to Results</button>
     </div>
@@ -61,7 +55,6 @@ const emitFilter = defineEmits(['filter']);
 const selectedLink = ref('');
 
 const router = useRouter()
-const publicUsers = ref<DBUser[]>([]);
 const allUsers = ref<DBUser[]>([]);
 const showMenu = ref(false);
 const selectedUser = ref('');
@@ -88,21 +81,12 @@ const handleClick = (filterType: string) => {
   emitFilter('filter', filterType);
 };
 
-const fetchRoles = async (type: string) => {
-  if (type === 'public') {
-    const items = await PersistentDataService.fetchPublicUsers() as DBUser[];
-    publicUsers.value = items.sort((a, b) => a.name.localeCompare(b.name));
-    const userId = publicUsers.value[0].id;
-    store.setSelectedUserId(userId);
-    selectedUser.value = userId;
-  }
-  else if (type === 'all') {
-    let items = await PersistentDataService.fetchNonPublicUsers() as DBUser[];
-    allUsers.value = items.sort((a, b) => a.email.localeCompare(b.email));
-    const userId = allUsers.value.filter(user => user.email === store.authUser?.email)[0].id;
-    store.setSelectedUserId(userId);
-    selectedUser.value = userId;
-  }
+const fetchRoles = async () => {
+  let items = await PersistentDataService.fetchNonPublicUsers() as DBUser[];
+  allUsers.value = items.sort((a, b) => a.email.localeCompare(b.email));
+  const userId = allUsers.value.filter(user => user.email === store.authUser?.email)[0].id;
+  store.setSelectedUserId(userId);
+  selectedUser.value = userId;
 }
 
 const checkUserLoginStatus = async () => {
@@ -139,12 +123,12 @@ onMounted(async () => {
 
   if (!store.authUser) {
     userIsNotLoggedIn.value = true;
-    await fetchRoles('public');
+    router.push('/login');
   }
 
   if (store.dbUser?.is_admin) {
     userIsAdmin.value = true;
-    await fetchRoles('all');
+    await fetchRoles();
   }
 
   supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
@@ -164,9 +148,8 @@ watch(() => props.selectedFilter, (newVal) => {
   console.log('New filter:', newVal, 'Valid:', validFilter);
   if (validFilter)
     handleClick(newVal);
-  }
+}
 )
-
 </script>
 
 <style scoped>

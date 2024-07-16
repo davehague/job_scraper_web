@@ -28,23 +28,47 @@
                 <div class="column scores-column">
                     <h2 class="scores-h2">Your match scores for this job</h2>
                     <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
-                        <span>Overall Score</span>
+                        <div class="score-label">
+                            <span>Overall Score</span>
+                            <InfoTooltip
+                                text="An assessment from 1 to 100, where 1 is very little chance of this being a good match for you and for the
+                                hiring manager, and 100 being a perfect match (you'll have a great chance to succeed in this role)." />
+                        </div>
                         <span class="score">{{ job.overall_score }}</span>
                     </div>
                     <div class="score-item">
-                        <span>Desire Score</span>
+                        <div class="score-label">
+                            <span>Desire Score</span>
+                            <InfoTooltip text="How you might rate this job on a scale from 1 to 100 in terms of how well it matches your 
+                                experience and the type of job you desire." />
+                        </div>
                         <span class="score">{{ job.desire_score }}</span>
                     </div>
                     <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
-                        <span>Experience Score</span>
+                        <div class="score-label">
+                            <span>Experience Score</span>
+                            <InfoTooltip
+                                text="How you might rate this job on a scale from 1 to 100 as a match for your EXPERIENCE level 
+                                (you don't feel underqualified OR overqualified)." />
+                        </div>
                         <span class="score">{{ job.experience_score }}</span>
                     </div>
                     <div class="score-item">
-                        <span>Meets Requirements Score</span>
+                        <div class="score-label">
+                            <span>Meets Requirements Score</span>
+                            <InfoTooltip
+                                text="How a hiring manager for this job might rate you (on a scale from 1 to 100) on how 
+                                well you meet the SKILL requirements for this job." />
+                        </div>
                         <span class="score">{{ job.meets_requirements_score }}</span>
                     </div>
                     <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
-                        <span>Meets Experience Score</span>
+                        <div class="score-label">
+                            <span>Meets Experience Score</span>
+                            <InfoTooltip
+                                text="How a hiring manager for this job might rate you (on a scale from 1 to 100) on how 
+                                well you meet the EXPERIENCE requirements for this job." />
+                        </div>
                         <span class="score">{{ job.meets_experience_score }}</span>
                     </div>
                 </div>
@@ -90,7 +114,8 @@
         <div v-if="job">
             <div class="actions-bar">
                 <div class="actions-container">
-                    <JobActionButtons :job="job" @applied-updated="appliedUpdated" @interest-updated="interestUpdated" />
+                    <JobActionButtons :job="job" @applied-updated="appliedUpdated"
+                        @interest-updated="interestUpdated" />
                 </div>
             </div>
         </div>
@@ -174,14 +199,14 @@ const goToJobPost = () => {
 }
 
 const appliedUpdated = (jobId: string, applied: boolean) => {
-    if(applied)
+    if (applied)
         router.push('/home?filter=viewApplied')
     else
         router.push('/home?filter=savedResults')
 };
 
 const interestUpdated = (jobId: string, interest: boolean | null) => {
-    if(interest === null)
+    if (interest === null)
         router.push('/home')
     else if (interest)
         router.push('/home?filter=savedResults')
@@ -199,6 +224,10 @@ const getScoreItemStyle = (score: number | undefined) => {
 .container {
     margin: 0 auto;
     background-color: #fff;
+}
+
+.score-circle:hover {
+  box-shadow: none;
 }
 
 .job-details {
@@ -297,8 +326,16 @@ h1 {
     padding: 8px;
 }
 
+.score-label {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
 .score {
     font-weight: 600;
+    display: flex; 
+    align-items: center;
 }
 
 .guidance {

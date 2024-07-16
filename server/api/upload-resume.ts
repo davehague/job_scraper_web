@@ -21,8 +21,8 @@ const storage = new Storage({
 const bucketName = "job-scout";
 const outputPrefix = "output";
 
-async function uploadFileToGCS(filePath: string): Promise<string> {
-  const destination = `pdfs/${path.basename(filePath)}`;
+async function uploadFileToGCS(filePath: string, userId: string): Promise<string> {
+  const destination = `resumes/${userId}/${path.basename(filePath)}`;
   await storage.bucket(bucketName).upload(filePath, { destination });
   return `gs://${bucketName}/${destination}`;
 }
@@ -46,6 +46,16 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
+    const userIdPart = form.find(part => part.name === 'user_id');
+    if (!userIdPart || !userIdPart.data) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "UserId is required",
+      });
+    }
+    const userId = userIdPart.data.toString('utf-8');
+
+
     const pdfFiles = form.filter(
       (part) => part.name === "pdfs" && part.filename
     );
@@ -59,7 +69,7 @@ export default defineEventHandler(async (event: H3Event) => {
     const fileUploadPromises = pdfFiles.map(async (file) => {
       const tempPath = `/tmp/${file.filename}`;
       await fs.promises.writeFile(tempPath, file.data);
-      const gcsUri = await uploadFileToGCS(tempPath);
+      const gcsUri = await uploadFileToGCS(tempPath, userId);
       await fs.promises.unlink(tempPath);
       return gcsUri;
     });
@@ -117,18 +127,18 @@ export default defineEventHandler(async (event: H3Event) => {
     const [files] = await storage.bucket(bucketName).getFiles({
       prefix: `${outputPrefix}/${uniqueId}/`,
     });
-    console.log("Files found in output:", files);
+    console.log(`${files.length} files found in output`);
 
     const textPromises = files.map((file) =>
       extractTextFromJson(`gs://${bucketName}/${file.name}`)
     );
     const texts = await Promise.all(textPromises);
-    console.log("Text extracted from files:", texts);
+    console.log("Text extracted from files!");
 
     const fullText = texts.join("\n\n--- Page Break ---\n\n");
 
     await Promise.all(files.map((file) => file.delete()));
-    console.log("Files deleted from output:", files);
+    console.log(`${files.length} files deleted from output`);
 
     return {
       message: "File processed successfully",

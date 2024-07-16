@@ -272,6 +272,7 @@ const uploadFile = async () => {
 
   const resumeData = new FormData()
   resumeData.append('pdfs', file.value)
+  resumeData.append('user_id', store.authUser!.id)
 
   isUploading.value = true;
   try {

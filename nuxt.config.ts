@@ -8,7 +8,13 @@ export default defineNuxtConfig({
           maxDuration: 60,
         }
       }
-    }
+    },
+    serverHandlers: [
+      {
+        route: '/api/upload-resume',
+        handler: '~/server/api/upload-resume'
+      }
+    ]
   },
   devtools: { enabled: true },
   devServer: {

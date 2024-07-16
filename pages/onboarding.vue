@@ -34,16 +34,30 @@
 
         <template #default>
           <h2>Welcome, we're glad you're here. Let's get started.</h2>
-          <p class="instructions">Paste your up-to-date resume below to help us tailor your job recommendations to your
-            skills and experience.
-
+          <p class="instructions">Upload your up-to-date resume or paste its content below to help us tailor
+            your job recommendations to your skills and experience.
           </p>
-          <textarea v-model="formData.resume" rows="20" style="width: 100%;"
-            placeholder="Paste your resume here"></textarea>
-          <div v-if="userIsAdmin">
-            <input type="file" @change="handleFileUpload" accept=".pdf" />
-            <button @click="uploadFile" :disabled="!file">Upload Resume</button>
+
+          <div v-if="userIsAdmin" class="file-upload-container">
+            <label for="file-upload" class="file-upload-label">
+              Choose File
+            </label>
+            <input id="file-upload" type="file" @change="handleFileUpload" accept=".pdf,.doc,.docx" />
+            <input type="text" class="file-name-input" :value="file ? file.name : ''" readonly
+              placeholder="No file chosen" />
+            <button @click="uploadFile" :disabled="!file || isUploading" class="upload-button">
+              Process Resume
+            </button>
           </div>
+
+          <div v-if="isUploading" class="loading-overlay">
+            <div class="spinner"></div>
+            <p class="upload-message">Uploading and processing your resume...</p>
+          </div>
+
+          <textarea v-model="formData.resume" rows="20"
+            :placeholder="isUploading ? 'Please wait...' : 'Or paste your resume here'"
+            :disabled="isUploading"></textarea>
         </template>
       </OnboardingScreen>
 
@@ -185,6 +199,7 @@ import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
 import { type User, type UserConfig } from '@/types/interfaces';
 import { shouldRedirectToOnboarding, consolidateText, isNumeric } from '@/utils/helpers';
+import { getResponseFromGeminiFlash } from '@/utils/llm';
 
 const router = useRouter();
 const store = useJsaStore();
@@ -223,14 +238,15 @@ const formData = ref({
   intentions: [],
 });
 
-const file = ref<File | null>(null)
+const file = ref<File | null>(null);
+const isUploading = ref(false);
 
 const handleFileUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
+  const target = event.target as HTMLInputElement;
   if (target.files) {
-    file.value = target.files[0]
+    file.value = target.files[0];
   }
-}
+};
 
 const uploadFile = async () => {
   if (!file.value) {
@@ -241,6 +257,7 @@ const uploadFile = async () => {
   const resumeData = new FormData()
   resumeData.append('pdfs', file.value)
 
+  isUploading.value = true;
   try {
     const response = await fetch('/api/upload-resume', {
       method: 'POST',
@@ -254,10 +271,15 @@ const uploadFile = async () => {
 
     const result = await response.json()
     console.log('Upload successful:', result)
-    
-    formData.value.resume = result.text;
+
+    const prompt = `Reformat the resume below into something that can be copied and pasted into an application as plain text. 
+    DO NOT include any explanation, only include the resume text. ${consolidateText(result.text)}`
+    const reformattedResponse = await getResponseFromGeminiFlash(prompt);
+    formData.value.resume = reformattedResponse;
   } catch (error) {
     console.error('Upload error:', error)
+  } finally {
+    isUploading.value = false;
   }
 }
 
@@ -665,9 +687,11 @@ const removeFormatting = () => {
   .onboarding-container {
     flex-direction: column;
   }
+
   .mobile-status {
     display: block;
   }
+
   .sidebar {
     display: none;
     background-color: red;
@@ -756,6 +780,103 @@ textarea {
   box-sizing: border-box;
 }
 
+/* File upload */
+.file-upload-container {
+  margin: 8px 0 24px 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.file-upload-label {
+  padding: 10px 15px;
+  background-color: #59c9a5;
+  color: white;
+  border-radius: 4px 0 0 4px;
+  cursor: pointer;
+  font-weight: 400;
+  white-space: nowrap;
+  margin: 0;
+  height: 16px;
+}
+
+.file-upload-label:hover {
+  background-color: #408e82;
+}
+
+#file-upload {
+  display: none;
+}
+
+.file-upload-container .file-name-input {
+  flex-grow: 1;
+  font-style: italic;
+  background-color: #f9f9f9;
+  cursor: default;
+  margin: 0 16px 0 0;
+  border-radius: 0 4px 4px 0;
+  height: 36px;
+}
+
+.upload-button {
+  padding: 10px 15px;
+  background-color: #408e82;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  width: auto;
+  height: 36px;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #234f5b;
+}
+
+.upload-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.upload-message {
+  color: white;
+  font-size: 20px;
+  margin-top: 16px;
+}
+
+
 /* Role information Onboarding screen */
 .left-right-container {
   display: flex;
@@ -776,7 +897,7 @@ textarea {
   width: 30%;
 }
 
-/* Abput you Onboarding screen */
+/* About you Onboarding screen */
 .checkbox-rows {
   margin-top: 8px;
 }

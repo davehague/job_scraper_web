@@ -90,7 +90,8 @@
       </section>
     </main>
 
-    <footer>
+    <footer style="display:flex; justify-content: space-around;" >
+      <div>
       <h2>Copyright 2024. All rights reserved</h2>
       <h3>Image Credits</h3>
       <a href="https://storyset.com/job">Job illustrations by Storyset</a><br />
@@ -99,6 +100,13 @@
       <a href="https://storyset.com/business">Business illustrations by Storyset</a><br />
       <a href="https://storyset.com/job">Job illustrations by Storyset</a>
       <p></p>
+    </div>
+    <div >
+      <a class="social" href="https://discord.gg/EZ5cyyvu">
+        <i class="fab fa-discord larger-icon"></i>
+        <h2>Build with us on Discord</h2>
+      </a>
+      </div>
     </footer>
   </div>
 </template>
@@ -358,6 +366,23 @@ footer {
 
 a {
   color: #ccc;
+  text-decoration: none;
+}
+
+.social {
+  color: #eee;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.larger-icon {
+    font-size: 24px;
+}
+
+span {
+  margin-top: 16px;
+  font-size: 24px;
 }
 
 @media (max-width: 768px) {
@@ -371,7 +396,9 @@ a {
     margin-bottom: 1rem;
   }
 
-  .header-left, .text-left, .text-right {
+  .header-left,
+  .text-left,
+  .text-right {
     flex-direction: column;
     gap: 1rem;
     margin: 0;
@@ -387,7 +414,9 @@ a {
     line-height: 56px;
   }
 
-  .cta-primary, .cta-secondary, .cta-tertiary {
+  .cta-primary,
+  .cta-secondary,
+  .cta-tertiary {
     width: 100%;
     margin-right: 0;
   }
@@ -418,7 +447,8 @@ a {
     margin: 24px 0;
   }
 
-  .right img, .left img {
+  .right img,
+  .left img {
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
@@ -437,7 +467,9 @@ a {
     line-height: 30px;
   }
 
-  .cta-primary, .cta-secondary, .cta-tertiary {
+  .cta-primary,
+  .cta-secondary,
+  .cta-tertiary {
     font-size: 16px;
     height: 40px;
   }

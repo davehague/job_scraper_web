@@ -30,7 +30,7 @@
       <!-- Resume -->
       <OnboardingScreen v-if="currentScreen === 1" :onSubmit="submitResume"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :isSubmitting="isSubmitting" :validateForm="validateResumeForm">
+        :isSubmitting="isSubmitting" :validateForm="validateResumeForm" :errors="errors">
 
         <template #default>
           <h2>Welcome, we're glad you're here. Let's get started.</h2>
@@ -45,7 +45,7 @@
             <input id="file-upload" type="file" @change="handleFileUpload" accept=".pdf,.doc,.docx" />
             <input type="text" class="file-name-input" :value="file ? file.name : ''" readonly
               placeholder="No file chosen" />
-            <button @click="uploadFile" :disabled="!file || isUploading" class="upload-button">
+            <button type="button" @click="uploadFile" :disabled="!file || isUploading" class="upload-button">
               Process Resume
             </button>
           </div>
@@ -64,7 +64,7 @@
       <!-- Role information -->
       <OnboardingScreen v-if="currentScreen === 2" :onSubmit="submitRoleInfo"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :isSubmitting="isSubmitting" :validateForm="validateRoleInfoForm">
+        :isSubmitting="isSubmitting" :validateForm="validateRoleInfoForm" :errors="errors">
         <h2>Tell us some basics about the role you want</h2>
         <p class="instructions">This helps us filter out jobs that don't fit your current needs</p>
 
@@ -107,7 +107,7 @@
       <!-- Additional search info -->
       <OnboardingScreen v-if="currentScreen === 3" :onSubmit="submitAdditionalSearchInfo"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :validateForm="validateAdditionalSearchInfoForm" :isSubmitting="isSubmitting">
+        :validateForm="validateAdditionalSearchInfoForm" :isSubmitting="isSubmitting" :errors="errors">
         <h2>Now, let's dig into what you're looking for</h2>
         <p class="instructions">This will help us find the best matches for your career goals. Use commas to separate
           entries in each field.</p>
@@ -136,7 +136,7 @@
       <!-- About you -->
       <OnboardingScreen v-if="currentScreen === 4" :onSubmit="submitAboutYou"
         :isLastScreen="currentScreen === totalScreens" :showBackButton="currentScreen > 1" :onBack="handleBack"
-        :isSubmitting="isSubmitting" :validateForm="validateAboutYouForm">
+        :isSubmitting="isSubmitting" :validateForm="validateAboutYouForm" :errors="errors">
 
         <template #default>
           <h2>Finally, tell us a little bit about yourself</h2>
@@ -193,7 +193,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import PersistentDataService from '@/services/PersistentDataService';
 import { useJsaStore } from '@/stores/jsaStore';
@@ -203,6 +203,8 @@ import { getResponseFromGeminiFlash } from '@/utils/llm';
 
 const router = useRouter();
 const store = useJsaStore();
+
+const errors = ref<string[]>([]);
 
 const currentScreen = ref(1);
 const totalScreens = ref(4);
@@ -249,8 +251,22 @@ const handleFileUpload = (event: Event) => {
 };
 
 const uploadFile = async () => {
+  errors.value = [];
   if (!file.value) {
-    console.log('Please select a file first.');
+    console.log('No file selected');
+    errors.value = ['Please select a file first.'];
+    return
+  }
+
+  if (file.value.type !== 'application/pdf') {
+    console.log('Invalid file type:', file.value.type);
+    errors.value = ['Please upload a PDF file.'];
+    return
+  }
+
+  if (file.value.size > 500000) {
+    console.log('File too large:', file.value.size);
+    errors.value = ['Please upload a PDF file smaller than 500KB.'];
     return
   }
 
@@ -296,6 +312,8 @@ let skillStopWordsPlaceholder = 'Keywords to avoid in a job description ';
 const validateResumeForm = () => {
   const minLengthValidation = formData.value.resume.trim().length < 500 ? ['Please expand upon your experience, education, and goals (min length is 500 characters).'] : [];
   const maxLengthValidation = formData.value.resume.trim().length > 15000 ? ['Please shorten your resume (max lengh is 15,000 characters).'] : [];
+  const validationErrors = [...minLengthValidation, ...maxLengthValidation];
+  errors.value = validationErrors;
   return [...minLengthValidation, ...maxLengthValidation];
 };
 
@@ -419,10 +437,12 @@ const validateRoleInfoForm = () => {
   const salaryMinValue = minSalary.value < 0 ? ['Please enter a positive integer for salary.'] : [];
   const salaryMaxValue = minSalary.value > 1000000 ? ['Maximum salary value is $1,000,000.'] : [];
 
-  return [...jobTitlesMinLength, ...jobTitlesMaxLength, ...jobTitlesMaxCount,
+  const validationErrors = [...jobTitlesMinLength, ...jobTitlesMaxLength, ...jobTitlesMaxCount,
   ...locationMinLength, ...locationMaxLength,
   ...distanceIsNumeric, ...distanceMinValue, ...distanceMaxValue,
   ...salaryMinValue, ...salaryMaxValue];
+  errors.value = validationErrors;
+  return validationErrors;
 };
 
 const submitRoleInfo = async () => {
@@ -462,7 +482,9 @@ const validateAdditionalSearchInfoForm = () => {
   const stopWordsMaxLength = formData.value.stopWords.trim().length > 300 ? ['Please enter a maximum of 300 characters for job and title descriptors.'] : [];
   const candidateRequirementsMaxLength = formData.value.candidateRequirements.trim().length > 300 ? ['Please enter a maximum of 300 characters for must havese.'] : [];
 
-  return [...skillWordsMaxLength, ...skillStopWordsMaxLength, ...stopWordsMaxLength, ...candidateRequirementsMaxLength];
+  const validationErrors = [...skillWordsMaxLength, ...skillStopWordsMaxLength, ...stopWordsMaxLength, ...candidateRequirementsMaxLength];
+  errors.value = validationErrors;
+  return validationErrors;
 };
 
 const submitAdditionalSearchInfo = async () => {
@@ -504,7 +526,9 @@ const validateAboutYouForm = () => {
   const nameMaxLength = formData.value.name.trim().length > 150 ? ['Please enter a maximum of 150 characters for your name.'] : [];
 
   const intentionsValidation = formData.value.intentions.length > 0 ? [] : ['Please select at least one intention to continue.'];
-  return [...nameMinLength, ...nameMaxLength, ...intentionsValidation];
+  const validationErrors = [...nameMinLength, ...nameMaxLength, ...intentionsValidation];
+  errors.value = validationErrors;
+  return validationErrors;
 };
 
 const submitAboutYou = async () => {

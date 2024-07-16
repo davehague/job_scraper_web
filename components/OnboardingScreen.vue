@@ -8,7 +8,7 @@
           {{ isLastScreen ? (isSubmitting ? 'Finishing up...' : 'Finish') : (isSubmitting ? 'Saving...' : 'Next') }}
         </button>
       </div>
-      <div class="form-errors" v-for="error in formErrors">
+      <div class="form-errors" v-for="error in errors" :key="error">
         <p class="form-error">{{ error }}</p>
       </div>
     </form>
@@ -25,13 +25,15 @@ const props = withDefaults(defineProps<{
   isLastScreen?: boolean,
   showBackButton?: boolean,
   isSubmitting: boolean,
-  validateForm?: () => string[] 
+  validateForm?: () => string[],
+  errors?: string[]
 }>(), {
   onSubmit: (data: any) => { },
   onBack: () => { },
   isLastScreen: false,
   showBackButton: false,
   validateForm: () => [],
+  errors: () => []
 });
 
 const onBack = () => {
@@ -40,17 +42,13 @@ const onBack = () => {
   }
 };
 
-// Dummy ref to represent some kind of data collection, adjust as needed
+// Dummy ref to represent the passed-in form data
 const formData = ref({});
-const formErrors = ref<string[]>([]);
 
 const onSubmitLocal = () => {
   const result = props.validateForm();
   if (result.length === 0) {
     props.onSubmit(formData.value);
-  } else {
-    // Display the error messages with <br> between them
-    formErrors.value = result;
   }
 };
 </script>

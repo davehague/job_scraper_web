@@ -70,6 +70,7 @@
 
         <div class="label-container">
           <label>Job Titles (top 3, comma separated)</label>
+          <i class="fas fa-wand-magic-sparkles" @click="takeAISuggestion('jobTitles')" title="Take the AI suggestions"></i>
         </div>
         <input v-model="formData.jobTitles" type="text" :placeholder=jobTitlesPlaceholder />
 
@@ -114,16 +115,19 @@
 
         <div class="label-container">
           <label>List the top 2-5 skills that show that a job is a good fit for you</label>
+          <i class="fas fa-wand-magic-sparkles" @click="takeAISuggestion('skillWords')" title="Take the AI suggestions"></i>
         </div>
         <input v-model="formData.skillWords" type="text" :placeholder=skillWordsPlaceholder />
 
         <div class="label-container">
           <label>List 2-5 skills that show that a job is a NOT a good fit for you</label>
+          <i class="fas fa-wand-magic-sparkles" @click="takeAISuggestion('skillStopWords')" title="Take the AI suggestions"></i>
         </div>
         <input v-model="formData.skillStopWords" type="text" :placeholder=skillStopWordsPlaceholder />
 
         <div class="label-container">
           <label>List any job titles or descriptors (senior, manager, etc.) that you're NOT looking for</label>
+          <i class="fas fa-wand-magic-sparkles" @click="takeAISuggestion('stopWords')" title="Take the AI suggestions"></i>
         </div>
         <input v-model="formData.stopWords" type="text" :placeholder=stopWordsPlaceholder />
 
@@ -308,6 +312,24 @@ let stopWordsPlaceholder = 'Exclude titles with certain keywords ';
 let skillWordsPlaceholder = 'Keywords to look for in a job description ';
 let skillStopWordsPlaceholder = 'Keywords to avoid in a job description ';
 
+const takeAISuggestion = (field: string) => {
+  console.log('Taking AI suggestion for:', field);
+  switch (field) {
+    case 'jobTitles':
+      formData.value.jobTitles = getValueFromPlaceholder(jobTitlesPlaceholder).trim();
+      break;
+    case 'stopWords':
+      formData.value.stopWords = getValueFromPlaceholder(stopWordsPlaceholder).trim();
+      break;
+    case 'skillWords':
+      formData.value.skillWords = getValueFromPlaceholder(skillWordsPlaceholder).trim();
+      break;
+    case 'skillStopWords':
+      formData.value.skillStopWords = getValueFromPlaceholder(skillStopWordsPlaceholder).trim();
+      break;
+  }
+};
+
 const validateResumeForm = () => {
   const minLengthValidation = formData.value.resume.trim().length < 500 ? ['Please expand upon your experience, education, and goals (min length is 500 characters).'] : [];
   const maxLengthValidation = formData.value.resume.trim().length > 15000 ? ['Please shorten your resume (max lengh is 15,000 characters).'] : [];
@@ -360,6 +382,10 @@ const submitResume = async () => {
 
 const cleanSuggestedTextFromPlaceholder = (text: string) => {
   return text.substring(0, text.indexOf('(e.g.') > 0 ? text.indexOf('(e.g.') : text.length);
+};
+
+const getValueFromPlaceholder = (text: string) => {
+  return text.substring(text.indexOf('(e.g.') + 5, text.indexOf(')'));
 };
 
 const getSuggestedUserConfigs = async (resume: string) => {
@@ -775,17 +801,22 @@ h2 {
 
 .label-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  margin-bottom: 8px;
+  margin-top: 16px;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.label-container i {
+  color: mediumpurple;
+  cursor: pointer;
 }
 
 label {
   text-align: left;
   display: block;
   font-weight: 600;
-  margin-top: 16px;
-  margin-bottom: 4px;
 }
 
 input[type="text"],

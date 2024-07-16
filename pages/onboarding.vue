@@ -38,7 +38,7 @@
             your job recommendations to your skills and experience.
           </p>
 
-          <div v-if="userIsAdmin" class="file-upload-container">
+          <div class="file-upload-container">
             <label for="file-upload" class="file-upload-label">
               Choose File
             </label>
@@ -210,7 +210,6 @@ const currentScreen = ref(1);
 const totalScreens = ref(4);
 
 const isSubmitting = ref(false);
-const userIsAdmin = ref(false);
 
 onMounted(async () => {
   const userShouldOnboard = await shouldRedirectToOnboarding();
@@ -221,7 +220,6 @@ onMounted(async () => {
   }
 
   const loggedInUser = await store.getDBUser();
-  userIsAdmin.value = loggedInUser?.is_admin || false;
 });
 
 const formData = ref({

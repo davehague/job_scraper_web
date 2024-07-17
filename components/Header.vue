@@ -5,9 +5,14 @@
         <h2 class="app-name">Job Scout</h2>
       </div>
       <div class="right">
-        <select v-if="userIsAdmin" id="roles" v-model="selectedUser">
-          <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.email }}</option>
-        </select>
+        <div v-if="userIsAdmin" class="admin-tools">
+          <select id="roles" v-model="selectedUser">
+            <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.email }}</option>
+          </select>
+          <span>+{{usersNotYetOnboardedCount}} not onboarded yet</span>
+        </div>
+
+
         <div class="user-details" @click="toggleProfileMenu" v-if="store.authUser">
           <div class="username">{{ userName }}</div>
           <img :src="userProfileURL" class="profile-pic" alt="User profile picture" />
@@ -56,6 +61,8 @@ const selectedLink = ref('');
 
 const router = useRouter()
 const allUsers = ref<DBUser[]>([]);
+const usersNotYetOnboardedCount = ref(0);
+
 const showMenu = ref(false);
 const selectedUser = ref('');
 const store = useJsaStore();
@@ -83,7 +90,12 @@ const handleClick = (filterType: string) => {
 
 const fetchRoles = async () => {
   let items = await PersistentDataService.fetchNonPublicUsers() as DBUser[];
-  allUsers.value = items.sort((a, b) => a.email.localeCompare(b.email));
+  allUsers.value = items
+    .filter(user => user.onboarding_complete)
+    .sort((a, b) => a.email.localeCompare(b.email));
+
+  usersNotYetOnboardedCount.value = items.filter(user => !user.onboarding_complete).length;
+
   const userId = allUsers.value.filter(user => user.email === store.authUser?.email)[0].id;
   store.setSelectedUserId(userId);
   selectedUser.value = userId;
@@ -246,6 +258,19 @@ i {
   background-color: #555;
 }
 
+.admin-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 24px;
+}
+
+.admin-tools span {
+  color: #ddd;
+  font-size: 14px;
+  font-style: italic;
+}
+
 #roles {
   padding: 10px;
   font-size: 1em;
@@ -253,7 +278,6 @@ i {
   border-radius: 5px;
   outline: none;
   transition: border-color 0.3s ease;
-  margin-right: 20px;
 }
 
 #roles:focus {
@@ -267,6 +291,8 @@ i {
   flex-direction: row;
   justify-content: flex-end;
 }
+
+
 
 .user-details {
   display: flex;
@@ -331,6 +357,7 @@ i {
   .username {
     display: none;
   }
+
   .left {
     justify-content: center;
   }
@@ -344,6 +371,7 @@ i {
   .link-row {
     margin: 24px 16px;
   }
+
   .back-row {
     margin: 24px 16px;
     justify-content: flex-start;

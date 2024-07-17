@@ -228,9 +228,9 @@ const removeOnboardingParam = () => {
   justify-items: center;
 }
 
-@media (min-width: 768px) {
+@media (max-width: 768px) {
   .job-list {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    margin: 40px 20px;
   }
 }
 

@@ -392,6 +392,9 @@ button {
 }
 
 @media (max-width: 1200px) {
+    .score-item {
+        width: 100%;
+    }
     .title-and-link {
         flex-direction: column;
         align-items: start;
@@ -408,6 +411,17 @@ button {
 
     .row {
         flex-direction: column;
+    }
+
+    .actions-bar {
+        padding-left: 0;
+        justify-content: center;
+    }
+    
+    .actions-container {
+        min-width: 0;
+        flex: 1;
+        padding: 0 20px;
     }
 }
 </style>

@@ -318,4 +318,35 @@ i {
 .dropdown-menu button:hover {
   background-color: #f1f1f1;
 }
+
+@media (max-width: 768px) {
+  .title-row {
+    height: auto;
+    margin: 0;
+    padding: 16px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .username {
+    display: none;
+  }
+  .left {
+    justify-content: center;
+  }
+
+  .right {
+    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .link-row {
+    margin: 24px 16px;
+  }
+  .back-row {
+    margin: 24px 16px;
+    justify-content: flex-start;
+  }
+}
 </style>

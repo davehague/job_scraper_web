@@ -34,7 +34,7 @@
 
         <template #default>
           <h2>Welcome, we're glad you're here. Let's get started.</h2>
-          <p class="instructions">Upload your up-to-date resume or paste its content below to help us tailor
+          <p class="instructions">Upload your up-to-date resume in PDF format or paste its content below to help us tailor
             your job recommendations to your skills and experience.
           </p>
 

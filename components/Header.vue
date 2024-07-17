@@ -9,7 +9,7 @@
           <select id="roles" v-model="selectedUser">
             <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.email }}</option>
           </select>
-          <span>+{{usersNotYetOnboardedCount}} not onboarded yet</span>
+          <span>{{ onboardedUsersCount }} onboarded + {{ notOnboardedUsersCount }} not onboarded = {{ totalUserCount }} total</span>
         </div>
 
 
@@ -61,7 +61,6 @@ const selectedLink = ref('');
 
 const router = useRouter()
 const allUsers = ref<DBUser[]>([]);
-const usersNotYetOnboardedCount = ref(0);
 
 const showMenu = ref(false);
 const selectedUser = ref('');
@@ -88,13 +87,20 @@ const handleClick = (filterType: string) => {
   emitFilter('filter', filterType);
 };
 
+const totalUserCount = ref(0);
+const onboardedUsersCount = ref(0);
+const notOnboardedUsersCount = ref(0);
+
 const fetchRoles = async () => {
   let items = await PersistentDataService.fetchNonPublicUsers() as DBUser[];
+
+  totalUserCount.value = items.length;
+  onboardedUsersCount.value = items.filter(user => user.onboarding_complete).length;
+  notOnboardedUsersCount.value = items.filter(user => !user.onboarding_complete).length;
+
   allUsers.value = items
     .filter(user => user.onboarding_complete)
     .sort((a, b) => a.email.localeCompare(b.email));
-
-  usersNotYetOnboardedCount.value = items.filter(user => !user.onboarding_complete).length;
 
   const userId = allUsers.value.filter(user => user.email === store.authUser?.email)[0].id;
   store.setSelectedUserId(userId);

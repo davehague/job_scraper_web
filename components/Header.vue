@@ -2,7 +2,8 @@
   <header class="header">
     <div class="title-row">
       <div class="left">
-        <h2 class="app-name">Job Scout</h2>
+        <img class="logo" src="/logo-circuit-board-medium.svg" alt="JobScout logo" />
+        <h2 class="app-name">JobScout</h2>
       </div>
       <div class="right">
         <div v-if="userIsAdmin" class="admin-tools">
@@ -243,6 +244,12 @@ i {
   box-shadow: 0 4px 0 0 #59C9A5;
 }
 
+.logo {
+  height: 64px;
+  width: 64px;
+  margin-right: 16px;
+}
+
 .app-name {
   color: #fff;
   font-size: 32px;
@@ -298,8 +305,6 @@ i {
   justify-content: flex-end;
 }
 
-
-
 .user-details {
   display: flex;
   height: 64px;
@@ -352,6 +357,10 @@ i {
 }
 
 @media (max-width: 768px) {
+  .logo {
+    display: none;
+  }
+
   .title-row {
     height: auto;
     margin: 0;

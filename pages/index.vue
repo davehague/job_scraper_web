@@ -2,9 +2,15 @@
 <template>
   <div class="landing-page">
     <header>
-      <div class="buttons">
-        <button @click="navigateToSignup(true)" class="cta-primary">Sign up</button>
-        <button @click="navigateToSignup()" class="cta-secondary">Log In</button>
+      <div class="top-row">
+        <div class="title-and-logo">
+          <img src="/logo.svg" alt="JobScout Logo">
+          <p>JobScout</p>
+        </div>
+        <div class="buttons">
+          <button @click="navigateToSignup(true)" class="cta-primary">Sign up</button>
+          <button @click="navigateToSignup()" class="cta-secondary">Log In</button>
+        </div>
       </div>
       <div class="header-left">
         <div class="max-width">
@@ -221,11 +227,23 @@ const checkIfConfirmingEmail = async () => {
 </script>
 
 <style scoped>
-.buttons {
+.top-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
   margin-bottom: 2rem;
+  align-items: center;
+}
+
+.title-and-logo {
+  display: flex;
+  gap: 16px;
+  margin-left: 48px;
+}
+
+.title-and-logo p {
+  font-size: 32px;
+  font-weight: 700;
 }
 
 .cta-primary {
@@ -484,6 +502,27 @@ span {
 }
 
 @media (max-width: 768px) {
+  .top-row {
+    flex-direction: column;
+    align-items: start;
+  }
+  .title-and-logo {
+    display: flex;
+    gap: 4px;
+    margin-left: 0;
+  }
+
+  .title-and-logo p {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+  }
+
   header {
     height: auto;
     padding: 1rem;
@@ -502,7 +541,8 @@ span {
     margin: 0;
   }
 
-  .header-details, .emphasized {
+  .header-details,
+  .emphasized {
     font-size: 24px;
     line-height: 36px;
   }
@@ -512,7 +552,10 @@ span {
     line-height: 56px;
   }
 
-  h1, h2, p, li {
+  h1,
+  h2,
+  p,
+  li {
     margin-left: 16px;
     margin-right: 16px;
   }
@@ -540,7 +583,7 @@ span {
 
   .center-wrapped {
     max-width: 100%;
-  } 
+  }
 
   .image-cta {
     flex-direction: column;

@@ -7,7 +7,7 @@
         <button @click="navigateToSignup()" class="cta-secondary">Log In</button>
       </div>
       <div class="header-left">
-        <div class="left">
+        <div class="max-width">
           <h1>Search smarter, not harder.</h1>
           <p class="header-details">Get job postings that match your
             <span class="emphasized">skills</span>,
@@ -26,18 +26,18 @@
     <main>
       <section class="frustrations">
         <div class="text-left">
-          <div class="left">
+          <div class="max-width">
             <h2>Tired of sorting through hundreds of job posts on numerous job board sites?</h2>
             <p>We use AI to do the work for you. We search job boards to find job postings that match what you're
               looking for and bring them together in one easy-to-use interface to streamline your search.</p>
           </div>
           <div class="right">
-            <img src="/landing/search-bro-1.svg" alt="Description of your image">
+            <img src="/landing/search-bro-1.svg" alt="Detective searching a website">
           </div>
         </div>
         <div class="text-right">
-          <div class="left">
-            <img src="/landing/choose-pana-1.svg" alt="Description of your image">
+          <div class="max-width">
+            <img src="/landing/choose-pana-1.svg" alt="Man attempting to decide">
           </div>
           <div class="right">
             <h2>Overwhelmed deciding which roles are worth your time to apply to?</h2>
@@ -47,24 +47,24 @@
 
         </div>
         <div class="text-left">
-          <div class="left">
+          <div class="max-width">
             <h2>Frustrated with sending out endless applications hoping to find a good match?</h2>
             <p>Our hiring manager insights help you tailor your application and stand out from the crowd. And by
               focusing your job search on your strongest matches, you’ll reap greater rewards for your efforts.</p>
           </div>
           <div class="right">
-            <img src="/landing/hired-amico-1.svg" alt="Description of your image">
+            <img src="/landing/hired-amico-1.svg" alt="Woman in middle, spotlighted">
           </div>
         </div>
       </section>
 
-      <section class="text-cta">
+      <section class="bg-box-cta seventy-percent-green">
         <h2 class="center-wrapped">Spend less time searching and more time succeeding with targeted job matches</h2>
         <button @click="navigateToSignup(true)" class="cta-tertiary">Sign up now</button>
       </section>
 
-      <section class="text-left text-left-features">
-        <div class="left">
+      <section class="text-left text-features">
+        <div class="max-width">
           <h2 class="features-h2">Key Features</h2>
           <ul>
             <li>AI-powered job summaries and requirement lists</li>
@@ -88,24 +88,71 @@
         </div>
         <div class="buffer-line"></div>
       </section>
+
+      <div class="divider-line"></div>
+
+      <section class="bg-box-cta ten-percent-green">
+        <h2 class="centered">Your AI-driven job search with JobScout</h2>
+        <div class="steps">
+          <div class="column search-step">
+            <div class="round">
+              <span class="number">1</span>
+            </div>
+            <h3>Complete your profile</h3>
+            <span>Upload your resume and answer a few questions</span>
+          </div>
+          <div class="column search-step">
+            <div class="round">
+              <span class="number">2</span>
+            </div>
+            <h3>Review your matches</h3>
+            <span>Save jobs that interest you and discard the rest</span>
+          </div>
+          <div class="column search-step">
+            <div class="round">
+              <span class="number">3</span>
+            </div>
+            <h3>Prep your materials</h3>
+            <span>Use AI-driven insights to put your best foot forward</span>
+          </div>
+          <div class="column search-step">
+            <div class="round">
+              <span class="number">4</span>
+            </div>
+            <h3>Apply!</h3>
+            <span>Mark jobs as applied to clear your queue</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- <section class="text-left text-features">
+        <div class="left-50">
+          <img src="/landing/track-progress.gif" alt="Job Details Screenshot">
+        </div>
+        <div class="right-50">
+          <h2 class="features-h2">Work your queue, track your progress</h2>
+          <p>Keep track of the jobs you’re interested in, the ones you’ve applied to, and the
+            ones you’ve heard back from. No more losing track of where you are in the application process.</p>
+        </div>
+      </section> -->
     </main>
 
-    <footer style="display:flex; justify-content: space-around;" >
+    <footer style="display:flex; justify-content: space-around;">
       <div>
-      <h2>Copyright 2024. All rights reserved</h2>
-      <h3>Image Credits</h3>
-      <a href="https://storyset.com/job">Job illustrations by Storyset</a><br />
-      <a href="https://storyset.com/people">People illustrations by Storyset</a><br />
-      <a href="https://storyset.com/marketing">Marketing illustrations by Storyset</a><br />
-      <a href="https://storyset.com/business">Business illustrations by Storyset</a><br />
-      <a href="https://storyset.com/job">Job illustrations by Storyset</a>
-      <p></p>
-    </div>
-    <div >
-      <a class="social" href="https://discord.gg/EZ5cyyvu">
-        <i class="fab fa-discord larger-icon"></i>
-        <h2>Build with us on Discord</h2>
-      </a>
+        <h2>Copyright 2024. All rights reserved</h2>
+        <h3>Image Credits</h3>
+        <a href="https://storyset.com/job">Job illustrations by Storyset</a><br />
+        <a href="https://storyset.com/people">People illustrations by Storyset</a><br />
+        <a href="https://storyset.com/marketing">Marketing illustrations by Storyset</a><br />
+        <a href="https://storyset.com/business">Business illustrations by Storyset</a><br />
+        <a href="https://storyset.com/job">Job illustrations by Storyset</a>
+        <p></p>
+      </div>
+      <div>
+        <a class="social" href="https://discord.gg/EZ5cyyvu">
+          <i class="fab fa-discord larger-icon"></i>
+          <h2>Build with us on Discord</h2>
+        </a>
       </div>
     </footer>
   </div>
@@ -231,6 +278,7 @@ header {
 }
 
 .emphasized {
+  font-size: 32px;
   font-weight: 700;
   color: #59C9A5;
 }
@@ -250,7 +298,7 @@ header {
   margin: 0 200px;
 }
 
-.text-left-features {
+.text-features {
   margin: 48px;
   align-items: start;
 }
@@ -259,10 +307,11 @@ header {
   flex: 1;
 }
 
-.right-50 {
+.max-width {
   flex: 1;
 }
 
+.left-50 img,
 .right-50 img {
   max-width: 100%;
   height: auto;
@@ -295,16 +344,23 @@ p {
   height: auto;
 }
 
-.text-cta {
-  background-color: #59C9A5B2;
+.bg-box-cta {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  height: 250px;
   margin: 48px;
   border-radius: 4px;
+  height: auto;
+}
+
+.ten-percent-green {
+  background-color: #59C9A522;
+}
+
+.seventy-percent-green {
+  background-color: #59C9A5CC;
 }
 
 .center-wrapped {
@@ -344,12 +400,32 @@ li::before {
   display: flex;
 }
 
+.steps {
+  display: flex;
+  flex-direction: row;
+}
+
 .column {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   text-align: center;
+  align-items: center;
+}
+
+.search-step {
+  padding: 8px;
+  margin: 16px;
 }
 
 .buffer-line {
+  margin: 48px;
+  flex: 1;
+  border-top: 4px solid #59C9A5;
+  width: 100%;
+}
+
+.divider-line {
   margin: 48px;
   flex: 1;
   border-top: 4px solid #59C9A5;
@@ -377,12 +453,34 @@ a {
 }
 
 .larger-icon {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 span {
   margin-top: 16px;
   font-size: 24px;
+}
+
+.round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #8BD9C0;
+  border: 4px solid #234F5B;
+}
+
+.number {
+  margin-top: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.centered {
+  text-align: center;
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {
@@ -404,7 +502,7 @@ span {
     margin: 0;
   }
 
-  .header-details {
+  .header-details, .emphasized {
     font-size: 24px;
     line-height: 36px;
   }
@@ -412,6 +510,11 @@ span {
   h1 {
     font-size: 48px;
     line-height: 56px;
+  }
+
+  h1, h2, p, li {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
   .cta-primary,
@@ -437,7 +540,7 @@ span {
 
   .center-wrapped {
     max-width: 100%;
-  }
+  } 
 
   .image-cta {
     flex-direction: column;
@@ -453,6 +556,18 @@ span {
     max-width: 300px;
     margin: 0 auto;
     display: block;
+  }
+
+  .steps {
+    flex-direction: column;
+  }
+
+  .divider-line {
+    display: none;
+  }
+
+  .bg-box-cta {
+    margin: 24px;
   }
 }
 

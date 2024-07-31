@@ -219,6 +219,7 @@ function reconcileConfigs(key: string, newValue: string, maxValues = 99) {
 
   let newValues = newValue.split(',').map(v => v.trim().toLowerCase());
   newValues = newValues.slice(0, maxValues);
+  newValues = newValues.filter(v => v !== '');
 
   const existingConfigs = userConfigs.value.filter(config => config.key === key);
 

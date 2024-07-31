@@ -623,6 +623,7 @@ const createConfigs = (uid: string, key: string, newValue: string, maxValues = 9
   let configs = [];
   let newValues = newValue.split(',').map(v => v.trim().toLowerCase());
   newValues = newValues.slice(0, maxValues);
+  newValues = newValues.filter(v => v !== '');
 
   for (let i = 0; i < newValues.length; i++) {
     configs.push({

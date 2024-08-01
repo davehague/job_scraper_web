@@ -77,7 +77,7 @@ const restoreToApplied = () => {
 
 button {
   border-radius: 4px;
-  padding: 4px 32px;
+  padding: 4px 24px;
   height: 32px;
   font-weight: 400;
   flex: 1;

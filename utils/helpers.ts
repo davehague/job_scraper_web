@@ -120,7 +120,8 @@ export const transformDataToJobs = (data: any[]): Job[] => {
 };
 
 export const renderMarkdown = (text: string) => {
-  return marked(text);
+  if(text)
+    return marked(text);
 };
 
 export const jobRecencyText = (datePosted: string, datePulled: string) => {

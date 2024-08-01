@@ -45,7 +45,7 @@
 import { ref, onMounted, onUnmounted, type PropType } from 'vue';
 import { useRouter } from 'vue-router'
 import type { Job } from '@/types/interfaces';
-import { marked } from 'marked';
+import { renderMarkdown } from '@/utils/helpers';
 import { useJsaStore } from '@/stores/jsaStore'
 import { jobRecencyText } from '@/utils/helpers';
 
@@ -101,12 +101,8 @@ const appliedUpdated = (jobId: string, hasApplied: boolean) => {
   emits('appliedUpdated', jobId, hasApplied);
 };
 
-const renderMarkdown = (text: string) => {
-  return marked(text);
-};
-
 const truncate = (text: string, length: number) => {
-  if (text.length > length) {
+  if (text && text.length > length) {
     return text.substring(0, length) + '...';
   }
   return text;

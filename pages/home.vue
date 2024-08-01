@@ -159,10 +159,15 @@ onMounted(async () => {
     const loggedInUserId = store.authUser?.id || null;
     await fetchJobs(loggedInUserId)
 
+    currentFilter.value = localStorage.getItem('userFilter') || 'latestSearch'
     checkForUrlFilter();
     recalculateVisibleJobs();
     // intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
   }
+})
+
+watch(currentFilter, (newFilter) => {
+  localStorage.setItem('userFilter', newFilter)
 })
 
 const checkForUrlFilter = () => {

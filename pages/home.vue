@@ -9,17 +9,42 @@
       </div>
     </div>
     <div v-else class="job-list-container">
-      <div class="sorter-container">
-        <p class="sort-text">Sort</p>
-        <select class="sorter" v-model="sortOrder">
-          <option value="recent">Most recent</option>
-          <option value="rating">Highest rating</option>
-          <option value="pay">Highest salary</option>
-        </select>
-      </div>
-      <div class="job-list" v-if="visibleJobs.length > 0">
-        <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
-          @appliedUpdated="appliedUpdated" />
+      <div v-if="visibleJobs.length > 0">
+        <div class="sorter-container">
+          <p class="sort-text">Sort</p>
+          <select class="sorter" v-model="sortOrder">
+            <option value="recent">Most recent</option>
+            <option value="rating">Highest rating</option>
+            <option value="pay">Highest salary</option>
+          </select>
+        </div>
+        <div v-if="sortOrder != 'recent'" class="job-list">
+          <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
+            @appliedUpdated="appliedUpdated" />
+        </div>
+        <div v-else-if="sortOrder === 'recent'">
+          <div v-if="todayJobs.length > 0" class="recency-section">
+            <h1>Today</h1>
+            <div class="job-list">
+              <JobCard v-for="job in todayJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
+                @appliedUpdated="appliedUpdated" />
+            </div>
+          </div>
+          <div v-if="yesterdayJobs.length > 0" class="recency-section">
+            <h1>Yesterday</h1>
+            <div class="job-list">
+              <JobCard v-for="job in yesterdayJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
+                @appliedUpdated="appliedUpdated" />
+            </div>
+          </div>
+          <div v-if="earlierJobs.length > 0" class="recency-section">
+            <h1>Earlier</h1>
+            <div class="job-list">
+              <JobCard v-for="job in earlierJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
+                @appliedUpdated="appliedUpdated" />
+            </div>
+          </div>
+        </div>
       </div>
       <div v-if="visibleJobs.length === 0" class="no-jobs">
         <p>{{ noJobsMessage }} </p>
@@ -111,6 +136,31 @@ const sortVisibleJobs = () => {
   }
   recalculateVisibleJobs();
 }
+
+const todayDate = new Date().toISOString().split('T')[0];
+const dateDiff = (date1: string, date2: string) => Math.floor((Date.parse(date1) - Date.parse(date2)) / (1000 * 60 * 60 * 24));
+
+const isToday = (job: Job) => {
+  const datePostedDiff = job.date_posted ? dateDiff(todayDate, job.date_posted) : null;
+  const datePulledDiff = dateDiff(todayDate, job.date_pulled);
+  return datePostedDiff === 0 || datePulledDiff === 0;
+};
+
+const isYesterday = (job: Job) => {
+  const datePostedDiff = job.date_posted ? dateDiff(todayDate, job.date_posted) : null;
+  const datePulledDiff = dateDiff(todayDate, job.date_pulled);
+  return datePostedDiff === 1 || datePulledDiff === 1;
+};
+
+const isEarlier = (job: Job) => {
+  const datePostedDiff = job.date_posted ? dateDiff(todayDate, job.date_posted) : null;
+  const datePulledDiff = dateDiff(todayDate, job.date_pulled);
+  return (datePostedDiff !== null && datePostedDiff > 1) || datePulledDiff > 1;
+};
+
+const todayJobs = computed(() => visibleJobs.value.filter(isToday));
+const yesterdayJobs = computed(() => visibleJobs.value.filter(isYesterday));
+const earlierJobs = computed(() => visibleJobs.value.filter(isEarlier));
 
 const fetchJobs = async (loggedInUserId: string | null) => {
   try {
@@ -290,6 +340,17 @@ const removeOnboardingParam = () => {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
+}
+
+.recency-section {
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-weight: 400;
+  margin: 32px 0 20px 0;
+  color: #234F5B;
 }
 
 .job-list {

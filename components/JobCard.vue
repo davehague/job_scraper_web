@@ -125,6 +125,9 @@ const isOlder = () => {
 
 <style scoped>
 .job-card {
+  flex: 1 1 400px;
+  max-width: 500px;
+  min-height: 640px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -132,10 +135,7 @@ const isOlder = () => {
   border: 1px solid #ccc;
   padding: 24px;
   box-sizing: border-box;
-  overflow: hidden;
   box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.2);
-  min-height: 640px;
-  max-width: 500px;
   overflow: visible;
 }
 

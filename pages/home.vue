@@ -8,7 +8,15 @@
         <p class="small-italic">{{ loadingMessageProgress }}</p>
       </div>
     </div>
-    <div v-else>
+    <div v-else class="job-list-container">
+      <div class="sorter-container">
+        <p class="sort-text">Sort</p>
+        <select class="sorter" v-model="sortOrder">
+          <option value="recent">Most recent</option>
+          <option value="rating">Highest rating</option>
+          <option value="pay">Highest salary</option>
+        </select>
+      </div>
       <div class="job-list" v-if="visibleJobs.length > 0">
         <JobCard v-for="job in visibleJobs" :key="job.id" :job="job" @interestUpdated="interestUpdated"
           @appliedUpdated="appliedUpdated" />
@@ -44,6 +52,12 @@ const noJobsMessage = ref<string>('Loading jobs...');
 
 const intervalId = ref<number>();
 const currentFilter = ref<string>('latestSearch');
+const sortOrder = ref<string>('recent');
+
+watch(sortOrder, (newVal) => {
+  console.log('Setting a new sort order:', newVal);
+  sortVisibleJobs();
+})
 
 const updateVisibleJobs = (filterType: string) => {
   currentFilter.value = filterType;
@@ -67,6 +81,35 @@ const updateVisibleJobs = (filterType: string) => {
     default:
       visibleJobs.value = allJobs.value;
   }
+}
+
+const sortVisibleJobs = () => {
+  if (sortOrder.value === 'recent') {
+    store.currentJobs = store.currentJobs.sort((a, b) => {
+      const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+      const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+      return (dateB - dateA) || (b.overall_score - a.overall_score);
+    })
+  } else if (sortOrder.value === 'rating') {
+    store.currentJobs = store.currentJobs.sort((a, b) => {
+      const scoreComparison = b.overall_score - a.overall_score;
+      if (scoreComparison === 0) {
+        const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+        const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+        return (dateB - dateA) || (b.overall_score - a.overall_score);
+      }
+      return scoreComparison;
+    });
+  } else if (sortOrder.value === 'pay') {
+    store.currentJobs = store.currentJobs.sort((a, b) => {
+      const payA = a.comp_max || 0;
+      const payB = b.comp_max || 0;
+      return (payB - payA)
+        || (new Date(b.date_posted || b.date_pulled).getTime() - new Date(a.date_posted || a.date_pulled).getTime())
+        || (b.overall_score - a.overall_score);
+    });
+  }
+  recalculateVisibleJobs();
 }
 
 const fetchJobs = async (loggedInUserId: string | null) => {
@@ -225,16 +268,38 @@ const removeOnboardingParam = () => {
   background-color: #fff;
 }
 
-.job-list {
+.job-list-container {
   margin: 40px 108px;
-  display: grid;
+}
+
+.sorter-container {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.sort-text {
+  font-size: 20px;
+  color: #000;
+  margin: 0 10px 0 0;
+  font-weight: 700;
+  align-self: center;
+}
+
+.sorter {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.job-list {
+  display: flex;
+  flex-wrap: wrap;
   gap: 48px;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  justify-items: center;
 }
 
 @media (max-width: 768px) {
-  .job-list {
+  .job-list-container {
     margin: 40px 20px;
   }
 }

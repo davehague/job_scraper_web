@@ -266,9 +266,9 @@ const uploadFile = async () => {
     return
   }
 
-  if (file.value.size > 500000) {
+  if (file.value.size > 1000000) {
     console.log('File too large:', file.value.size);
-    errors.value = ['Please upload a PDF file smaller than 500KB.'];
+    errors.value = ['Please upload a PDF file smaller than 1MB.'];
     return
   }
 

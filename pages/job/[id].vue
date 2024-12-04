@@ -47,8 +47,7 @@
                     <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
                         <div class="score-label">
                             <span>Experience Score</span>
-                            <InfoTooltip
-                                text="How you might rate this job on a scale from 1 to 100 as a match for your EXPERIENCE level 
+                            <InfoTooltip text="How you might rate this job on a scale from 1 to 100 as a match for your EXPERIENCE level 
                                 (you don't feel underqualified OR overqualified)." />
                         </div>
                         <span class="score">{{ job.experience_score }}</span>
@@ -56,8 +55,7 @@
                     <div class="score-item">
                         <div class="score-label">
                             <span>Meets Requirements Score</span>
-                            <InfoTooltip
-                                text="How a hiring manager for this job might rate you (on a scale from 1 to 100) on how 
+                            <InfoTooltip text="How a hiring manager for this job might rate you (on a scale from 1 to 100) on how 
                                 well you meet the SKILL requirements for this job." />
                         </div>
                         <span class="score">{{ job.meets_requirements_score }}</span>
@@ -65,8 +63,7 @@
                     <div class="score-item" :style="{ background: getScoreItemStyle(job.overall_score) }">
                         <div class="score-label">
                             <span>Meets Experience Score</span>
-                            <InfoTooltip
-                                text="How a hiring manager for this job might rate you (on a scale from 1 to 100) on how 
+                            <InfoTooltip text="How a hiring manager for this job might rate you (on a scale from 1 to 100) on how 
                                 well you meet the EXPERIENCE requirements for this job." />
                         </div>
                         <span class="score">{{ job.meets_experience_score }}</span>
@@ -102,10 +99,10 @@
                             <div v-html="renderMarkdown(job.hard_requirements)" />
                         </div>
 
-                        <div class="content-box column single-row-column"
+                        <div class="content-box column single-row-column centered"
                             :style="{ borderColor: getScoreColor(job.overall_score) }">
-                            <h2>About {{ job.company }}</h2>
-                            <p>Company information coming soon...</p>
+                            <CompanyInfoModal :company="job.company"
+                                :location="job.location || 'Location not specified'" />
                         </div>
                     </div>
                 </div>
@@ -129,8 +126,9 @@ import { type Job } from '@/types/interfaces'
 import { useJsaStore } from '@/stores/jsaStore'
 import { renderMarkdown } from '@/utils/helpers'
 import { jobRecencyText } from '@/utils/helpers'
-import { setUserInterest, setHasApplied, getScoreColor } from '@/utils/jobs'
+import { getScoreColor } from '@/utils/jobs'
 import '@/assets/buttons.css'
+import CompanyInfoModal from '~/components/job/CompanyInfoModal.vue'
 
 
 const route = useRoute();
@@ -139,12 +137,9 @@ const job = ref<Job | null>(null);
 const store = useJsaStore();
 
 const fetchJobDetails = async (id: string) => {
-    console.log('Store Jobs:', store.currentJobs)
     await store.refreshJobs(store.dbUser!.id);
-    console.log('Store Jobs:', store.currentJobs)
-
     const storeJob = store.getJobById(id);
-    console.log('Store Job:', storeJob)
+
     if (storeJob) {
         job.value = storeJob
     }
@@ -206,12 +201,13 @@ const appliedUpdated = (jobId: string, applied: boolean) => {
 };
 
 const interestUpdated = (jobId: string, interest: boolean | null) => {
-    if (interest === null)
-        router.push('/home')
-    else if (interest)
-        router.push('/home?filter=savedResults')
-    else
-        router.push('/home?filter=viewDiscards')
+    router.push('/home')
+    // if (interest === null)
+    //     router.push('/home')
+    // else if (interest)
+    //     router.push('/home?filter=savedResults')
+    // else
+    //     router.push('/home?filter=viewDiscards')
 };
 
 const getScoreItemStyle = (score: number | undefined) => {
@@ -227,7 +223,7 @@ const getScoreItemStyle = (score: number | undefined) => {
 }
 
 .score-circle:hover {
-  box-shadow: none;
+    box-shadow: none;
 }
 
 .job-details {
@@ -309,6 +305,9 @@ h1 {
     gap: 0px;
 }
 
+.centered {
+    text-align: center;
+}
 .group {
     gap: 12px;
 }

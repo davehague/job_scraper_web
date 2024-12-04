@@ -80,7 +80,6 @@ const currentFilter = ref<string>('latestSearch');
 const sortOrder = ref<string>('recent');
 
 watch(sortOrder, (newVal) => {
-  console.log('Setting a new sort order:', newVal);
   sortVisibleJobs();
 })
 

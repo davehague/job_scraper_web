@@ -158,7 +158,6 @@ onMounted(async () => {
 })
 
 watch(selectedUser, (newVal) => {
-  console.log('Setting a new selected user:', newVal);
   store.setSelectedUserId(newVal);
 })
 

@@ -13,18 +13,18 @@ export const useJsaStore = defineStore("jsaStore", {
   }),
   actions: {
     async refreshJobs(currentUserId: string) {
-      console.log("Refreshing jobs...", this.currentJobs);
       if (this.currentJobs.length > 0) {
         console.log("Jobs already loaded, skipping refresh");
         return;
       }
 
-      const rawItems = await PersistentDataService.fetchJobsForUser(currentUserId);
+      const rawItems = await PersistentDataService.fetchJobsForUser(
+        currentUserId
+      );
       this.currentJobs = transformDataToJobs(rawItems);
       console.log("Current jobs from raw items:", this.currentJobs);
     },
-    getJobById(jobId: string) : Job | undefined {
-      console.log("Getting job by ID:", jobId);
+    getJobById(jobId: string): Job | undefined {
       return this.currentJobs.find((job) => job.id === jobId);
     },
     setSelectedUserId(userId: string) {
@@ -86,7 +86,7 @@ export const useJsaStore = defineStore("jsaStore", {
     },
     async signOutUser() {
       const result = await supabase.auth.signOut();
-      if (result.error != null) console.error('Sign-out error:', result)
+      if (result.error != null) console.error("Sign-out error:", result);
 
       this.authUser = null;
       this.dbUser = null;

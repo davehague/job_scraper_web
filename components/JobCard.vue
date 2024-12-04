@@ -61,7 +61,7 @@ const props = defineProps({
 const store = useJsaStore();
 const router = useRouter();
 const userLoggedIn = store.authUser !== null;
-const showRequirements = ref(false);
+const showRequirements = ref(true);
 const showFullSummary = ref(false);
 const showContent = ref(true);
 

@@ -1,4 +1,4 @@
-// server/api/openRouterChat.ts
+// server/api/openrouter.ts
 import { defineEventHandler, readBody } from 'h3';
 
 export default defineEventHandler(async (event) => {

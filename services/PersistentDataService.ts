@@ -98,7 +98,6 @@ export default class PersistentDataService {
       throw error;
     }
 
-    console.log("Fetched jobs for users:", users, data);
     return data;
   }
 
@@ -113,7 +112,6 @@ export default class PersistentDataService {
       throw error;
     }
 
-    console.log("Fetched jobs for user with userId ", userId, ":", data);
     return data;
   }
 

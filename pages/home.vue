@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Header :selectedFilter="currentFilter" @filter="updateVisibleJobs" />
+    <Header :selectedFilter="currentFilter" @filter="updateFilter" />
     <div v-if="isOnboarding">
       <div class="spinner-container">
         <span class="spinner"></span>
@@ -47,7 +47,17 @@
         </div>
       </div>
       <div v-if="visibleJobs.length === 0" class="no-jobs">
-        <p>{{ noJobsMessage }} </p>
+        <div v-if="isLoading" class="spinner-container">
+          <span class="spinner"></span>
+          <p>Loading jobs...</p>
+        </div>
+        <template v-else>
+          <p>{{ noJobsMessage }}</p>
+          <button v-if="currentFilter === 'latestSearch' && store.dbUser?.is_admin" @click="getMoreJobs"
+            class="get-more-jobs-btn">
+            Get More Jobs
+          </button>
+        </template>
       </div>
     </div>
   </div>
@@ -65,45 +75,93 @@ import { shouldRedirectToOnboarding, transformDataToJobs } from '@/utils/helpers
 const router = useRouter();
 const route = useRoute();
 const store = useJsaStore();
-const lastRefreshed = ref(Date.now());
 
 const isOnboarding = ref(route.query.onboarding !== undefined);
 const loadingMessage = ref("We're currently searching, gathering results, and finding your best matches.  They'll load here soon!");
 const loadingMessageProgress = ref('Tickling keyboards to wake up job databases...');
 
-const allJobs = ref<Job[]>([]);
-const visibleJobs = ref<Job[]>([]);
+const isLoading = ref(true);
 const noJobsMessage = ref<string>('Loading jobs...');
 
 const intervalId = ref<number>();
-const currentFilter = ref<string>('latestSearch');
+
+const jobs = ref<Job[]>([]);
 const sortOrder = ref<string>('recent');
+const currentFilter = ref<string>('latestSearch');
+
+const sortedJobs = computed(() => {
+  return [...jobs.value].sort((a, b) => {
+    if (sortOrder.value === 'recent') {
+      const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+      const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+      return (dateB - dateA) || (b.overall_score - a.overall_score);
+    }
+    else if (sortOrder.value === 'rating') {
+      const scoreComparison = b.overall_score - a.overall_score;
+      if (scoreComparison === 0) {
+        const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+        const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+        return dateB - dateA;
+      }
+      return scoreComparison;
+    }
+    else if (sortOrder.value === 'pay') {
+      const payA = a.comp_max || 0;
+      const payB = b.comp_max || 0;
+      if (payA === payB) {
+        const dateA = new Date(a.date_posted || a.date_pulled).getTime();
+        const dateB = new Date(b.date_posted || b.date_pulled).getTime();
+        return (dateB - dateA) || (b.overall_score - a.overall_score);
+      }
+      return payB - payA;
+    }
+    return 0;
+  });
+});
+
+const visibleJobs = computed(() => {
+  const filtered = sortedJobs.value.filter(job => {
+    switch (currentFilter.value) {
+      case 'latestSearch':
+        return job.user_interested == null && !job.has_applied;
+      case 'savedResults':
+        return job.user_interested != null && job.user_interested && !job.has_applied;
+      case 'viewApplied':
+        return job.has_applied && job.user_interested !== false;
+      case 'viewDiscards':
+        return job.user_interested != null && !job.user_interested;
+      default:
+        return true;
+    }
+  });
+
+  // Additional filtering for non-authenticated or admin users
+  if (!store.authUser && store.selectedUserId != null) {
+    return filtered.filter(job => job.user_id === store.selectedUserId);
+  }
+
+  return filtered;
+});
 
 watch(sortOrder, (newVal) => {
   sortVisibleJobs();
 })
 
-const updateVisibleJobs = (filterType: string) => {
+const updateFilter = (filterType: string) => {
   currentFilter.value = filterType;
   switch (filterType) {
     case 'latestSearch':
-      visibleJobs.value = allJobs.value.filter(job => job.user_interested == null && !job.has_applied);
       noJobsMessage.value = "No jobs are available at the moment. Please check back later.";
       break;
     case 'savedResults':
-      visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && job.user_interested && !job.has_applied);
       noJobsMessage.value = 'No saved jobs found.';
       break;
     case 'viewApplied':
-      visibleJobs.value = allJobs.value.filter(job => job.has_applied && job.user_interested !== false);
       noJobsMessage.value = 'No applied jobs found.';
       break;
     case 'viewDiscards':
-      visibleJobs.value = allJobs.value.filter(job => job.user_interested != null && !job.user_interested);
       noJobsMessage.value = 'No discarded jobs found.';
       break;
-    default:
-      visibleJobs.value = allJobs.value;
   }
 }
 
@@ -133,7 +191,6 @@ const sortVisibleJobs = () => {
         || (b.overall_score - a.overall_score);
     });
   }
-  recalculateVisibleJobs();
 }
 
 const todayDate = new Date().toISOString().split('T')[0];
@@ -162,56 +219,72 @@ const yesterdayJobs = computed(() => visibleJobs.value.filter(isYesterday));
 const earlierJobs = computed(() => visibleJobs.value.filter(isEarlier));
 
 const fetchJobs = async (loggedInUserId: string | null) => {
+  isLoading.value = true;
   try {
     let rawItems = [];
     if (loggedInUserId === null) {
       const publicUsers = await PersistentDataService.fetchPublicUsers();
       rawItems = await PersistentDataService.fetchJobsForUsers(publicUsers);
     } else {
-      rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId!);
+      rawItems = await PersistentDataService.fetchJobsForUser(loggedInUserId);
     }
 
-    lastRefreshed.value = Date.now();
-    store.currentJobs = transformDataToJobs(rawItems);
-    allJobs.value = store.currentJobs.sort((a, b) => {
-      const dateA = new Date(a.date_posted || a.date_pulled).getTime();
-      const dateB = new Date(b.date_posted || b.date_pulled).getTime();
-      return (dateB - dateA) || (b.overall_score - a.overall_score);
-    })
-
-    if (loggedInUserId === null || store.dbUser?.is_admin) {
-      visibleJobs.value = allJobs.value.filter(job => job.user_id === store.selectedUserId);
-    }
-    else {
-      visibleJobs.value = allJobs.value.filter(job => job.user_id === loggedInUserId);
-    }
+    const transformedJobs = transformDataToJobs(rawItems);
+    jobs.value = transformedJobs;
+    store.currentJobs = transformedJobs;
   } catch (error) {
     console.error("Error fetching jobs:", error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
 const appliedUpdated = (jobId: string, applied: boolean) => {
-  const job = allJobs.value.find(job => job.id === jobId);
+  const job = jobs.value.find(job => job.id === jobId);
   if (job) {
     job.has_applied = applied;
   }
-  recalculateVisibleJobs();
 }
 
 const interestUpdated = (jobId: string, interested: boolean | null) => {
-  const job = allJobs.value.find(job => job.id === jobId);
+  const job = jobs.value.find(job => job.id === jobId);
   if (job) {
     job.user_interested = interested;
   }
-  recalculateVisibleJobs();
 }
 
-const recalculateVisibleJobs = () => {
-  updateVisibleJobs(currentFilter.value);
-  if (!store.authUser && store.selectedUserId != null) {
-    visibleJobs.value = allJobs.value.filter(job => job.user_id === store.selectedUserId);
+const getMoreJobs = async () => {
+  if (!store.dbUser?.id) {
+    console.error('User not found');
+    return;
   }
-}
+
+  try {
+    const { buildUserPreferencesFromConfigs, formatPreferencesAsXml } = useUserPreferences()
+    const preferences = await buildUserPreferencesFromConfigs(store.dbUser.id)
+    const resumePlus = formatPreferencesAsXml(preferences)
+
+    fetch('/api/onboarding', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: store.dbUser.id,
+        resume: resumePlus
+      }),
+    });
+
+    await router.push({
+      path: route.path,
+      query: { ...route.query, onboarding: 'true' }
+    });
+
+    window.location.reload();
+  } catch (error) {
+    console.error('Error getting more jobs:', error);
+  }
+};
 
 watch(() => store.selectedUserId, (newVal) => {
   handleNewUserId(newVal);
@@ -223,12 +296,8 @@ const handleNewUserId = async (newVal: string) => {
     return;
   }
 
-  if (store.dbUser?.is_admin) {
+  if (store.dbUser?.is_admin || !loggedInUserId) {
     await fetchJobs(newVal);
-  }
-
-  if (newVal != null) {
-    visibleJobs.value = allJobs.value.filter(job => job.user_id === newVal);
   }
 };
 
@@ -253,7 +322,6 @@ onMounted(async () => {
 
     currentFilter.value = localStorage.getItem('userFilter') || 'latestSearch'
     checkForUrlFilter();
-    recalculateVisibleJobs();
     // intervalId.value = setInterval(fetchJobs, 3600000); // Refresh every 60 minutes
   }
 })
@@ -289,7 +357,7 @@ const fetchJobsRepeatedly = async () => {
     if (attempts >= 12) {  // After 2 minutes, stop trying
       clearInterval(interval);
       removeOnboardingParam();
-      updateVisibleJobs('latestSearch');
+      updateFilter('latestSearch');
       return;
     }
     attempts++;
@@ -366,6 +434,7 @@ h1 {
 
 .no-jobs {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: #f8f9fa;
@@ -412,5 +481,21 @@ h1 {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.get-more-jobs-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #09f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 200px;
+}
+
+.get-more-jobs-btn:hover {
+  background-color: #0077cc;
 }
 </style>

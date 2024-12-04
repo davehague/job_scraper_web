@@ -48,6 +48,17 @@ export interface Job {
     intentions: string
   }
 
+
+export interface UserPreferences {
+  jobTitles: string[];
+  stopWords: string[];
+  skillWords: string[];
+  skillStopWords: string[];
+  intentions: string[];
+  candidateRequirements: string[];
+  resume: string;
+}
+
   export interface UserConfig {
     id: number
     key: string
